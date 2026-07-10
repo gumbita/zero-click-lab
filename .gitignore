@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# Runtime folders
+logs/*.log
+processed/
+inbox/*.bin
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Evidence / large outputs
+evidence/
+captures/
+*.zip
