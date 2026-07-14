@@ -1,82 +1,103 @@
-\# Zero-click Lab
+# Zero-click Lab
 
-
-
-Laboratorio educativo para demostrar, de forma segura y controlada, el patrón general de una vulnerabilidad zero-click:
-
-
+MVP educativo y local que muestra este patrón de forma segura:
 
 ```text
+entrada recibida → procesamiento automático → parser vulnerable
+→ fallo por falta de validación → parser seguro → rechazo controlado
+```
 
-entrada recibida
+No contiene malware, no explota software real, no usa red ni se conecta a
+WhatsApp o a servicios externos. Los paquetes son un formato sintético propio y
+Python convierte el fallo vulnerable en una excepción controlada, sin corrupción
+de memoria.
 
-→ procesamiento automático
+Esta fase emula una validación insuficiente de longitud mediante excepciones
+seguras de Python. No reproduce corrupción de memoria, un *heap overflow* nativo
+ni ejecución remota de código (RCE).
 
-→ parser vulnerable
+## Formato de la muestra
 
-→ fallo por falta de validación
+Cada archivo contiene `MAGIC(4) | VERSION(1) | FLAGS(1) | TYPE(1) |
+LENGTH(2) | SSRC(4) | PAYLOAD(N)`. El parser vulnerable confía deliberadamente
+en `LENGTH`; el seguro valida cabecera, tipo, tamaño máximo y consistencia entre
+la longitud declarada y la real.
 
-→ parser corregido
+`oversized_payload.bin` combina dos anomalías: declara 64 bytes aunque contiene
+solo 4, y esa longitud declarada supera el máximo seguro de 32 bytes. El parser
+seguro informa primero del exceso de tamaño por el orden de sus validaciones.
 
-→ rechazo controlado
+La especificación completa, incluidos offsets, muestras y hashes reproducibles,
+está en [docs/02_packet_format.md](docs/02_packet_format.md).
 
+## Ejecución en Windows PowerShell
 
+Ejecuta los comandos desde la raíz del repositorio. No es necesario instalar
+dependencias externas.
 
-Alcance
+1. Genera las muestras:
 
+   ```powershell
+   python -m app.create_samples
+   ```
 
+   Se crean una muestra válida en `samples/benign/` y tres entradas de prueba en
+   `samples/malformed/`.
 
-Este laboratorio no implementa malware, no explota software real y no interactúa con WhatsApp ni con infraestructura de terceros.
+2. Prueba válida con el parser vulnerable:
 
+   ```powershell
+   Copy-Item .\samples\benign\valid_call_control.bin .\inbox\
+   python -m app.processor --mode vulnerable
+   Get-Content .\logs\processing.log -Tail 10
+   ```
 
+   El log incluye `CONTROL_FILE_RECEIVED`, `PACKET_READ`, `PACKET_ACCEPTED` y
+   `FILE_MOVED_TO_PROCESSED`.
 
-La demo procesa archivos locales .bin dentro de una carpeta inbox/ para simular la llegada automática de una entrada externa.
+3. Prueba malformada con el parser vulnerable:
 
+   ```powershell
+   Copy-Item .\samples\malformed\oversized_payload.bin .\inbox\
+   python -m app.processor --mode vulnerable
+   Get-Content .\logs\processing.log -Tail 10
+   ```
 
+   El acceso basado en la longitud no validada genera un `IndexError`, capturado
+   como `PACKET_PROCESSING_FAILED outcome=controlled_failure`. El proceso sigue
+   funcionando y mueve la muestra a `processed/`.
 
-Estructura inicial
+4. Prueba la misma entrada con el parser seguro:
 
-zero-click-lab/
+   ```powershell
+   Copy-Item .\samples\malformed\oversized_payload.bin .\inbox\
+   python -m app.processor --mode secure
+   Get-Content .\logs\processing.log -Tail 10
+   ```
 
-├─ app/
+   El parser la rechaza antes de acceder al payload. El log muestra
+   `PACKET_PROCESSING_FAILED outcome=rejected reason=payload_too_large`, sin
+   excepción inesperada.
 
-├─ inbox/
+El procesador realiza una pasada sobre todos los `.bin` presentes en `inbox/` al
+arrancar. Cada ejecución registra `ZERO_CLICK_LAB_STARTED`. Los archivos se
+mueven a `processed/`; si un nombre ya existe, se añade un sufijo numérico.
+Después de esa única pasada el proceso termina: no es un *watcher* y no detecta
+archivos que lleguen posteriormente.
 
-├─ processed/
+## Pruebas automatizadas
 
-├─ samples/
+La suite usa únicamente `unittest` y directorios temporales; no altera los
+directorios runtime reales ni regenera las muestras versionadas:
 
-│  ├─ benign/
+```powershell
+python -m unittest discover -s tests -p "test_*.py" -v
+```
 
-│  └─ malformed/
+## Archivos generados durante la ejecución
 
-├─ logs/
+- Log comparable: `logs/processing.log`.
+- Entradas ya tratadas: `processed/`.
+- Entradas pendientes: `inbox/*.bin`.
 
-├─ docs/
-
-├─ README.md
-
-├─ requirements.txt
-
-└─ .gitignore
-
-
-
-Guarda y cierra.
-
-
-
-\# Paso 6 — Primer commit local
-
-
-
-Ejecuta:
-
-
-
-```powershell id="y6qgwo"
-
-git add .
-
-git commit -m "Initial zero-click lab structure"
-
+Estas rutas están excluidas de Git mediante `.gitignore`.
