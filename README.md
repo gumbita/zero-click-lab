@@ -12,12 +12,23 @@ WhatsApp o a servicios externos. Los paquetes son un formato sintético propio y
 Python convierte el fallo vulnerable en una excepción controlada, sin corrupción
 de memoria.
 
+Esta fase emula una validación insuficiente de longitud mediante excepciones
+seguras de Python. No reproduce corrupción de memoria, un *heap overflow* nativo
+ni ejecución remota de código (RCE).
+
 ## Formato de la muestra
 
 Cada archivo contiene `MAGIC(4) | VERSION(1) | FLAGS(1) | TYPE(1) |
 LENGTH(2) | SSRC(4) | PAYLOAD(N)`. El parser vulnerable confía deliberadamente
 en `LENGTH`; el seguro valida cabecera, tipo, tamaño máximo y consistencia entre
 la longitud declarada y la real.
+
+`oversized_payload.bin` combina dos anomalías: declara 64 bytes aunque contiene
+solo 4, y esa longitud declarada supera el máximo seguro de 32 bytes. El parser
+seguro informa primero del exceso de tamaño por el orden de sus validaciones.
+
+La especificación completa, incluidos offsets, muestras y hashes reproducibles,
+está en [docs/02_packet_format.md](docs/02_packet_format.md).
 
 ## Ejecución en Windows PowerShell
 
@@ -71,6 +82,17 @@ dependencias externas.
 El procesador realiza una pasada sobre todos los `.bin` presentes en `inbox/` al
 arrancar. Cada ejecución registra `ZERO_CLICK_LAB_STARTED`. Los archivos se
 mueven a `processed/`; si un nombre ya existe, se añade un sufijo numérico.
+Después de esa única pasada el proceso termina: no es un *watcher* y no detecta
+archivos que lleguen posteriormente.
+
+## Pruebas automatizadas
+
+La suite usa únicamente `unittest` y directorios temporales; no altera los
+directorios runtime reales ni regenera las muestras versionadas:
+
+```powershell
+python -m unittest discover -s tests -p "test_*.py" -v
+```
 
 ## Archivos generados durante la ejecución
 
@@ -79,4 +101,3 @@ mueven a `processed/`; si un nombre ya existe, se añade un sufijo numérico.
 - Entradas pendientes: `inbox/*.bin`.
 
 Estas rutas están excluidas de Git mediante `.gitignore`.
-

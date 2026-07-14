@@ -7,7 +7,7 @@ import struct
 
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
-HEADER = struct.Struct(">4sBBBH I")
+HEADER = struct.Struct(">4sBBBHI")
 MAGIC = b"ECLB"
 VERSION = 1
 CALL_CONTROL = 1
@@ -18,9 +18,10 @@ def packet(payload: bytes, *, declared_length: int | None = None) -> bytes:
     return HEADER.pack(MAGIC, VERSION, 0, CALL_CONTROL, length, 0x10203040) + payload
 
 
-def main() -> None:
-    benign = ROOT_DIR / "samples" / "benign"
-    malformed = ROOT_DIR / "samples" / "malformed"
+def generate_samples(root_dir: Path = ROOT_DIR) -> list[Path]:
+    """Genera las muestras bajo ``root_dir`` y devuelve sus rutas."""
+    benign = root_dir / "samples" / "benign"
+    malformed = root_dir / "samples" / "malformed"
     benign.mkdir(parents=True, exist_ok=True)
     malformed.mkdir(parents=True, exist_ok=True)
 
@@ -32,6 +33,13 @@ def main() -> None:
     }
     for path, data in samples.items():
         path.write_bytes(data)
+
+    return list(samples)
+
+
+def main() -> None:
+    for path in generate_samples():
+        data = path.read_bytes()
         print(f"Generated {path.relative_to(ROOT_DIR)} ({len(data)} bytes)")
 
 

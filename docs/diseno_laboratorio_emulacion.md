@@ -1192,6 +1192,19 @@ El `README.md` debe explicar desde el principio:
 * crear repo;
 * documentar límites.
 
+### Fase 0.5 — Prototipo lógico en Python
+
+* definir y documentar un formato binario sintético de 13 bytes de cabecera;
+* generar muestras locales benignas y malformadas de forma reproducible;
+* comparar un parser Python con validación insuficiente y otro defensivo;
+* procesar automáticamente, en una única pasada, los `.bin` del inbox local;
+* registrar eventos comparables y contener las excepciones del parser;
+* cubrir generación, parsers y procesador mediante pruebas aisladas;
+* demostrar el patrón lógico sin corrupción de memoria, heap overflow ni RCE.
+
+Esta fase es un prototipo seguro en Python. No implementa la vulnerabilidad de
+memoria que se estudiará posteriormente y queda separada de la Fase 1 nativa.
+
 ### Fase 1 — Parser C fuera de Android
 
 * implementar parser vulnerable;

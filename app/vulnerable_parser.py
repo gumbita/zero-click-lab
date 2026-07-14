@@ -1,16 +1,18 @@
-"""Parser educativo con una validacion de longitud deliberadamente ausente."""
+"""Emula validacion insuficiente en Python, sin corrupcion de memoria nativa."""
 
 from __future__ import annotations
 
 import struct
 
 
-HEADER = struct.Struct(">4sBBBH I")
+HEADER = struct.Struct(">4sBBBHI")
 
 
 def parse_packet(data: bytes) -> dict[str, object]:
     """Procesa confiando en la longitud declarada (patron inseguro intencional)."""
-    magic, version, flags, packet_type, declared_length, ssrc = HEADER.unpack_from(data)
+    magic, version, flags, packet_type, declared_length, ssrc = (
+        HEADER.unpack_from(data)
+    )
     payload = data[HEADER.size:]
 
     # Fallo didactico: accede a todos los bytes declarados sin comprobar cuantos

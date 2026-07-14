@@ -5,7 +5,7 @@ from __future__ import annotations
 import struct
 
 
-HEADER = struct.Struct(">4sBBBH I")
+HEADER = struct.Struct(">4sBBBHI")
 MAGIC = b"ECLB"
 VERSION = 1
 ALLOWED_TYPES = {1}
@@ -22,7 +22,9 @@ def parse_packet(data: bytes) -> dict[str, object]:
             f"truncated_header actual={len(data)} required={HEADER.size}"
         )
 
-    magic, version, flags, packet_type, declared_length, ssrc = HEADER.unpack_from(data)
+    magic, version, flags, packet_type, declared_length, ssrc = (
+        HEADER.unpack_from(data)
+    )
     payload = data[HEADER.size:]
 
     if magic != MAGIC:
