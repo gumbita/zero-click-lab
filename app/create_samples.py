@@ -28,6 +28,9 @@ def generate_samples(root_dir: Path = ROOT_DIR) -> list[Path]:
     samples = {
         benign / "valid_call_control.bin": packet(b"CALL"),
         malformed / "oversized_payload.bin": packet(b"TINY", declared_length=64),
+        malformed / "oversized_complete_payload.bin": packet(
+            bytes(range(64)), declared_length=64
+        ),
         malformed / "length_mismatch.bin": packet(b"SHORT", declared_length=10),
         malformed / "truncated_packet.bin": b"ECLB\x01",
     }

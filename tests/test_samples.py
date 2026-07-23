@@ -19,6 +19,10 @@ EXPECTED = {
         17,
         "3c3cd136ffb223449f226fe22061922371e8b8c11ec60f336e293f41f4047d30",
     ),
+    "samples/malformed/oversized_complete_payload.bin": (
+        77,
+        "516f7c6a9b6237274f33f8ab01057dfdbd1137df0c898f70b5afb6b7da742aba",
+    ),
     "samples/malformed/length_mismatch.bin": (
         18,
         "b7b3e3d267ca313b943147a83c7461fb3e0553ef17a0b595ac986611a1b83584",
