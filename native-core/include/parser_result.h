@@ -12,7 +12,8 @@ typedef enum parser_status {
     PARSER_UNSUPPORTED_VERSION,
     PARSER_INVALID_PACKET_TYPE,
     PARSER_PAYLOAD_TOO_LARGE,
-    PARSER_LENGTH_MISMATCH
+    PARSER_LENGTH_MISMATCH,
+    PARSER_ALLOCATION_FAILED
 } parser_status;
 
 typedef struct parser_result {

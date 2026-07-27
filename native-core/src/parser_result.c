@@ -19,6 +19,8 @@ const char *parser_status_name(const parser_status status)
         return "payload_too_large";
     case PARSER_LENGTH_MISMATCH:
         return "length_mismatch";
+    case PARSER_ALLOCATION_FAILED:
+        return "allocation_failed";
     default:
         return "unknown_status";
     }

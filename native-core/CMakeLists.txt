@@ -6,6 +6,8 @@ set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
+option(ENABLE_ASAN "Enable AddressSanitizer for the vulnerable receiver" OFF)
+
 function(enable_strict_warnings target_name)
     if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
         target_compile_options(${target_name} PRIVATE
@@ -34,6 +36,27 @@ enable_strict_warnings(safe_parser)
 add_executable(receiver_safe cli/receiver_safe.c)
 target_link_libraries(receiver_safe PRIVATE safe_parser)
 enable_strict_warnings(receiver_safe)
+
+add_library(vulnerable_parser STATIC src/vulnerable_parser.c)
+target_include_directories(vulnerable_parser PUBLIC include)
+target_link_libraries(vulnerable_parser PUBLIC parser_result)
+enable_strict_warnings(vulnerable_parser)
+
+add_executable(receiver_vuln cli/receiver_vuln.c)
+target_link_libraries(receiver_vuln PRIVATE vulnerable_parser)
+enable_strict_warnings(receiver_vuln)
+
+if(ENABLE_ASAN AND CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(vulnerable_parser PRIVATE
+        -fsanitize=address
+        -fno-omit-frame-pointer
+    )
+    target_compile_options(receiver_vuln PRIVATE
+        -fsanitize=address
+        -fno-omit-frame-pointer
+    )
+    target_link_options(receiver_vuln PRIVATE -fsanitize=address)
+endif()
 
 enable_testing()
 

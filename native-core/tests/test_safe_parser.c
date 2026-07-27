@@ -137,7 +137,8 @@ static void test_arguments_and_names(void)
         {PARSER_UNSUPPORTED_VERSION, "unsupported_version"},
         {PARSER_INVALID_PACKET_TYPE, "invalid_packet_type"},
         {PARSER_PAYLOAD_TOO_LARGE, "payload_too_large"},
-        {PARSER_LENGTH_MISMATCH, "length_mismatch"}
+        {PARSER_LENGTH_MISMATCH, "length_mismatch"},
+        {PARSER_ALLOCATION_FAILED, "allocation_failed"}
     };
     const uint8_t empty_buffer = (uint8_t)0u;
     parser_result result;
