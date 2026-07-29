@@ -19,8 +19,10 @@ add_library(
     "${NATIVE_CORE_ROOT}/include/packet_format.h"
     "${NATIVE_CORE_ROOT}/include/parser_result.h"
     "${NATIVE_CORE_ROOT}/include/safe_parser.h"
+    "${NATIVE_CORE_ROOT}/include/vulnerable_parser.h"
     "${NATIVE_CORE_ROOT}/src/parser_result.c"
     "${NATIVE_CORE_ROOT}/src/safe_parser.c"
+    "${NATIVE_CORE_ROOT}/src/vulnerable_parser.c"
 )
 
 target_include_directories(

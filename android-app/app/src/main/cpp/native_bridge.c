@@ -5,6 +5,13 @@
 #include <stdio.h>
 
 #include "safe_parser.h"
+#include "vulnerable_parser.h"
+
+typedef parser_status (*packet_parser_fn)(
+    const uint8_t *data,
+    size_t data_size,
+    parser_result *result
+);
 
 JNIEXPORT jstring JNICALL
 Java_com_echocall_lab_NativeBridge_nativeStatus(
@@ -16,11 +23,10 @@ Java_com_echocall_lab_NativeBridge_nativeStatus(
     return (*env)->NewStringUTF(env, "Native JNI connected");
 }
 
-JNIEXPORT jstring JNICALL
-Java_com_echocall_lab_NativeBridge_parsePacket(
+static jstring parse_packet_to_string(
     JNIEnv *env,
-    jobject receiver,
-    jbyteArray packet
+    jbyteArray packet,
+    packet_parser_fn parser
 )
 {
     char output[256] = {0};
@@ -29,8 +35,6 @@ Java_com_echocall_lab_NativeBridge_parsePacket(
     jsize packet_size;
     jbyte *packet_data;
     int written;
-
-    (void)receiver;
 
     if (packet == NULL) {
         return (*env)->NewStringUTF(
@@ -45,7 +49,7 @@ Java_com_echocall_lab_NativeBridge_parsePacket(
         return NULL;
     }
 
-    status = safe_parse_packet(
+    status = parser(
         (const uint8_t *)packet_data,
         (size_t)packet_size,
         &result
@@ -81,4 +85,26 @@ Java_com_echocall_lab_NativeBridge_parsePacket(
     }
 
     return (*env)->NewStringUTF(env, output);
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_echocall_lab_NativeBridge_parsePacket(
+    JNIEnv *env,
+    jobject receiver,
+    jbyteArray packet
+)
+{
+    (void)receiver;
+    return parse_packet_to_string(env, packet, safe_parse_packet);
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_echocall_lab_NativeBridge_parsePacketVulnerable(
+    JNIEnv *env,
+    jobject receiver,
+    jbyteArray packet
+)
+{
+    (void)receiver;
+    return parse_packet_to_string(env, packet, vulnerable_parse_packet);
 }

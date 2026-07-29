@@ -36,7 +36,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun EchoCallLabScreen(nativeStatus: String) {
     val context = LocalContext.current
-    var parserResult by remember { mutableStateOf("Valid sample not parsed") }
+    var safeResult by remember { mutableStateOf("Valid sample not parsed") }
+    var vulnerableResult by remember { mutableStateOf("Valid sample not parsed") }
 
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
@@ -56,7 +57,7 @@ private fun EchoCallLabScreen(nativeStatus: String) {
                 Spacer(modifier = Modifier.height(24.dp))
                 Button(
                     onClick = {
-                        parserResult = context.assets
+                        safeResult = context.assets
                             .open("valid_call_control.bin")
                             .use { input ->
                                 NativeBridge.parsePacket(input.readBytes())
@@ -66,7 +67,23 @@ private fun EchoCallLabScreen(nativeStatus: String) {
                     Text(text = "Parse valid sample")
                 }
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(text = parserResult)
+                Text(text = "SAFE")
+                Text(text = safeResult)
+                Spacer(modifier = Modifier.height(24.dp))
+                Button(
+                    onClick = {
+                        vulnerableResult = context.assets
+                            .open("valid_call_control.bin")
+                            .use { input ->
+                                NativeBridge.parsePacketVulnerable(input.readBytes())
+                            }
+                    },
+                ) {
+                    Text(text = "Parse valid sample (vulnerable)")
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(text = "VULNERABLE")
+                Text(text = vulnerableResult)
             }
         }
     }

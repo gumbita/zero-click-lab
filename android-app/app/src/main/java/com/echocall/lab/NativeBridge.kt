@@ -8,4 +8,6 @@ internal object NativeBridge {
     external fun nativeStatus(): String
 
     external fun parsePacket(packet: ByteArray): String
+
+    external fun parsePacketVulnerable(packet: ByteArray): String
 }
