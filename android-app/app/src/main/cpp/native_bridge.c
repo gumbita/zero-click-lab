@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "packet_format.h"
 #include "safe_parser.h"
 #include "vulnerable_parser.h"
 
@@ -70,6 +71,16 @@ static jstring parse_packet_to_string(
             result.actual_length,
             result.ssrc,
             (unsigned int)result.checksum
+        );
+    } else if (status == PARSER_PAYLOAD_TOO_LARGE) {
+        written = snprintf(
+            output,
+            sizeof(output),
+            "status=rejected code=payload_too_large declared_length=%u "
+            "actual_length=%zu maximum=%zu",
+            (unsigned int)result.declared_length,
+            result.actual_length,
+            PACKET_MAX_PAYLOAD_SIZE
         );
     } else {
         written = snprintf(
