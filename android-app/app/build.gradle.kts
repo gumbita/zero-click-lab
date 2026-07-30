@@ -4,6 +4,8 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
+val generatedAsanRoot = layout.buildDirectory.dir("generated/asan")
+
 android {
     namespace = "com.echocall.lab"
     compileSdk = 36
@@ -18,8 +20,32 @@ android {
     }
 
     buildTypes {
+        create("asan") {
+            initWith(getByName("debug"))
+            applicationIdSuffix = ".asan"
+            isDebuggable = true
+            matchingFallbacks += listOf("debug")
+
+            ndk {
+                abiFilters += listOf("x86_64")
+            }
+
+            externalNativeBuild {
+                cmake {
+                    arguments += "-DENABLE_ANDROID_ASAN=ON"
+                }
+            }
+        }
+
         release {
             isMinifyEnabled = false
+        }
+    }
+
+    sourceSets {
+        getByName("asan") {
+            jniLibs.srcDir(generatedAsanRoot.map { it.dir("jniLibs") })
+            resources.srcDir(generatedAsanRoot.map { it.dir("resources") })
         }
     }
 
@@ -41,6 +67,51 @@ android {
             path = file("src/main/cpp/CMakeLists.txt")
             version = "3.22.1"
         }
+    }
+}
+
+val ndkDirectory = androidComponents.sdkComponents.ndkDirectory
+val asanRuntime = ndkDirectory.map { ndk ->
+    val matches = ndk.asFileTree.matching {
+        include(
+            "toolchains/llvm/prebuilt/*/lib/clang/*/lib/linux/" +
+                "libclang_rt.asan-x86_64-android.so",
+        )
+    }.files
+
+    require(matches.size == 1) {
+        "Expected exactly one x86_64 ASan runtime in ${ndk.asFile}, " +
+            "found ${matches.size}"
+    }
+    matches.single()
+}
+val asanWrapper = ndkDirectory.map { ndk ->
+    ndk.file("wrap.sh/asan.sh").asFile
+}
+
+val prepareAsanRuntime by tasks.registering(Sync::class) {
+    from(asanRuntime) {
+        into("jniLibs/x86_64")
+    }
+    from(asanWrapper) {
+        into("resources/lib/x86_64")
+        rename("asan.sh", "wrap.sh")
+    }
+    into(generatedAsanRoot)
+}
+
+tasks.configureEach {
+    if (name == "preAsanBuild") {
+        dependsOn(prepareAsanRuntime)
+    }
+}
+
+androidComponents {
+    onVariants(selector().withBuildType("asan")) { variant ->
+        variant.packaging.jniLibs.useLegacyPackaging.set(true)
+        variant.packaging.jniLibs.keepDebugSymbols.add(
+            "**/libclang_rt.asan-x86_64-android.so",
+        )
     }
 }
 

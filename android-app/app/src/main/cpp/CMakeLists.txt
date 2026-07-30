@@ -6,6 +6,12 @@ set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
+option(
+    ENABLE_ANDROID_ASAN
+    "Instrument the Android native library with AddressSanitizer"
+    OFF
+)
+
 get_filename_component(
     NATIVE_CORE_ROOT
     "${CMAKE_CURRENT_LIST_DIR}/../../../../../native-core"
@@ -37,3 +43,13 @@ target_compile_options(echocall_native PRIVATE
     -Wpedantic
     -Werror
 )
+
+if(ENABLE_ANDROID_ASAN)
+    target_compile_options(echocall_native PRIVATE
+        -fsanitize=address
+        -fno-omit-frame-pointer
+    )
+    target_link_options(echocall_native PRIVATE
+        -fsanitize=address
+    )
+endif()

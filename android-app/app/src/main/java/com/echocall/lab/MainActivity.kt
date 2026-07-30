@@ -111,7 +111,7 @@ private fun EchoCallLabScreen(nativeStatus: String) {
                             }
                             ParserMode.VULNERABLE -> {
                                 val packet = context.assets
-                                    .open("valid_call_control.bin")
+                                    .open("oversized_complete_payload.bin")
                                     .use { input -> input.readBytes() }
                                 incomingCallResult = "Automatic native parsing started"
                                 coroutineScope.launch {
