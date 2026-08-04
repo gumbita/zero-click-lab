@@ -1,0 +1,407 @@
+--------- beginning of main
+07-31 14:04:12.279  1734  2138 I AiAiTranslate: C2T - not in a conversation
+07-31 14:04:12.281  1137  1137 I ClipboardListener: Clipboard overlay suppressed.
+07-31 14:04:12.294  1734  2227 I AiAiTextClassifier: GenerateLinks did not find valid links, returning empty result
+07-31 14:04:13.401  1764  2019 I bbax    : (REDACTED) getHotwordActive::active query: %s, watch: %s, devices connected: %s
+--------- beginning of radio
+07-31 14:04:14.628  1296  1772 D RILJ    : [UNSL]< UNSOL_CELL_INFO_LIST [CellInfoNr:{ mRegistered=YES mTimeStamp=9213013890459ns mCellConnectionStatus=1 CellIdentityNr:{ mPci = 555 mTac = 8514 mNrArfcn = 9000 mBands = [41] mMcc = 310 mMnc = 260 mNci = 100500 mAlphaLong = T-Mobile mAlphaShort = TMOBILE mAdditionalPlmns = {310260} } CellSignalStrengthNr:{ csiRsrp = 2147483647 csiRsrq = 2147483647 csiCqiTableIndex = 2147483647 csiCqiReport = [] ssRsrp = -44 ssRsrq = 2147483647 ssSinr = 2147483647 level = 4 parametersUseForLevel = 1 timingAdvance = 2147483647 } }] [PHONE0]
+07-31 14:04:14.628  1296  1511 D SatelliteController: iisInCarrierRoamingNbIotNtn: satellite is disabled
+07-31 14:04:14.636  1296  1296 D DN-101-C: ConnectedState: onBandwidthUpdated: downlinkBandwidthKbps=-1, uplinkBandwidthKbps=-1
+07-31 14:04:14.637  1296  1296 D DN-101-C: ConnectedState: updateNetworkCapabilities: dsri=android.telephony.DataSpecificRegistrationInfo :{ maxDataCalls = 16 isDcNrRestricted = false isNrAvailable = true isEnDcAvailable = false mLteAttachResultType = 0 mLteAttachExtraInfo = 0 LteVopsSupportInfo :  mVopsSupport = 3 mEmcBearerSupport = 3 }
+07-31 14:04:14.641  1296  1296 D DN-101-C: ConnectedState: updateNetworkCapabilities: Capabilities not changed.
+07-31 14:04:14.641  1296  1296 D LocaleTracker-0: processCellInfo: cell info=[CellInfoNr:{ mRegistered=YES mTimeStamp=9213013890459ns mCellConnectionStatus=1 CellIdentityNr:{ mPci = 555 mTac = 8514 mNrArfcn = 9000 mBands = [41] mMcc = 310 mMnc = 260 mNci = 100500 mAlphaLong = T-Mobile mAlphaShort = TMOBILE mAdditionalPlmns = {310260} } CellSignalStrengthNr:{ csiRsrp = 2147483647 csiRsrq = 2147483647 csiCqiTableIndex = 2147483647 csiCqiReport = [] ssRsrp = -44 ssRsrq = 2147483647 ssSinr = 2147483647 level = 4 parametersUseForLevel = 1 timingAdvance = 2147483647 } }]
+07-31 14:04:14.641  1296  1296 D LocaleTracker-0: updateLocale: countryIso = us, countryIsoDebugInfo = OperatorNumeric(310260): MccTable.geoCountryCodeForMccMnc("MccMnc{mcc='310', mnc='260'}")
+07-31 14:04:14.641  1296  1296 D LocaleTracker-0: updateLocale: timeZoneCountryIso = us, timeZoneCountryIsoDebugInfo = OperatorNumeric(310260): MccTable.geoCountryCodeForMccMnc("MccMnc{mcc='310', mnc='260'}")
+07-31 14:04:14.641  1296  1296 D NitzStateMachineImpl: handleCountryDetected: countryIsoCode=us, mLatestNitzSignal=null
+07-31 14:04:20.006   767  1099 D androidtc: Initializing SystemTextClassifier, type = System
+07-31 14:04:20.008  1734  1734 I AiAiTextClassifier: onCreateTextClassificationSession = TextClassificationSessionId {0a119f75-36a9-4b91-bde9-28b2e332bed6}
+07-31 14:04:20.020  1734  2138 I AiAiTranslate: C2T - not in a conversation
+07-31 14:04:20.027  1137  1137 I ClipboardListener: Clipboard overlay suppressed.
+07-31 14:04:20.042  1137  1137 I ClipboardListener: Clipboard overlay suppressed.
+07-31 14:04:22.761  6847  6869 I EchoCallUDP: Datagram received from /10.0.2.2:52313 length=77
+07-31 14:04:22.780  6847  6909 I EchoCallUDP: Dispatching datagram mode=VULNERABLE length=77
+07-31 14:04:22.784  6846  6846 I wrap.sh : =================================================================
+07-31 14:04:22.784  6846  6846 I wrap.sh : [1m[31m==6847==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x503000007d70 at pc 0x761f29978f84 bp 0x761c493f77d0 sp 0x761c493f6f90
+07-31 14:04:22.784  6846  6846 I wrap.sh : [1m[0m[1m[34mWRITE of size 64 at 0x503000007d70 thread T25 (DefaultDispatch)[1m[0m
+07-31 14:04:22.812  6846  6846 I wrap.sh :     #0 0x761f29978f83  (/data/app/~~17opl6JEp2WTVyfSDG8I5g==/com.echocall.lab.asan-CDe_i3ePykTKev1vNZqvNA==/lib/x86_64/libclang_rt.asan-x86_64-android.so+0xdbf83) (BuildId: 3a151d09f677bf8add3834376cb104781a668003)
+07-31 14:04:22.812  6846  6846 I wrap.sh :     #1 0x761c8e8b997a  (/data/app/~~17opl6JEp2WTVyfSDG8I5g==/com.echocall.lab.asan-CDe_i3ePykTKev1vNZqvNA==/lib/x86_64/libechocall_native.so+0x697a) (BuildId: c455a1c576ff356de665e37770bd209913e6e7b2)
+07-31 14:04:22.813  6846  6846 I wrap.sh :     #2 0x761c8e8b72e5  (/data/app/~~17opl6JEp2WTVyfSDG8I5g==/com.echocall.lab.asan-CDe_i3ePykTKev1vNZqvNA==/lib/x86_64/libechocall_native.so+0x42e5) (BuildId: c455a1c576ff356de665e37770bd209913e6e7b2)
+07-31 14:04:22.813  6846  6846 I wrap.sh :     #3 0x761c8e8b7947  (/data/app/~~17opl6JEp2WTVyfSDG8I5g==/com.echocall.lab.asan-CDe_i3ePykTKev1vNZqvNA==/lib/x86_64/libechocall_native.so+0x4947) (BuildId: c455a1c576ff356de665e37770bd209913e6e7b2)
+07-31 14:04:22.813  6846  6846 I wrap.sh : 
+07-31 14:04:22.813  6846  6846 I wrap.sh : [1m[32m0x503000007d70 is located 0 bytes after 32-byte region [0x503000007d50,0x503000007d70)
+07-31 14:04:22.813  6846  6846 I wrap.sh : [1m[0m[1m[35mallocated by thread T25 (DefaultDispatch) here:[1m[0m
+07-31 14:04:22.815  6846  6846 I wrap.sh :     #0 0x761f2997a72f  (/data/app/~~17opl6JEp2WTVyfSDG8I5g==/com.echocall.lab.asan-CDe_i3ePykTKev1vNZqvNA==/lib/x86_64/libclang_rt.asan-x86_64-android.so+0xdd72f) (BuildId: 3a151d09f677bf8add3834376cb104781a668003)
+07-31 14:04:22.816  6846  6846 I wrap.sh :     #1 0x761c8e8b9816  (/data/app/~~17opl6JEp2WTVyfSDG8I5g==/com.echocall.lab.asan-CDe_i3ePykTKev1vNZqvNA==/lib/x86_64/libechocall_native.so+0x6816) (BuildId: c455a1c576ff356de665e37770bd209913e6e7b2)
+07-31 14:04:22.816  6846  6846 I wrap.sh :     #2 0x761c8e8b72e5  (/data/app/~~17opl6JEp2WTVyfSDG8I5g==/com.echocall.lab.asan-CDe_i3ePykTKev1vNZqvNA==/lib/x86_64/libechocall_native.so+0x42e5) (BuildId: c455a1c576ff356de665e37770bd209913e6e7b2)
+07-31 14:04:22.816  6846  6846 I wrap.sh :     #3 0x761c8e8b7947  (/data/app/~~17opl6JEp2WTVyfSDG8I5g==/com.echocall.lab.asan-CDe_i3ePykTKev1vNZqvNA==/lib/x86_64/libechocall_native.so+0x4947) (BuildId: c455a1c576ff356de665e37770bd209913e6e7b2)
+07-31 14:04:22.816  6846  6846 I wrap.sh :     #4 0x71836da4  (/system/framework/x86_64/boot.oat+0x2deda4) (BuildId: 9083d3c301e7d514bb074e4d021820fc53775ff6)
+07-31 14:04:22.816  6846  6846 I wrap.sh : 
+07-31 14:04:22.816  6846  6846 I wrap.sh : Thread T25 (DefaultDispatch) created by T0 (hocall.lab.asan) here:
+07-31 14:04:22.816  6846  6846 I wrap.sh :     #0 0x761f299680ee  (/data/app/~~17opl6JEp2WTVyfSDG8I5g==/com.echocall.lab.asan-CDe_i3ePykTKev1vNZqvNA==/lib/x86_64/libclang_rt.asan-x86_64-android.so+0xcb0ee) (BuildId: 3a151d09f677bf8add3834376cb104781a668003)
+07-31 14:04:22.816  6846  6846 I wrap.sh :     #1 0x761c938f5c35  (/apex/com.android.art/lib64/libart.so+0x8f5c35) (BuildId: 108a321dc93c20580e74b855c407e975)
+07-31 14:04:22.816  6846  6846 I wrap.sh :     #2 0x71836223  (/system/framework/x86_64/boot.oat+0x2de223) (BuildId: 9083d3c301e7d514bb074e4d021820fc53775ff6)
+07-31 14:04:22.816  6846  6846 I wrap.sh : 
+07-31 14:04:22.818  6846  6846 I wrap.sh : SUMMARY: AddressSanitizer: heap-buffer-overflow (/data/app/~~17opl6JEp2WTVyfSDG8I5g==/com.echocall.lab.asan-CDe_i3ePykTKev1vNZqvNA==/lib/x86_64/libclang_rt.asan-x86_64-android.so+0xdbf83) (BuildId: 3a151d09f677bf8add3834376cb104781a668003) 
+07-31 14:04:22.820  6846  6846 I wrap.sh : Shadow bytes around the buggy address:
+07-31 14:04:22.821  6846  6846 I wrap.sh :   0x503000007a80: [1m[35mfd[1m[0m [1m[35mfd[1m[0m [1m[35mfd[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[35mfd[1m[0m [1m[35mfd[1m[0m [1m[35mfd[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m
+07-31 14:04:22.821  6846  6846 I wrap.sh :   0x503000007b00: [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m
+07-31 14:04:22.821  6846  6846 I wrap.sh :   0x503000007b80: [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m
+--------- beginning of crash
+07-31 14:04:22.823  6847  6909 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 6909 (DefaultDispatch), pid 6847 (hocall.lab.asan)
+07-31 14:04:22.821  6846  6846 I wrap.sh :   0x503000007c00: [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m
+07-31 14:04:22.824  6846  6846 I wrap.sh :   0x503000007c80: [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m
+07-31 14:04:22.824  6846  6846 I wrap.sh : =>0x503000007d00: [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[0m00[1m[0m [1m[0m00[1m[0m [1m[0m00[1m[0m [1m[0m00[1m[0m[[1m[31mfa[1m[0m][1m[31mfa[1m[0m
+07-31 14:04:22.824  6846  6846 I wrap.sh :   0x503000007d80: [1m[35mfd[1m[0m [1m[35mfd[1m[0m [1m[35mfd[1m[0m [1m[35mfd[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[35mfd[1m[0m [1m[35mfd[1m[0m [1m[35mfd[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[35mfd[1m[0m [1m[35mfd[1m[0m [1m[35mfd[1m[0m [1m[35mfd[1m[0m
+07-31 14:04:22.824  6846  6846 I wrap.sh :   0x503000007e00: [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[35mfd[1m[0m [1m[35mfd[1m[0m [1m[35mfd[1m[0m [1m[35mfd[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[35mfd[1m[0m [1m[35mfd[1m[0m [1m[35mfd[1m[0m [1m[35mfd[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[35mfd[1m[0m [1m[35mfd[1m[0m
+07-31 14:04:22.824  6846  6846 I wrap.sh :   0x503000007e80: [1m[35mfd[1m[0m [1m[35mfd[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[35mfd[1m[0m [1m[35mfd[1m[0m [1m[35mfd[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[35mfd[1m[0m [1m[35mfd[1m[0m [1m[35mfd[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m
+07-31 14:04:22.825  6846  6846 I wrap.sh :   0x503000007f00: [1m[35mfd[1m[0m [1m[35mfd[1m[0m [1m[35mfd[1m[0m [1m[35mfd[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[35mfd[1m[0m [1m[35mfd[1m[0m [1m[35mfd[1m[0m [1m[35mfd[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m
+07-31 14:04:22.825  6846  6846 I wrap.sh :   0x503000007f80: [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[0m00[1m[0m [1m[0m00[1m[0m
+07-31 14:04:22.825  6846  6846 I wrap.sh : Shadow byte legend (one shadow byte represents 8 application bytes):
+07-31 14:04:22.826  6846  6846 I wrap.sh :   Addressable:           [1m[0m00[1m[0m
+07-31 14:04:22.826  6846  6846 I wrap.sh :   Partially addressable: [1m[0m01[1m[0m [1m[0m02[1m[0m [1m[0m03[1m[0m [1m[0m04[1m[0m [1m[0m05[1m[0m [1m[0m06[1m[0m [1m[0m07[1m[0m 
+07-31 14:04:22.826  6846  6846 I wrap.sh :   Heap left redzone:       [1m[31mfa[1m[0m
+07-31 14:04:22.827  6846  6846 I wrap.sh :   Freed heap region:       [1m[35mfd[1m[0m
+07-31 14:04:22.827  6846  6846 I wrap.sh :   Stack left redzone:      [1m[31mf1[1m[0m
+07-31 14:04:22.827  6846  6846 I wrap.sh :   Stack mid redzone:       [1m[31mf2[1m[0m
+07-31 14:04:22.827  6846  6846 I wrap.sh :   Stack right redzone:     [1m[31mf3[1m[0m
+07-31 14:04:22.827  6846  6846 I wrap.sh :   Stack after return:      [1m[35mf5[1m[0m
+07-31 14:04:22.827  6846  6846 I wrap.sh :   Stack use after scope:   [1m[35mf8[1m[0m
+07-31 14:04:22.827  6846  6846 I wrap.sh :   Global redzone:          [1m[31mf9[1m[0m
+07-31 14:04:22.827  6846  6846 I wrap.sh :   Global init order:       [1m[36mf6[1m[0m
+07-31 14:04:22.827  6846  6846 I wrap.sh :   Poisoned by user:        [1m[34mf7[1m[0m
+07-31 14:04:22.828  6846  6846 I wrap.sh :   Container overflow:      [1m[34mfc[1m[0m
+07-31 14:04:22.828  6846  6846 I wrap.sh :   Array cookie:            [1m[31mac[1m[0m
+07-31 14:04:22.828  6846  6846 I wrap.sh :   Intra object redzone:    [1m[33mbb[1m[0m
+07-31 14:04:22.829  6846  6846 I wrap.sh :   ASan internal:           [1m[33mfe[1m[0m
+07-31 14:04:22.829  6846  6846 I wrap.sh :   Left alloca redzone:     [1m[34mca[1m[0m
+07-31 14:04:22.829  6846  6846 I wrap.sh :   Right alloca redzone:    [1m[34mcb[1m[0m
+07-31 14:04:22.829  6846  6846 I wrap.sh : ==6847==ABORTING
+--------- beginning of events
+07-31 14:04:22.892  7012  7012 I auditd  : type=1400 audit(0.0:801): avc:  denied  { read write } for  comm="crash_dump64" path="/dev/pts/2" dev="devpts" ino=5 scontext=u:r:crash_dump:s0:c218,c256,c512,c768 tcontext=u:object_r:untrusted_app_all_devpts:s0:c218,c256,c512,c768 tclass=chr_file permissive=0 app=com.echocall.lab.asan
+07-31 14:04:22.892  7012  7012 W crash_dump64: type=1400 audit(0.0:801): avc:  denied  { read write } for  path="/dev/pts/2" dev="devpts" ino=5 scontext=u:r:crash_dump:s0:c218,c256,c512,c768 tcontext=u:object_r:untrusted_app_all_devpts:s0:c218,c256,c512,c768 tclass=chr_file permissive=0 app=com.echocall.lab.asan
+07-31 14:04:23.061  7013  7013 I crash_dump64: obtaining output fd from tombstoned, type: kDebuggerdTombstoneProto
+07-31 14:04:23.109   306   306 I tombstoned: received crash request for pid 6909
+07-31 14:04:23.116  7013  7013 I crash_dump64: performing dump of process 6847 (target tid = 6909)
+07-31 14:04:24.631  1296  1772 D RILJ    : [UNSL]< UNSOL_CELL_INFO_LIST [CellInfoNr:{ mRegistered=YES mTimeStamp=9223017256659ns mCellConnectionStatus=1 CellIdentityNr:{ mPci = 555 mTac = 8514 mNrArfcn = 9000 mBands = [41] mMcc = 310 mMnc = 260 mNci = 100500 mAlphaLong = T-Mobile mAlphaShort = TMOBILE mAdditionalPlmns = {310260} } CellSignalStrengthNr:{ csiRsrp = 2147483647 csiRsrq = 2147483647 csiCqiTableIndex = 2147483647 csiCqiReport = [] ssRsrp = -49 ssRsrq = 2147483647 ssSinr = 2147483647 level = 4 parametersUseForLevel = 1 timingAdvance = 2147483647 } }] [PHONE0]
+07-31 14:04:24.632  1296  1511 D SatelliteController: iisInCarrierRoamingNbIotNtn: satellite is disabled
+07-31 14:04:24.649  1296  1296 D LocaleTracker-0: processCellInfo: cell info=[CellInfoNr:{ mRegistered=YES mTimeStamp=9223017256659ns mCellConnectionStatus=1 CellIdentityNr:{ mPci = 555 mTac = 8514 mNrArfcn = 9000 mBands = [41] mMcc = 310 mMnc = 260 mNci = 100500 mAlphaLong = T-Mobile mAlphaShort = TMOBILE mAdditionalPlmns = {310260} } CellSignalStrengthNr:{ csiRsrp = 2147483647 csiRsrq = 2147483647 csiCqiTableIndex = 2147483647 csiCqiReport = [] ssRsrp = -49 ssRsrq = 2147483647 ssSinr = 2147483647 level = 4 parametersUseForLevel = 1 timingAdvance = 2147483647 } }]
+07-31 14:04:24.649  1296  1296 D LocaleTracker-0: updateLocale: countryIso = us, countryIsoDebugInfo = OperatorNumeric(310260): MccTable.geoCountryCodeForMccMnc("MccMnc{mcc='310', mnc='260'}")
+07-31 14:04:24.649  1296  1296 D LocaleTracker-0: updateLocale: timeZoneCountryIso = us, timeZoneCountryIsoDebugInfo = OperatorNumeric(310260): MccTable.geoCountryCodeForMccMnc("MccMnc{mcc='310', mnc='260'}")
+07-31 14:04:24.649  1296  1296 D NitzStateMachineImpl: handleCountryDetected: countryIsoCode=us, mLatestNitzSignal=null
+07-31 14:04:24.806  7013  7013 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+07-31 14:04:24.806  7013  7013 F DEBUG   : Build fingerprint: 'google/sdk_gphone64_x86_64/emu64xa:16/BE2A.250530.026.D1/13818094:user/release-keys'
+07-31 14:04:24.806  7013  7013 F DEBUG   : Revision: '0'
+07-31 14:04:24.806  7013  7013 F DEBUG   : ABI: 'x86_64'
+07-31 14:04:24.806  7013  7013 F DEBUG   : Timestamp: 2026-07-31 14:04:23.126116896+0200
+07-31 14:04:24.806  7013  7013 F DEBUG   : Process uptime: 1786s
+07-31 14:04:24.806  7013  7013 F DEBUG   : Cmdline: com.echocall.lab.asan
+07-31 14:04:24.806  7013  7013 F DEBUG   : pid: 6847, tid: 6909, name: DefaultDispatch  >>> com.echocall.lab.asan <<<
+07-31 14:04:24.806  7013  7013 F DEBUG   : uid: 10218
+07-31 14:04:24.806  7013  7013 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+07-31 14:04:24.810  7013  7013 F DEBUG   : Abort message: '=================================================================
+07-31 14:04:24.810  7013  7013 F DEBUG   : ==6847==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x503000007d70 at pc 0x761f29978f84 bp 0x761c493f77d0 sp 0x761c493f6f90
+07-31 14:04:24.810  7013  7013 F DEBUG   : WRITE of size 64 at 0x503000007d70 thread T25 (DefaultDispatch)
+07-31 14:04:24.810  7013  7013 F DEBUG   :     #0 0x761f29978f83  (/data/app/~~17opl6JEp2WTVyfSDG8I5g==/com.echocall.lab.asan-CDe_i3ePykTKev1vNZqvNA==/lib/x86_64/libclang_rt.asan-x86_64-android.so+0xdbf83) (BuildId: 3a151d09f677bf8add3834376cb104781a668003)
+07-31 14:04:24.810  7013  7013 F DEBUG   :     #1 0x761c8e8b997a  (/data/app/~~17opl6JEp2WTVyfSDG8I5g==/com.echocall.lab.asan-CDe_i3ePykTKev1vNZqvNA==/lib/x86_64/libechocall_native.so+0x697a) (BuildId: c455a1c576ff356de665e37770bd209913e6e7b2)
+07-31 14:04:24.810  7013  7013 F DEBUG   :     #2 0x761c8e8b72e5  (/data/app/~~17opl6JEp2WTVyfSDG8I5g==/com.echocall.lab.asan-CDe_i3ePykTKev1vNZqvNA==/lib/x86_64/libechocall_native.so+0x42e5) (BuildId: c455a1c576ff356de665e37770bd209913e6e7b2)
+07-31 14:04:24.810  7013  7013 F DEBUG   :     #3 0x761c8e8b7947  (/data/app/~~17opl6JEp2WTVyfSDG8I5g==/com.echocall.lab.asan-CDe_i3ePykTKev1vNZqvNA==/lib/x86_64/libechocall_native.so+0x4947) (BuildId: c455a1c576ff356de665e37770bd209913e6e7b2)
+07-31 14:04:24.810  7013  7013 F DEBUG   : 
+07-31 14:04:24.810  7013  7013 F DEBUG   : 0x503000007d70 is located 0 bytes after 32-byte region [0x503000007d50,0x503000007d70)
+07-31 14:04:24.810  7013  7013 F DEBUG   : allocated by thread T25 (DefaultDispatch) here:
+07-31 14:04:24.810  7013  7013 F DEBUG   :     #0 0x761f2997a72f  (/data/app/~~17opl6JEp2WTVyfSDG8I5g==/com.echocall.lab.asan-CDe_i3ePykTKev1vNZqvNA==/lib/x86_64/libclang_rt.asan-x86_64-android.so+0xdd72f) (BuildId: 3a151d09f677bf8add3834376cb104781a668003)
+07-31 14:04:24.810  7013  7013 F DEBUG   :     #1 0x761c8e8b9816  (/data/app/~~17opl6JEp2WTVyfSDG8I5g==/com.echocall.lab.asan-CDe_i3ePykTKev1vNZqvNA==/lib/x86_64/libechocall_native.so+0x6816) (BuildId: c455a1c576ff356de665e37770bd209913e6e7b2)
+07-31 14:04:24.810  7013  7013 F DEBUG   :     #2 0x761c8e8b72e5  (/data/app/~~17opl6JEp2WTVyfSDG8I5g==/com.echocall.lab.asan-CDe_i3ePykTKev1vNZqvNA==/lib/x86_64/libechocall_native.so+0x42e5) (BuildId: c455a1c576ff356de665e37770bd209913e6e7b2)
+07-31 14:04:24.810  7013  7013 F DEBUG   :     #3 0x761c8e8b7947  (/data/app/~~17opl6JEp2WTVyfSDG8I5g==/com.echocall.lab.asan-CDe_i3ePykTKev1vNZqvNA==/lib/x86_64/libechocall_native.so+0x4947) (BuildId: c455a1c576ff356de665e37770bd209913e6e7b2)
+07-31 14:04:24.810  7013  7013 F DEBUG   :     #4 0x71836da4  (/system/framework/x86_64/boot.oat+0x2deda4) (BuildId: 9083d3c301e7d514bb074e4d021820fc53775ff6)
+07-31 14:04:24.810  7013  7013 F DEBUG   : 
+07-31 14:04:24.810  7013  7013 F DEBUG   : Thread T25 (DefaultDispatch) created by T0 (hocall.lab.asan) here:
+07-31 14:04:24.810  7013  7013 F DEBUG   :     #0 0x761f299680ee  (/data/app/~~17opl6JEp2WTVyfSDG8I5g==/com.echocall.lab.asan-CDe_i3ePykTKev1vNZqvNA==/lib/x86_64/libclang_rt.asan-x86_64-android.so+0xcb0ee) (BuildId: 3a151d09f677bf8add3834376cb104781a668003)
+07-31 14:04:24.810  7013  7013 F DEBUG   :     #1 0x761c938f5c35  (/apex/com.android.art/lib64/libart.so+0x8f5c35) (BuildId: 108a321dc93c20580e74b855c407e975)
+07-31 14:04:24.810  7013  7013 F DEBUG   :     #2 0x71836223  (/system/framework/x86_64/boot.oat+0x2de223) (BuildId: 9083d3c301e7d514bb074e4d021820fc53775ff6)
+07-31 14:04:24.810  7013  7013 F DEBUG   : 
+07-31 14:04:24.810  7013  7013 F DEBUG   : SUMMARY: AddressSanitizer: heap-buffer-overflow (/data/app/~~17opl6JEp2WTVyfSDG8I5g==/com.echocall.lab.asan-CDe_i3ePykTKev1vNZqvNA==/lib/x86_64/libclang_rt.asan-x86_64-android.so+0xdbf83) (BuildId: 3a151d09f677bf8add3834376cb104781a668003) 
+07-31 14:04:24.810  7013  7013 F DEBUG   : Shadow bytes around the buggy address:
+07-31 14:04:24.810  7013  7013 F DEBUG   :   0x503000007a80: fd fd fd fa fa fa fd fd fd fa fa fa fa fa fa fa
+07-31 14:04:24.810  7013  7013 F DEBUG   :   0x503000007b00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+07-31 14:04:24.810  7013  7013 F DEBUG   :   0x503000007b80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+07-31 14:04:24.810  7013  7013 F DEBUG   :   0x503000007c00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+07-31 14:04:24.810  7013  7013 F DEBUG   :   0x503000007c80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+07-31 14:04:24.810  7013  7013 F DEBUG   : =>0x503000007d00: fa fa fa fa fa fa fa fa fa fa 00 00 00 00[fa]fa
+07-31 14:04:24.810  7013  7013 F DEBUG   :   0x503000007d80: fd fd fd fd fa fa fd fd fd fa fa fa fd fd fd fd
+07-31 14:04:24.810  7013  7013 F DEBUG   :   0x503000007e00: fa fa fd fd fd fd fa fa fd fd fd fd fa fa fd fd
+07-31 14:04:24.810  7013  7013 F DEBUG   :   0x503000007e80: fd fd fa fa fd fd fd fa fa fa fd fd fd fa fa fa
+07-31 14:04:24.810  7013  7013 F DEBUG   :   0x503000007f00: fd fd fd fd fa fa fd fd fd fd fa fa fa fa fa fa
+07-31 14:04:24.810  7013  7013 F DEBUG   :   0x503000007f80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa 00 00
+07-31 14:04:24.810  7013  7013 F DEBUG   : Shadow byte legend (one shadow byte represents 8 application bytes):
+07-31 14:04:24.810  7013  7013 F DEBUG   :   Addressable:           00
+07-31 14:04:24.810  7013  7013 F DEBUG   :   Partially addressable: 01 02 03 04 05 06 07 
+07-31 14:04:24.810  7013  7013 F DEBUG   :   Heap left redzone:       fa
+07-31 14:04:24.810  7013  7013 F DEBUG   :   Freed heap region:       fd
+07-31 14:04:24.810  7013  7013 F DEBUG   :   Stack left redzone:      f1
+07-31 14:04:24.810  7013  7013 F DEBUG   :   Stack mid redzone:       f2
+07-31 14:04:24.810  7013  7013 F DEBUG   :   Stack right redzone:     f3
+07-31 14:04:24.810  7013  7013 F DEBUG   :   Stack after return:      f5
+07-31 14:04:24.813  7013  7013 F DEBUG   :   Stack use after scope:   f8
+07-31 14:04:24.813  7013  7013 F DEBUG   :   Global redzone:          f9
+07-31 14:04:24.813  7013  7013 F DEBUG   :   Global init order:       f6
+07-31 14:04:24.813  7013  7013 F DEBUG   :   Poisoned by user:        f7
+07-31 14:04:24.813  7013  7013 F DEBUG   :   Container overflow:      fc
+07-31 14:04:24.813  7013  7013 F DEBUG   :   Array cookie:            ac
+07-31 14:04:24.813  7013  7013 F DEBUG   :   Intra object redzone:    bb
+07-31 14:04:24.813  7013  7013 F DEBUG   :   ASan internal:           fe
+07-31 14:04:24.813  7013  7013 F DEBUG   :   Left alloca redzone:     ca
+07-31 14:04:24.813  7013  7013 F DEBUG   :   Right alloca redzone:    cb'
+07-31 14:04:24.813  7013  7013 F DEBUG   :     rax 0000000000000000  rbx 0000000000001abf  rcx 0000761f28eb6424  rdx 0000000000000006
+07-31 14:04:24.813  7013  7013 F DEBUG   :     r8  0000000000000000  r9  0000000000000000  r10 0000761c493f61d0  r11 0000000000000203
+07-31 14:04:24.813  7013  7013 F DEBUG   :     r12 efffffffffffffff  r13 1000000000000000  r14 0000000000001afd  r15 0fffff0000000000
+07-31 14:04:24.813  7013  7013 F DEBUG   :     rdi 0000000000001abf  rsi 0000000000001afd
+07-31 14:04:24.813  7013  7013 F DEBUG   :     rbp 0000761c493f6270  rsp 0000761c493f61d0  rip 0000761f28eb6424
+07-31 14:04:24.813  7013  7013 F DEBUG   : 31 total frames
+07-31 14:04:24.813  7013  7013 F DEBUG   : backtrace:
+07-31 14:04:24.813  7013  7013 F DEBUG   :       #00 pc 000000000006a424  /apex/com.android.runtime/lib64/bionic/libc.so (abort+196) (BuildId: fcb82240218d1473de1e3d2137c0be35)
+07-31 14:04:24.814  7013  7013 F DEBUG   :       #01 pc 00000000000681d1  /data/app/~~17opl6JEp2WTVyfSDG8I5g==/com.echocall.lab.asan-CDe_i3ePykTKev1vNZqvNA==/lib/x86_64/libclang_rt.asan-x86_64-android.so (__sanitizer::Abort()+65) (BuildId: 3a151d09f677bf8add3834376cb104781a668003)
+07-31 14:04:24.814  7013  7013 F DEBUG   :       #02 pc 0000000000067000  /data/app/~~17opl6JEp2WTVyfSDG8I5g==/com.echocall.lab.asan-CDe_i3ePykTKev1vNZqvNA==/lib/x86_64/libclang_rt.asan-x86_64-android.so (__sanitizer::Die()+192) (BuildId: 3a151d09f677bf8add3834376cb104781a668003)
+07-31 14:04:24.814  7013  7013 F DEBUG   :       #03 pc 00000000000e17ae  /data/app/~~17opl6JEp2WTVyfSDG8I5g==/com.echocall.lab.asan-CDe_i3ePykTKev1vNZqvNA==/lib/x86_64/libclang_rt.asan-x86_64-android.so (__asan::ScopedInErrorReport::~ScopedInErrorReport()+1182) (BuildId: 3a151d09f677bf8add3834376cb104781a668003)
+07-31 14:04:24.814  7013  7013 F DEBUG   :       #04 pc 00000000000e4644  /data/app/~~17opl6JEp2WTVyfSDG8I5g==/com.echocall.lab.asan-CDe_i3ePykTKev1vNZqvNA==/lib/x86_64/libclang_rt.asan-x86_64-android.so (__asan::ReportGenericError(unsigned long, unsigned long, unsigned long, unsigned long, bool, unsigned long, unsigned int, bool)+1764) (BuildId: 3a151d09f677bf8add3834376cb104781a668003)
+07-31 14:04:24.814  7013  7013 F DEBUG   :       #05 pc 00000000000dbfa5  /data/app/~~17opl6JEp2WTVyfSDG8I5g==/com.echocall.lab.asan-CDe_i3ePykTKev1vNZqvNA==/lib/x86_64/libclang_rt.asan-x86_64-android.so (__asan_memcpy+1061) (BuildId: 3a151d09f677bf8add3834376cb104781a668003)
+07-31 14:04:24.814  7013  7013 F DEBUG   :       #06 pc 000000000000697a  /data/app/~~17opl6JEp2WTVyfSDG8I5g==/com.echocall.lab.asan-CDe_i3ePykTKev1vNZqvNA==/lib/x86_64/libechocall_native.so (vulnerable_parse_packet+3274) (BuildId: c455a1c576ff356de665e37770bd209913e6e7b2)
+07-31 14:04:24.814  7013  7013 F DEBUG   :       #07 pc 00000000000042e5  /data/app/~~17opl6JEp2WTVyfSDG8I5g==/com.echocall.lab.asan-CDe_i3ePykTKev1vNZqvNA==/lib/x86_64/libechocall_native.so (BuildId: c455a1c576ff356de665e37770bd209913e6e7b2)
+07-31 14:04:24.814  7013  7013 F DEBUG   :       #08 pc 0000000000004947  /data/app/~~17opl6JEp2WTVyfSDG8I5g==/com.echocall.lab.asan-CDe_i3ePykTKev1vNZqvNA==/lib/x86_64/libechocall_native.so (Java_com_echocall_lab_NativeBridge_parsePacketVulnerable+39) (BuildId: c455a1c576ff356de665e37770bd209913e6e7b2)
+07-31 14:04:24.814  7013  7013 F DEBUG   :       #09 pc 00000000002deda4  /system/framework/x86_64/boot.oat (art_jni_trampoline+148) (BuildId: 9083d3c301e7d514bb074e4d021820fc53775ff6)
+07-31 14:04:24.814  7013  7013 F DEBUG   :       #10 pc 00000000002097ed  /apex/com.android.art/lib64/libart.so (nterp_helper+3837) (BuildId: 108a321dc93c20580e74b855c407e975)
+07-31 14:04:24.816  7013  7013 F DEBUG   :       #11 pc 0000000000003e2c  /data/app/~~17opl6JEp2WTVyfSDG8I5g==/com.echocall.lab.asan-CDe_i3ePykTKev1vNZqvNA==/base.apk (offset 0x14d9000) (com.echocall.lab.MainActivityKt$EchoCallLabScreen$1$1$result$1.invokeSuspend+204)
+07-31 14:04:24.818  7013  7013 F DEBUG   :       #12 pc 0000000000209788  /apex/com.android.art/lib64/libart.so (nterp_helper+3736) (BuildId: 108a321dc93c20580e74b855c407e975)
+07-31 14:04:24.818  7013  7013 F DEBUG   :       #13 pc 0000000000133bf6  /data/app/~~17opl6JEp2WTVyfSDG8I5g==/com.echocall.lab.asan-CDe_i3ePykTKev1vNZqvNA==/base.apk (offset 0x1056000) (kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith+42)
+07-31 14:04:24.818  7013  7013 F DEBUG   :       #14 pc 000000000020a5a1  /apex/com.android.art/lib64/libart.so (nterp_helper+7345) (BuildId: 108a321dc93c20580e74b855c407e975)
+07-31 14:04:24.818  7013  7013 F DEBUG   :       #15 pc 000000000017f15a  /data/app/~~17opl6JEp2WTVyfSDG8I5g==/com.echocall.lab.asan-CDe_i3ePykTKev1vNZqvNA==/base.apk (offset 0x1056000) (kotlinx.coroutines.DispatchedTask.run+458)
+07-31 14:04:24.818  7013  7013 F DEBUG   :       #16 pc 0000000000209788  /apex/com.android.art/lib64/libart.so (nterp_helper+3736) (BuildId: 108a321dc93c20580e74b855c407e975)
+07-31 14:04:24.818  7013  7013 F DEBUG   :       #17 pc 00000000001bf2ca  /data/app/~~17opl6JEp2WTVyfSDG8I5g==/com.echocall.lab.asan-CDe_i3ePykTKev1vNZqvNA==/base.apk (offset 0x1056000) (kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely+2)
+07-31 14:04:24.823  7013  7013 F DEBUG   :       #18 pc 0000000000209788  /apex/com.android.art/lib64/libart.so (nterp_helper+3736) (BuildId: 108a321dc93c20580e74b855c407e975)
+07-31 14:04:24.823  7013  7013 F DEBUG   :       #19 pc 00000000001bdeca  /data/app/~~17opl6JEp2WTVyfSDG8I5g==/com.echocall.lab.asan-CDe_i3ePykTKev1vNZqvNA==/base.apk (offset 0x1056000) (kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask+34)
+07-31 14:04:24.823  7013  7013 F DEBUG   :       #20 pc 0000000000209788  /apex/com.android.art/lib64/libart.so (nterp_helper+3736) (BuildId: 108a321dc93c20580e74b855c407e975)
+07-31 14:04:24.824  7013  7013 F DEBUG   :       #21 pc 00000000001bdff8  /data/app/~~17opl6JEp2WTVyfSDG8I5g==/com.echocall.lab.asan-CDe_i3ePykTKev1vNZqvNA==/base.apk (offset 0x1056000) (kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker+56)
+07-31 14:04:24.825  7013  7013 F DEBUG   :       #22 pc 0000000000209788  /apex/com.android.art/lib64/libart.so (nterp_helper+3736) (BuildId: 108a321dc93c20580e74b855c407e975)
+07-31 14:04:24.825  7013  7013 F DEBUG   :       #23 pc 00000000001bdfa8  /data/app/~~17opl6JEp2WTVyfSDG8I5g==/com.echocall.lab.asan-CDe_i3ePykTKev1vNZqvNA==/base.apk (offset 0x1056000) (kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run+0)
+07-31 14:04:24.825  7013  7013 F DEBUG   :       #24 pc 0000000000211e94  /apex/com.android.art/lib64/libart.so (art_quick_invoke_stub+756) (BuildId: 108a321dc93c20580e74b855c407e975)
+07-31 14:04:24.825  7013  7013 F DEBUG   :       #25 pc 00000000004621c5  /apex/com.android.art/lib64/libart.so (art::ArtMethod::Invoke(art::Thread*, unsigned int*, unsigned int, art::JValue*, char const*)+181) (BuildId: 108a321dc93c20580e74b855c407e975)
+07-31 14:04:24.826  7013  7013 F DEBUG   :       #26 pc 00000000008f42ec  /apex/com.android.art/lib64/libart.so (art::Thread::CreateCallback(void*)+1388) (BuildId: 108a321dc93c20580e74b855c407e975)
+07-31 14:04:24.826  7013  7013 F DEBUG   :       #27 pc 00000000008f3d78  /apex/com.android.art/lib64/libart.so (art::Thread::CreateCallbackWithUffdGc(void*)+8) (BuildId: 108a321dc93c20580e74b855c407e975)
+07-31 14:04:24.826  7013  7013 F DEBUG   :       #28 pc 00000000000dbb47  /data/app/~~17opl6JEp2WTVyfSDG8I5g==/com.echocall.lab.asan-CDe_i3ePykTKev1vNZqvNA==/lib/x86_64/libclang_rt.asan-x86_64-android.so (asan_thread_start(void*)+103) (BuildId: 3a151d09f677bf8add3834376cb104781a668003)
+07-31 14:04:24.829  7013  7013 F DEBUG   :       #29 pc 000000000007ac5f  /apex/com.android.runtime/lib64/bionic/libc.so (__pthread_start(void*)+63) (BuildId: fcb82240218d1473de1e3d2137c0be35)
+07-31 14:04:24.831  7013  7013 F DEBUG   :       #30 pc 000000000006d94d  /apex/com.android.runtime/lib64/bionic/libc.so (__start_thread+61) (BuildId: fcb82240218d1473de1e3d2137c0be35)
+07-31 14:04:24.870   767  7017 I am_crash: [767,0,com.echocall.lab.asan,820526662,Native crash,Aborted,unknown,0,0]
+07-31 14:04:24.877   306   306 E tombstoned: Tombstone written to: tombstone_07
+--------- beginning of system
+07-31 14:04:24.911   767  7018 I DropBoxManagerService: add tag=data_app_native_crash isTagEnabled=true flags=0x2
+07-31 14:04:24.936   767   966 I DropBoxManagerService: add tag=SYSTEM_TOMBSTONE_PROTO_WITH_HEADERS isTagEnabled=true flags=0x4
+07-31 14:04:24.944   767   982 W InputDispatcher: channel 'fcb2fa8 com.echocall.lab.asan/com.echocall.lab.MainActivity' ~ Consumer closed input channel or an error occurred.  events=0x9
+07-31 14:04:24.945   767   982 E InputDispatcher: channel 'fcb2fa8 com.echocall.lab.asan/com.echocall.lab.MainActivity' ~ Channel is unrecoverably broken and will be disposed!
+07-31 14:04:24.948   767   982 I WindowManager: WINDOW DIED Window{fcb2fa8 u0 com.echocall.lab.asan/com.echocall.lab.MainActivity}
+07-31 14:04:24.957   548   548 I adbd    : Remote process closed the socket (on MSG_PEEK)
+07-31 14:04:24.963  6846  6846 I wrap.sh : wrap.sh terminated by signal 6
+07-31 14:04:24.970   767  2220 I ImeTracker: com.echocall.lab.asan:5ca0c1d8: onRequestHide at ORIGIN_SERVER reason HIDE_REMOVE_CLIENT fromUser false
+07-31 14:04:24.971   767  2220 I ImeTracker: com.echocall.lab.asan:5ca0c1d8: onCancelled at PHASE_SERVER_SHOULD_HIDE
+07-31 14:04:24.976   767  1434 I ActivityManager: Process com.echocall.lab.asan (pid 6847) has died: fg  TOP 
+07-31 14:04:24.982   767  1434 I am_proc_died: [0,6847,com.echocall.lab.asan,0,2]
+07-31 14:04:24.983   767   982 I ImeTracker: system_server:592de395: onRequestHide at ORIGIN_SERVER reason IME_REQUESTED_CHANGED_LISTENER fromUser false
+07-31 14:04:24.985   767   872 E libprocessgroup: Failed to write 1 to /sys/fs/cgroup/apps/uid_10218/pid_6847/cgroup.kill: No such file or directory
+07-31 14:04:24.999   767   872 E libprocessgroup: Failed to open /sys/fs/cgroup/apps/uid_10218/pid_6847/cgroup.procs: No such file or directory
+07-31 14:04:25.011   767  1434 I am_uid_stopped: 10218
+07-31 14:04:25.012   767   861 I ImeTracker: system_server:592de395: onCancelled at PHASE_SERVER_SHOULD_HIDE
+07-31 14:04:25.027   767   862 I input_focus: [Requesting to set focus to null window,reason=UpdateInputWindows]
+07-31 14:04:25.036   480   480 I Zygote  : Process 6831 exited cleanly (246)
+07-31 14:04:25.036   767  1434 W ActivityTaskManager: Force removing ActivityRecord{177056556 u0 com.echocall.lab.asan/com.echocall.lab.MainActivity t34}: app died, no saved state
+07-31 14:04:25.037   767  1434 I wm_finish_activity: [0,177056556,34,com.echocall.lab.asan/com.echocall.lab.MainActivity,proc died without state saved]
+07-31 14:04:25.044  1137  1207 V WindowManagerShell: Transition requested (#35): android.os.BinderProxy@8de06fc TransitionRequestInfo { type = CLOSE, triggerTask = TaskInfo{userId=0 taskId=34 effectiveUid=10218 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.echocall.lab.asan/com.echocall.lab.MainActivity } baseActivity=ComponentInfo{com.echocall.lab.asan/com.echocall.lab.MainActivity} topActivity=ComponentInfo{com.echocall.lab.asan/com.echocall.lab.MainActivity} origActivity=null realActivity=ComponentInfo{com.echocall.lab.asan/com.echocall.lab.MainActivity} numActivities=1 lastActiveTime=7439138 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{android.window.IWindowContainerToken$Stub$Proxy@f91f185} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 0 - 0, 0) topActivityInfo=ActivityInfo{a988bda com.echocall.lab.MainActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isTopActivityNoDisplay=false isSleeping=false locusId=null displayAreaFeatureId=1 isTopActivityTransparent=false isActivityStackTransparent=false lastNonFullscreenBounds=Rect(284, 660 - 796, 1740) capturedLink=null capturedLinkTimestamp=0 requestedVisibleTypes=-9 topActivityRequestOpenInBrowserEducationTimestamp=0 appCompatTaskInfo=AppCompatTaskInfo { topActivityInSizeCompat=false eligibleForLetterboxEducation= false isLetterboxEducationEnabled= true isLetterboxDoubleTapEnabled= false eligibleForUserAspectRatioButton= false topActivityBoundsLetterboxed= false isFromLetterboxDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 topActivityAppBounds=Rect(0, 0 - 1080, 2400) isUserFullscreenOverrideEnabled=false isSystemFullscreenOverrideEnabled=false hasMinAspectRatioOverride=false topActivityLetterboxBounds=null cameraCompatTaskInfo=CameraCompatTaskInfo { freeformCameraCompatMode=inactive}} topActivityMainWindowFrame=null}, pipChange = null, remoteTransition = null, displayChange = null, flags = 0, debugId = 35 }
+07-31 14:04:25.051   767  1434 I wm_task_removed: [34,34,0,removeChild, last child = ActivityRecord{177056556 u0 com.echocall.lab.asan/com.echocall.lab.MainActivity t-1 f}} in Task{88179f5 #34 type=standard A=10218:com.echocall.lab.asan}]
+07-31 14:04:25.053   767  1036 D InetDiagMessage: Destroyed 0 sockets, proto=IPPROTO_TCP, family=AF_INET, states=14
+07-31 14:04:25.057   767  1434 I wm_set_resumed_activity: [0,com.google.android.apps.nexuslauncher/.NexusLauncherActivity,resumeTopActivity - onActivityStateChanged]
+07-31 14:04:25.057   767  1036 D InetDiagMessage: Destroyed 0 sockets, proto=IPPROTO_TCP, family=AF_INET6, states=14
+07-31 14:04:25.057   767  1036 D InetDiagMessage: Destroyed live tcp sockets for uids={10218} in 6ms
+07-31 14:04:25.060   529   735 I BpBinder: onLastStrongRef automatically unlinking death recipients: 
+07-31 14:04:25.069   767  1434 I wm_resume_activity: [0,76772486,2,com.google.android.apps.nexuslauncher/.NexusLauncherActivity]
+07-31 14:04:25.073   529   529 E BpTransactionCompletedListener: Failed to transact (-32)
+07-31 14:04:25.073  1310  1310 D ViewRootImpl: Skipping stats log for color mode
+07-31 14:04:25.074   767  1036 D InetDiagMessage: Destroyed 0 sockets, proto=IPPROTO_TCP, family=AF_INET, states=14
+07-31 14:04:25.076  1310  1310 I wm_on_restart_called: [76772486,com.google.android.apps.nexuslauncher.NexusLauncherActivity,performRestart,1]
+07-31 14:04:25.076   767  1036 D InetDiagMessage: Destroyed 0 sockets, proto=IPPROTO_TCP, family=AF_INET6, states=14
+07-31 14:04:25.077   767  1036 D InetDiagMessage: Destroyed live tcp sockets for uids={20218} in 16ms
+07-31 14:04:25.091  1310  1310 I wm_on_start_called: [76772486,com.google.android.apps.nexuslauncher.NexusLauncherActivity,handleStartActivity,14]
+07-31 14:04:25.092   529   529 I BpBinder: onLastStrongRef automatically unlinking death recipients: 
+07-31 14:04:25.096   767   861 W ActivityManager: setHasOverlayUi called on unknown pid: 6847
+07-31 14:04:25.098  1310  1310 I wm_on_resume_called: [76772486,com.google.android.apps.nexuslauncher.NexusLauncherActivity,RESUME_ACTIVITY,5]
+07-31 14:04:25.099  1310  1310 I wm_on_top_resumed_gained_called: [76772486,com.google.android.apps.nexuslauncher.NexusLauncherActivity,topWhenResuming]
+07-31 14:04:25.100   767  7017 I sysui_multi_action: [757,316,758,4,759,-1]
+07-31 14:04:25.101  1310  1310 D NexusLauncherModelDelegate: notifySmartspaceEvent: SmartspaceTargetEvent{mSmartspaceTarget=null, mSmartspaceActionId='null', mEventType=6}
+07-31 14:04:25.114  1137  1207 D WindowManagerShell: setLauncherKeepClearAreaHeight: visible=true, height=527
+07-31 14:04:25.117   767   862 I input_focus: [Focus request 82b9fa4 com.google.android.apps.nexuslauncher/com.google.android.apps.nexuslauncher.NexusLauncherActivity,reason=UpdateInputWindows]
+07-31 14:04:25.120   767  1087 D BackgroundInstallControlService: Package event received: 0
+07-31 14:04:25.124   767   861 V WindowManager: Unknown focus tokens, dropping reportFocusChanged
+07-31 14:04:25.135   767  1087 D BackgroundInstallControlService: Package event received: 0
+07-31 14:04:25.135   767  1087 D BackgroundInstallControlService: Package event received: 0
+07-31 14:04:25.136   767  1087 D BackgroundInstallControlService: Package event received: 0
+07-31 14:04:25.140  1310  1310 I viewroot_draw_event: [VRI[NexusLauncherActivity],Start draw after previous draw not visible]
+07-31 14:04:25.141  1310  1310 D BaseDepthController: setSurface:
+07-31 14:04:25.141  1310  1310 D BaseDepthController: 	mWaitingOnSurfaceValidity: false
+07-31 14:04:25.141  1310  1310 D BaseDepthController: 	mBaseSurface: Surface(name=com.google.android.apps.nexuslauncher/com.google.android.apps.nexuslauncher.NexusLauncherActivity)/@0xd247957
+07-31 14:04:25.157   767   862 I wm_wallpaper_surface: [0,1,Window{82b9fa4 u0 com.google.android.apps.nexuslauncher/com.google.android.apps.nexuslauncher.NexusLauncherActivity}]
+07-31 14:04:25.200   767   966 I commit_sys_config_file: [log-files,88]
+07-31 14:04:25.231   767   966 I BootReceiver: Copying /data/tombstones/tombstone_07 to DropBox (SYSTEM_TOMBSTONE)
+07-31 14:04:25.232   767   966 I DropBoxManagerService: add tag=SYSTEM_TOMBSTONE isTagEnabled=true flags=0x6
+07-31 14:04:25.237   767   966 I dropbox_file_copy: [/data/tombstones/tombstone_07,65536,SYSTEM_TOMBSTONE]
+07-31 14:04:25.276   767  1099 D androidtc: Initializing SystemTextClassifier, type = System
+07-31 14:04:25.282   767   966 I commit_sys_config_file: [log-files,43]
+07-31 14:04:25.297  1734  2138 I AiAiTranslate: C2T - not in a conversation
+07-31 14:04:25.297  1137  1137 I ClipboardListener: Clipboard overlay suppressed.
+07-31 14:04:25.302  1734  1734 I AiAiTextClassifier: onCreateTextClassificationSession = TextClassificationSessionId {a292b433-4357-44bf-932c-453b6c02e8f8}
+07-31 14:04:25.309  1310  1310 I viewroot_draw_event: [VRI[NexusLauncherActivity],reportDrawFinished seqId=0]
+07-31 14:04:25.314  1310  1310 D StatsLog: LAUNCHER_ONRESUME
+07-31 14:04:25.320  1310  1310 D RecentsView: onTaskRemoved: 34, not handling task stack changes
+07-31 14:04:25.320  1310  1310 D RecentsView: onTaskRemoved: 34, not handling task stack changes
+07-31 14:04:25.334   767   858 V WindowManager: Sent Transition (#35) createdAt=07-31 14:04:25.038 via request=TransitionRequestInfo { type = CLOSE, triggerTask = TaskInfo{userId=0 taskId=34 effectiveUid=10218 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.echocall.lab.asan/com.echocall.lab.MainActivity } baseActivity=ComponentInfo{com.echocall.lab.asan/com.echocall.lab.MainActivity} topActivity=ComponentInfo{com.echocall.lab.asan/com.echocall.lab.MainActivity} origActivity=null realActivity=ComponentInfo{com.echocall.lab.asan/com.echocall.lab.MainActivity} numActivities=1 lastActiveTime=7439138 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{RemoteToken{46da7e1 Task{88179f5 #34 type=standard A=10218:com.echocall.lab.asan}}} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 0 - 0, 0) topActivityInfo=ActivityInfo{4dd3906 com.echocall.lab.MainActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isTopActivityNoDisplay=false isSleeping=false locusId=null displayAreaFeatureId=1 isTopActivityTransparent=false isActivityStackTransparent=false lastNonFullscreenBounds=Rect(284, 660 - 796, 1740) capturedLink=null capturedLinkTimestamp=0 requestedVisibleTypes=-9 topActivityRequestOpenInBrowserEducationTimestamp=0 appCompatTaskInfo=AppCompatTaskInfo { topActivityInSizeCompat=false eligibleForLetterboxEducation= false isLetterboxEducationEnabled= true isLetterboxDoubleTapEnabled= false eligibleForUserAspectRatioButton= false topActivityBoundsLetterboxed= false isFromLetterboxDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 topActivityAppBounds=Rect(0, 0 - 1080, 2400) isUserFullscreenOverrideEnabled=false isSystemFullscreenOverrideEnabled=false hasMinAspectRatioOverride=false topActivityLetterboxBounds=null cameraCompatTaskInfo=CameraCompatTaskInfo { freeformCameraCompatMode=inactive}} topActivityMainWindowFrame=null}, pipChange = null, remoteTransition = null, displayChange = null, flags = 0, debugId = 35 }
+07-31 14:04:25.335   767   858 V WindowManager:     startWCT=WindowContainerTransaction { changes= {} hops= [] errorCallbackToken=null taskFragmentOrganizer=null }
+07-31 14:04:25.335   767   858 V WindowManager:     info={id=35 t=CLOSE f=0x0 trk=0 r=[0@Point(0, 0)] c=[
+07-31 14:04:25.335   767   858 V WindowManager:         {WCT{RemoteToken{42a57eb Task{5a9986b #1 type=home}}} m=TO_FRONT f=SHOW_WALLPAPER|MOVE_TO_TOP leash=Surface(name=Task=1)/@0xa7e3e2e sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) epz=Point(1080, 2400) d=0 taskParent=-1},
+07-31 14:04:25.335   767   858 V WindowManager:         {m=TO_FRONT f=IS_WALLPAPER leash=Surface(name=WallpaperWindowToken{2b2751e showWhenLocked=false})/@0x69868a9 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) epz=Point(1080, 2400) d=0}
+07-31 14:04:25.335   767   858 V WindowManager:     ]}
+07-31 14:04:25.341   767  1087 D BackgroundInstallControlService: Package event received: 0
+07-31 14:04:25.349  1137  6482 V WindowManagerShell: onTransitionReady(transaction=3294239917467)
+07-31 14:04:25.353  1310  1310 I NotificationListener: Handling notification state refresh for com.android.systemui#0
+07-31 14:04:25.353  1310  1310 I NotificationListener: Handling notification state refresh for android#0
+07-31 14:04:25.356  1734  2227 I AiAiTextClassifier: GenerateLinks did not find valid links, returning empty result
+07-31 14:04:25.363  1137  1207 V WindowManagerShell: onTransitionReady (#35) android.os.BinderProxy@8de06fc: {id=35 t=CLOSE f=0x0 trk=0 r=[0@Point(0, 0)] c=[
+07-31 14:04:25.363  1137  1207 V WindowManagerShell:         {m=TO_FRONT f=SHOW_WALLPAPER|MOVE_TO_TOP leash=Surface(name=Task=1)/@0x22c280b sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) epz=Point(1080, 2400) d=0 taskParent=-1},
+07-31 14:04:25.363  1137  1207 V WindowManagerShell:         {m=TO_FRONT f=IS_WALLPAPER leash=Surface(name=WallpaperWindowToken{2b2751e showWhenLocked=false})/@0x48296e8 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) epz=Point(1080, 2400) d=0}
+07-31 14:04:25.363  1137  1207 V WindowManagerShell:     ]}
+07-31 14:04:25.365  1137  1207 V WindowManagerShell: Playing animation for (#35) android.os.BinderProxy@8de06fc@0
+07-31 14:04:25.365  1137  1207 V ShellRecents: RecentsTransitionHandler.startAnimation: no controller found
+07-31 14:04:25.365  1137  1207 V WindowManagerShell: Transition doesn't have explicit remote, search filters for match for {id=35 t=CLOSE f=0x0 trk=0 r=[0@Point(0, 0)] c=[{m=TO_FRONT f=SHOW_WALLPAPER|MOVE_TO_TOP leash=Surface(name=Task=1)/@0x22c280b sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) epz=Point(1080, 2400) d=0 taskParent=-1},{m=TO_FRONT f=IS_WALLPAPER leash=Surface(name=WallpaperWindowToken{2b2751e showWhenLocked=false})/@0x48296e8 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) epz=Point(1080, 2400) d=0}]}
+07-31 14:04:25.365  1137  1207 V WindowManagerShell:  Checking filter Pair{{types=[] flags=0x0] notFlags=0x0 checks=[{atype=undefined independent=true modes=[CLOSE,TO_BACK] flags=IN_TASK_WITH_EMBEDDED_ACTIVITY mustBeTask=false order=ANY topActivity=null launchCookie=null taskFragmentToken=android.os.BinderProxy@f4ae90e windowingMode=undefined}]} RemoteTransition { remoteTransition = android.window.IRemoteTransition$Stub$Proxy@4bbaf2f, appThread = android.app.IApplicationThread$Stub$Proxy@a4193c, debugName = overlayBackTransition }}
+07-31 14:04:25.366  1137  1207 V WindowManagerShell:  Checking filter Pair{{types=[] flags=0x0] notFlags=0x0 checks=[{atype=dream independent=true modes=[OPEN,TO_FRONT] flags=NONE mustBeTask=false order=ANY topActivity=null launchCookie=null windowingMode=undefined},{atype=home independent=true modes=[CLOSE,TO_BACK] flags=NONE mustBeTask=false order=ANY topActivity=null launchCookie=null windowingMode=undefined}]} RemoteTransition { remoteTransition = android.window.IRemoteTransition$Stub$Proxy@5f736c5, appThread = android.app.IApplicationThread$Stub$Proxy@e50881a, debugName = LauncherToDream }}
+07-31 14:04:25.366  1137  1207 V WindowManagerShell:  Checking filter Pair{{types=[] flags=0x0] notFlags=0x100 checks=[{atype=home independent=true modes=[OPEN,TO_FRONT] flags=NONE mustBeTask=false order=TOP topActivity=ComponentInfo{com.google.android.apps.nexuslauncher/com.google.android.apps.nexuslauncher.NexusLauncherActivity} launchCookie=null windowingMode=undefined},{atype=standard independent=true modes=[CLOSE,TO_BACK] flags=NONE mustBeTask=false order=ANY topActivity=null launchCookie=null windowingMode=undefined},{NOT atype=undefined independent=true modes=[] flags=NONE mustBeTask=true order=ANY topActivity=null launchCookie=null customAnim=true windowingMode=undefined}]} RemoteTransition { remoteTransition = android.window.IRemoteTransition$Stub$Proxy@fde0f4b, appThread = android.app.IApplicationThread$Stub$Proxy@9378d28, debugName = QuickstepLaunchHome }}
+07-31 14:04:25.366  1137  1207 V WindowManagerShell:  Delegate animation for (#35) to null
+07-31 14:04:25.366  1137  1207 V WindowManagerShell: start default transition animation, info = {id=35 t=CLOSE f=0x0 trk=0 r=[0@Point(0, 0)] c=[{m=TO_FRONT f=SHOW_WALLPAPER|MOVE_TO_TOP leash=Surface(name=Task=1)/@0x22c280b sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) epz=Point(1080, 2400) d=0 taskParent=-1},{m=TO_FRONT f=IS_WALLPAPER leash=Surface(name=WallpaperWindowToken{2b2751e showWhenLocked=false})/@0x48296e8 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) epz=Point(1080, 2400) d=0}]}
+07-31 14:04:25.369  1310  1366 D QuickstepModelDelegate: notifyAppTargetEvent action=1 launchLocation=workspace/0/[-1,-1]/[1,1]
+07-31 14:04:25.375  1137  1207 V WindowManagerShell: loadAnimation: anim=android.view.animation.AnimationSet@d7339e7 animAttr=0x10 type=CLOSE isEntrance=true
+07-31 14:04:25.379  1137  1207 V WindowManagerShell:  animated by com.android.wm.shell.transition.DefaultTransitionHandler@18d1aac
+07-31 14:04:25.389  1734  2227 I AiAiTextClassifier: GenerateLinks did not find valid links, returning empty result
+07-31 14:04:25.395   767   861 W IPCThreadState: Sending oneway calls to frozen process.
+07-31 14:04:25.396   767   861 W IPCThreadState: Sending oneway calls to frozen process.
+07-31 14:04:25.402  1137  1137 I ClipboardListener: Clipboard overlay suppressed.
+07-31 14:04:25.405   767   861 W IPCThreadState: Sending oneway calls to frozen process.
+07-31 14:04:25.407   767   861 W IPCThreadState: Sending oneway calls to frozen process.
+07-31 14:04:25.411   767  1087 D BackgroundInstallControlService: Package event received: 0
+07-31 14:04:25.412   767   861 W IPCThreadState: Sending oneway calls to frozen process.
+07-31 14:04:25.412   767   861 W IPCThreadState: Sending oneway calls to frozen process.
+07-31 14:04:25.412   767   982 I input_focus: [Focus entering 82b9fa4 com.google.android.apps.nexuslauncher/com.google.android.apps.nexuslauncher.NexusLauncherActivity,reason=Window became focusable. Previous reason: NOT_VISIBLE]
+07-31 14:04:25.412   767   861 W IPCThreadState: Sending oneway calls to frozen process.
+07-31 14:04:25.413   767   861 W IPCThreadState: Sending oneway calls to frozen process.
+07-31 14:04:25.413   767   861 W IPCThreadState: Sending oneway calls to frozen process.
+07-31 14:04:25.413   767   861 W IPCThreadState: Sending oneway calls to frozen process.
+07-31 14:04:25.418   767   861 W IPCThreadState: Sending oneway calls to frozen process.
+07-31 14:04:25.419   767   861 W IPCThreadState: Sending oneway calls to frozen process.
+07-31 14:04:25.421   767   861 W IPCThreadState: Sending oneway calls to frozen process.
+07-31 14:04:25.425   767   990 I ImeTracker: com.google.android.apps.nexuslauncher:4b888eed: onRequestHide at ORIGIN_SERVER reason HIDE_UNSPECIFIED_WINDOW fromUser false
+07-31 14:04:25.428   767  1087 D BackgroundInstallControlService: Package event received: 0
+07-31 14:04:25.431   767   861 W IPCThreadState: Sending oneway calls to frozen process.
+07-31 14:04:25.431   767  1087 D BackgroundInstallControlService: Package event received: 0
+07-31 14:04:25.431   767   861 W IPCThreadState: Sending oneway calls to frozen process.
+07-31 14:04:25.432   767   861 W IPCThreadState: Sending oneway calls to frozen process.
+07-31 14:04:25.432   767   861 W IPCThreadState: Sending oneway calls to frozen process.
+07-31 14:04:25.436  1310  1310 D InsetsController: hide(ime(), fromIme=false)
+07-31 14:04:25.436  1310  1310 I ImeTracker: com.google.android.apps.nexuslauncher:4b888eed: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+07-31 14:04:25.436   767   861 W IPCThreadState: Sending oneway calls to frozen process.
+07-31 14:04:25.438   767   861 W IPCThreadState: Sending oneway calls to frozen process.
+07-31 14:04:25.444   767   861 W IPCThreadState: Sending oneway calls to frozen process.
+07-31 14:04:25.444   767   861 W IPCThreadState: Sending oneway calls to frozen process.
+07-31 14:04:25.444   767   861 W IPCThreadState: Sending oneway calls to frozen process.
+07-31 14:04:25.444   767   861 W IPCThreadState: Sending oneway calls to frozen process.
+07-31 14:04:25.451  1612  1612 I GoogleInputMethodService: GoogleInputMethodService.onFinishInput():2043 
+07-31 14:04:25.451   767  1087 D BackgroundInstallControlService: Package event received: 0
+07-31 14:04:25.455   767   861 W IPCThreadState: Sending oneway calls to frozen process.
+07-31 14:04:25.458   767  2238 I ImeTracker: system_server:550a8765: onRequestHide at ORIGIN_SERVER reason IME_REQUESTED_CHANGED_LISTENER fromUser false
+07-31 14:04:25.461  1612  1612 I Module  : DeviceLockedStatusModuleProvider$Module.updateDeviceLockedStatus():100 repeatCheckTimes = 0, locked = false
+07-31 14:04:25.464   767  1087 D BackgroundInstallControlService: Package event received: 0
+07-31 14:04:25.466   767   861 W IPCThreadState: Sending oneway calls to frozen process.
+07-31 14:04:25.466   767   861 W IPCThreadState: Sending oneway calls to frozen process.
+07-31 14:04:25.467   767   861 W IPCThreadState: Sending oneway calls to frozen process.
+07-31 14:04:25.469  1612  1612 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1293 onStartInput(EditorInfo{EditorInfo{packageName=com.google.android.apps.nexuslauncher, inputType=0, inputTypeString=NULL, enableLearning=false, autoCorrection=false, autoComplete=false, imeOptions=0, privateImeOptions=null, actionName=UNSPECIFIED, actionLabel=null, initialSelStart=-1, initialSelEnd=-1, initialCapsMode=0, label=null, fieldId=0, fieldName=null, extras=null, hintText=null, hintLocales=[]}}, false)
+07-31 14:04:25.469   767   869 I am_pss  : [4875,10149,com.google.android.googlequicksearchbox:search,0,0,0,119578624,0,19,28]
+07-31 14:04:25.469   767   869 I am_pss  : [2412,10146,com.google.android.apps.messaging,0,0,0,82423808,0,19,0]
+07-31 14:04:25.469   767   869 I am_pss  : [4134,10140,com.google.android.partnersetup,0,0,0,44986368,0,19,0]
+07-31 14:04:25.471   767   861 W IPCThreadState: Sending oneway calls to frozen process.
+07-31 14:04:25.483  1612  1612 I Module  : DeviceLockedStatusModuleProvider$Module.updateDeviceLockedStatus():100 repeatCheckTimes = 1, locked = false
+07-31 14:04:25.484  1612  1612 I EmojiCompatManager: EmojiCompatManager.getEmojiCompatIfLoaded():343 EmojiCompat.init() was never called.
+07-31 14:04:25.484  1612  1612 I EmojiCompatManager: java.lang.IllegalStateException: EmojiCompat is not initialized. Please call EmojiCompat.init() first
+07-31 14:04:25.484  1612  1612 I EmojiCompatManager: 	at asx.p(PG:6)
+07-31 14:04:25.484  1612  1612 I EmojiCompatManager: 	at axb.b(PG:13)
+07-31 14:04:25.484  1612  1612 I EmojiCompatManager: 	at jnr.b(PG:2)
+07-31 14:04:25.484  1612  1612 I EmojiCompatManager: 	at jnr.c(PG:4)
+07-31 14:04:25.484  1612  1612 I EmojiCompatManager: 	at jnr.f(PG:3)
+07-31 14:04:25.484  1612  1612 I EmojiCompatManager: 	at jnx.c(PG:3)
+07-31 14:04:25.484  1612  1612 I EmojiCompatManager: 	at kif.cz(PG:47)
+07-31 14:04:25.484  1612  1612 I EmojiCompatManager: 	at lhl.run(PG:1025)
+07-31 14:04:25.484  1612  1612 I EmojiCompatManager: 	at jaf.execute(PG:12)
+07-31 14:04:25.484  1612  1612 I EmojiCompatManager: 	at nco.v(PG:13)
+07-31 14:04:25.484  1612  1612 I EmojiCompatManager: 	at lhn.m(PG:96)
+07-31 14:04:25.484  1612  1612 I EmojiCompatManager: 	at lhn.k(PG:25)
+07-31 14:04:25.484  1612  1612 I EmojiCompatManager: 	at kgn.onStartInput(PG:250)
+07-31 14:04:25.484  1612  1612 I EmojiCompatManager: 	at android.inputmethodservice.InputMethodService.doStartInput(InputMethodService.java:3521)
+07-31 14:04:25.484  1612  1612 I EmojiCompatManager: 	at android.inputmethodservice.InputMethodService$InputMethodImpl.startInput(InputMethodService.java:879)
+07-31 14:04:25.484  1612  1612 I EmojiCompatManager: 	at android.inputmethodservice.InputMethodService$InputMethodImpl.dispatchStartInput(InputMethodService.java:908)
+07-31 14:04:25.484  1612  1612 I EmojiCompatManager: 	at android.inputmethodservice.IInputMethodWrapper.executeMessage(IInputMethodWrapper.java:201)
+07-31 14:04:25.484  1612  1612 I EmojiCompatManager: 	at com.android.internal.os.HandlerCaller$MyHandler.handleMessage(HandlerCaller.java:44)
+07-31 14:04:25.484  1612  1612 I EmojiCompatManager: 	at android.os.Handler.dispatchMessage(Handler.java:110)
+07-31 14:04:25.484  1612  1612 I EmojiCompatManager: 	at android.os.Looper.loopOnce(Looper.java:248)
+07-31 14:04:25.484  1612  1612 I EmojiCompatManager: 	at android.os.Looper.loop(Looper.java:338)
+07-31 14:04:25.484  1612  1612 I EmojiCompatManager: 	at android.app.ActivityThread.main(ActivityThread.java:9067)
+07-31 14:04:25.484  1612  1612 I EmojiCompatManager: 	at java.lang.reflect.Method.invoke(Native Method)
+07-31 14:04:25.484  1612  1612 I EmojiCompatManager: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:593)
+07-31 14:04:25.484  1612  1612 I EmojiCompatManager: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:932)
+07-31 14:04:25.490   767  1087 D BackgroundInstallControlService: Package event received: 0
+07-31 14:04:25.517  1734  2012 I AiAiEcho: Predicting[0]:  [CONTEXT sampling_count=5 ]
+07-31 14:04:25.518  1734  2012 I AiAiEcho: EchoTargets: 
+07-31 14:04:25.518  1734  2012 I AiAiEcho: Filtered by AiAi flag check: 
+07-31 14:04:25.518  1734  2012 I AiAiEcho: [CONTEXT ratelimit_period="10 SECONDS" ]
+07-31 14:04:25.525   767   861 W IPCThreadState: Sending oneway calls to frozen process.
+07-31 14:04:25.525   767   861 W IPCThreadState: Sending oneway calls to frozen process.
+07-31 14:04:25.525  1734  2012 I AiAiEcho: #remoteViewsTwiddler: feature disabled.
+07-31 14:04:25.526   767   861 W IPCThreadState: Sending oneway calls to frozen process.
+07-31 14:04:25.527   767   861 W IPCThreadState: Sending oneway calls to frozen process.
+07-31 14:04:25.532   767  1087 D BackgroundInstallControlService: Package event received: 0
+07-31 14:04:25.538  1734  2012 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface home with targets# 0 (types=[])
+07-31 14:04:25.555   767  1087 D BackgroundInstallControlService: Package event received: 0
+07-31 14:04:25.555   767  1087 D BackgroundInstallControlService: Package event received: 0
+07-31 14:04:25.556   767  1087 D BackgroundInstallControlService: Package event received: 0
+07-31 14:04:25.556   767  1087 D BackgroundInstallControlService: Package event received: 0
+07-31 14:04:25.556   767  1087 D BackgroundInstallControlService: Package event received: 0
+07-31 14:04:25.556   767  1087 D BackgroundInstallControlService: Package event received: 0
+07-31 14:04:25.556   767  1087 D BackgroundInstallControlService: Package event received: 0
+07-31 14:04:25.570   767  2238 W PackageConfigPersister: App-specific configuration not found for packageName: com.google.android.apps.nexuslauncher and userId: 0
+07-31 14:04:25.576   767  1087 D BackgroundInstallControlService: Package event received: 0
+07-31 14:04:25.576   767  1087 D BackgroundInstallControlService: Package event received: 0
+07-31 14:04:25.580  1612  1612 W NotificationCenter: NotificationCenter$NotificationQueue.notifyPendingNotificationsOnExecutor():877 Heavy notify work detected on UI thread: [kig->jjs] takes 81ms
+07-31 14:04:25.587   767   861 I ImeTracker: system_server:550a8765: onCancelled at PHASE_SERVER_SHOULD_HIDE
+07-31 14:04:25.591   767  1087 D BackgroundInstallControlService: Package event received: 0
+07-31 14:04:25.592   767  1087 D BackgroundInstallControlService: Package event received: 0
+07-31 14:04:25.592   767  1087 D BackgroundInstallControlService: Package event received: 0
+07-31 14:04:25.606  1310  1310 D SsBaseTemplateCard: No text view can be set up
+07-31 14:04:25.609  1310  1310 D SsBaseTemplateCard: Passed-in item info is null
+07-31 14:04:25.610  1310  1310 D SsBaseTemplateCard: Passed-in item info is null
+07-31 14:04:25.635  1310  1310 D SsBaseTemplateCard: Passed-in item info is null
+07-31 14:04:25.635  1310  1310 I SsBaseTemplateCard: Secondary card pane is null
+07-31 14:04:25.668   767  1087 D BackgroundInstallControlService: Package event received: 0
+07-31 14:04:25.669  1137  1207 V WindowManagerShell: Transition animation finished (aborted=false), notifying core (#35) android.os.BinderProxy@8de06fc@0
+07-31 14:04:25.680  1137  1207 V WindowManagerShell: Track 0 became idle
+07-31 14:04:25.683  1137  1207 V WindowManagerShell: All active transition animations finished
+07-31 14:04:25.686   767   858 V WindowManager: Finish Transition (#35): created at 07-31 14:04:25.038 collect-started=1.115ms request-sent=1.802ms started=39.06ms ready=284.776ms sent=294.879ms commit=58.505ms finished=637.076ms
+07-31 14:04:25.700   767   859 W Looper  : Slow dispatch took 112ms android.ui app=system_server main=false group=TOP_APP h=com.android.server.am.ActivityManagerService$UiHandler c=com.android.server.am.UidObserverController$$ExternalSyntheticLambda0@43d54da m=0
+07-31 14:04:25.809  1464  7025 I DropBoxUtil: (REDACTED) Reading dropbox entry with tag %s and timestamp %d
+07-31 14:04:25.833  1464  7025 I DropBoxUtil: (REDACTED) Reading dropbox entry with tag %s and timestamp %d
+07-31 14:04:28.078   767  1848 E TaskPersister: File error accessing recents directory (directory doesn't exist?).
+07-31 14:04:34.629  1296  1772 D RILJ    : [UNSL]< UNSOL_CELL_INFO_LIST [CellInfoNr:{ mRegistered=YES mTimeStamp=9233015153759ns mCellConnectionStatus=1 CellIdentityNr:{ mPci = 555 mTac = 8514 mNrArfcn = 9000 mBands = [41] mMcc = 310 mMnc = 260 mNci = 100500 mAlphaLong = T-Mobile mAlphaShort = TMOBILE mAdditionalPlmns = {310260} } CellSignalStrengthNr:{ csiRsrp = 2147483647 csiRsrq = 2147483647 csiCqiTableIndex = 2147483647 csiCqiReport = [] ssRsrp = -54 ssRsrq = 2147483647 ssSinr = 2147483647 level = 4 parametersUseForLevel = 1 timingAdvance = 2147483647 } }] [PHONE0]
+07-31 14:04:34.630  1296  1511 D SatelliteController: iisInCarrierRoamingNbIotNtn: satellite is disabled
+07-31 14:04:34.644  1296  1296 D LocaleTracker-0: processCellInfo: cell info=[CellInfoNr:{ mRegistered=YES mTimeStamp=9233015153759ns mCellConnectionStatus=1 CellIdentityNr:{ mPci = 555 mTac = 8514 mNrArfcn = 9000 mBands = [41] mMcc = 310 mMnc = 260 mNci = 100500 mAlphaLong = T-Mobile mAlphaShort = TMOBILE mAdditionalPlmns = {310260} } CellSignalStrengthNr:{ csiRsrp = 2147483647 csiRsrq = 2147483647 csiCqiTableIndex = 2147483647 csiCqiReport = [] ssRsrp = -54 ssRsrq = 2147483647 ssSinr = 2147483647 level = 4 parametersUseForLevel = 1 timingAdvance = 2147483647 } }]
+07-31 14:04:34.644  1296  1296 D LocaleTracker-0: updateLocale: countryIso = us, countryIsoDebugInfo = OperatorNumeric(310260): MccTable.geoCountryCodeForMccMnc("MccMnc{mcc='310', mnc='260'}")
+07-31 14:04:34.644  1296  1296 D LocaleTracker-0: updateLocale: timeZoneCountryIso = us, timeZoneCountryIsoDebugInfo = OperatorNumeric(310260): MccTable.geoCountryCodeForMccMnc("MccMnc{mcc='310', mnc='260'}")
+07-31 14:04:34.644  1296  1296 D NitzStateMachineImpl: handleCountryDetected: countryIsoCode=us, mLatestNitzSignal=null

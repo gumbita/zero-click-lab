@@ -1,0 +1,14 @@
+--------- beginning of radio
+08-04 12:17:44.524  1109  1388 D RILJ    : [UNSL]< UNSOL_CELL_INFO_LIST [CellInfoNr:{ mRegistered=YES mTimeStamp=1517102992465ns mCellConnectionStatus=1 CellIdentityNr:{ mPci = 555 mTac = 8514 mNrArfcn = 9000 mBands = [41] mMcc = 310 mMnc = 260 mNci = 100500 mAlphaLong = T-Mobile mAlphaShort = TMOBILE mAdditionalPlmns = {310260} } CellSignalStrengthNr:{ csiRsrp = 2147483647 csiRsrq = 2147483647 csiCqiTableIndex = 2147483647 csiCqiReport = [] ssRsrp = -92 ssRsrq = 2147483647 ssSinr = 2147483647 level = 1 parametersUseForLevel = 1 timingAdvance = 2147483647 } }] [PHONE0]
+--------- beginning of main
+08-04 12:17:44.524  1109  1346 D SatelliteController: iisInCarrierRoamingNbIotNtn: satellite is disabled
+08-04 12:17:44.528  1109  1109 D DN-101-C: ConnectedState: onBandwidthUpdated: downlinkBandwidthKbps=-1, uplinkBandwidthKbps=-1
+08-04 12:17:44.528  1109  1109 D DN-101-C: ConnectedState: updateNetworkCapabilities: dsri=android.telephony.DataSpecificRegistrationInfo :{ maxDataCalls = 16 isDcNrRestricted = false isNrAvailable = true isEnDcAvailable = false mLteAttachResultType = 0 mLteAttachExtraInfo = 0 LteVopsSupportInfo :  mVopsSupport = 3 mEmcBearerSupport = 3 }
+08-04 12:17:44.529  1109  1109 D DN-101-C: ConnectedState: updateNetworkCapabilities: Capabilities not changed.
+08-04 12:17:44.529  1109  1109 D LocaleTracker-0: processCellInfo: cell info=[CellInfoNr:{ mRegistered=YES mTimeStamp=1517102992465ns mCellConnectionStatus=1 CellIdentityNr:{ mPci = 555 mTac = 8514 mNrArfcn = 9000 mBands = [41] mMcc = 310 mMnc = 260 mNci = 100500 mAlphaLong = T-Mobile mAlphaShort = TMOBILE mAdditionalPlmns = {310260} } CellSignalStrengthNr:{ csiRsrp = 2147483647 csiRsrq = 2147483647 csiCqiTableIndex = 2147483647 csiCqiReport = [] ssRsrp = -92 ssRsrq = 2147483647 ssSinr = 2147483647 level = 1 parametersUseForLevel = 1 timingAdvance = 2147483647 } }]
+08-04 12:17:44.529  1109  1109 D LocaleTracker-0: updateLocale: countryIso = us, countryIsoDebugInfo = OperatorNumeric(310260): MccTable.geoCountryCodeForMccMnc("MccMnc{mcc='310', mnc='260'}")
+08-04 12:17:44.529  1109  1109 D LocaleTracker-0: updateLocale: timeZoneCountryIso = us, timeZoneCountryIsoDebugInfo = OperatorNumeric(310260): MccTable.geoCountryCodeForMccMnc("MccMnc{mcc='310', mnc='260'}")
+08-04 12:17:44.529  1109  1109 D NitzStateMachineImpl: handleCountryDetected: countryIsoCode=us, mLatestNitzSignal=null
+08-04 12:17:44.616  5397  5425 I EchoCallUDP: Datagram received from /10.0.2.2:49287 length=77
+08-04 12:17:44.621  5397  5510 I EchoCallUDP: Dispatching datagram mode=SAFE length=77
+08-04 12:17:44.621  5397  5397 I EchoCallUDP: Parser returned mode=SAFE result=status=rejected code=payload_too_large declared_length=64 actual_length=64 maximum=32

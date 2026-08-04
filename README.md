@@ -30,6 +30,13 @@ seguro informa primero del exceso de tamaño por el orden de sus validaciones.
 La especificación completa, incluidos offsets, muestras y hashes reproducibles,
 está en [docs/02_packet_format.md](docs/02_packet_format.md).
 
+## Evidencias experimentales
+
+La matriz maestra de validación, las pruebas pendientes y las convenciones para
+logs y capturas están en
+[docs/evidencias/](docs/evidencias/README.md). Esta ruta forma parte del
+repositorio y permite que el registro se revise mediante Git y el pull request.
+
 ## Ejecución en Windows PowerShell
 
 Ejecuta los comandos desde la raíz del repositorio. No es necesario instalar
