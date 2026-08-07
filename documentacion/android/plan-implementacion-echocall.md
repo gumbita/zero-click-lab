@@ -1,12 +1,14 @@
 # Plan de implementación de EchoCall Lab Vulnerable/Patched
 
-- **Estado general:** FASE 1 VALIDADA — implementación y validación completadas; pendiente únicamente de cierre Git.
+- **Estado general:** FASES 0, 1 Y 2 VALIDADAS; FASE 3 PENDIENTE.
 - **Rama prevista:** `feature/echocall-ui`.
 - **Línea base protegida:** `8b20ffed4ef3ef5fb4b4f22c67e8853ebef1065c`.
+- **Cierre versionado de Fase 1:** `26b0638442a5f31b134ba259a8afcbfc0d40d35d`.
 - **Documento asociado:** `documentacion/android/diseno-interfaz-echocall.md`.
 - **Auditoría inicial del repositorio:** 2026-08-04.
-- **Revisión y consolidación documental:** 2026-08-05.
-- **Alcance de este cierre:** actualización exclusiva de este plan y del documento de diseño asociado; las fuentes técnicas se inspeccionan en modo de solo lectura.
+- **Revisión y consolidación documental:** 2026-08-07.
+- **Alcance de este cierre:** Fase 2, sus dos documentos vinculantes y las 16
+  rutas funcionales aprobadas; Fase 3 permanece fuera de alcance.
 
 > Ninguna fase posterior debe iniciarse sin autorización expresa después de revisar la fase anterior.
 
@@ -80,8 +82,9 @@ que:
 - `UdpPacketReceiver.kt` fijaba el puerto del laboratorio en `43568`.
 
 La matriz de variantes, las identidades y la separación CMake/JNI dejaron de ser
-objetivos futuros al completarse la Fase 1. La nueva navegación, el marcador
-persistente y los APK finales congelados siguen pendientes de fases posteriores.
+objetivos futuros al completarse la Fase 1. La navegación y el estado simulado en
+memoria se implementaron en Fase 2. El marcador persistente, las pantallas de
+llamada y los APK finales congelados siguen pendientes de fases posteriores.
 
 ### 2.7. Resultado consolidado de Fase 1
 
@@ -90,6 +93,19 @@ variantes y dos identidades conceptuales de producto. El parser queda fijado al
 compilar, no existe selector runtime y Kotlin expone una única entrada JNI
 `parsePacket`, además de una consulta de solo lectura de la implementación
 compilada.
+
+### 2.8. Resultado consolidado de Fase 2
+
+**HECHO VALIDADO.** La aplicación continúa siendo single-activity y usa
+`EchoCallApp` como raíz Compose. `EchoCallNavHost` concentra cinco destinos y
+abre `ConversationsScreen` como pantalla inicial. `EchoCallStateHolder` es la
+única fuente mutable del estado simulado de producto y permanece separado del
+estado técnico de Lab mode.
+
+Navigation Compose, los cinco contactos ficticios, chat, historial, envío local,
+actualización de preview/timestamp/orden y reset confirmado fueron validados en
+`vulnerableDebug` y `patchedDebug`. No se enviaron datagramas ni se procesaron
+muestras durante la validación de Fase 2.
 
 ## 3. Reglas generales
 
@@ -126,7 +142,8 @@ APK existentes
 XLSX pendiente
 ```
 
-En este cierre documental de Fase 1 solo se autoriza modificar:
+En el cierre de Fase 2 se autorizan las 16 rutas funcionales auditadas y estos
+dos documentos:
 
 ```text
 documentacion/android/diseno-interfaz-echocall.md
@@ -284,8 +301,8 @@ Un commit por fase validada. No crear commit antes de la revisión de la usuaria
 | Fase | Estado | Commit | Automática | Manual | Evidencias | Observaciones |
 |---|---|---|---|---|---|---|
 | 0 — Diseño y planificación | VALIDADA | — | Completada | No aplica | Markdown | Completada |
-| 1 — Arquitectura de variantes | VALIDADA | Pendiente | Completada | Completada | Entrada válida; sin oversized | Implementación y validación completadas; pendiente únicamente de cierre Git |
-| 2 — Modelos y navegación | PENDIENTE | — | Pendiente | Pendiente | Capturas opcionales | — |
+| 1 — Arquitectura de variantes | VALIDADA | `26b0638` | Completada | Completada | Entrada válida; sin oversized | Cerrada y publicada |
+| 2 — Modelos y navegación | VALIDADA | Cierre actual | Completada | Completada | Capturas temporales | UI, estado local y reset validados; sin UDP ni muestras |
 | 3 — Mensajería y llamadas normales | PENDIENTE | — | Pendiente | Pendiente | Entrada válida | — |
 | 4 — Integración Patched | PENDIENTE | — | Pendiente | Pendiente | Patched oversized | — |
 | 5 — Operación nativa incompleta | PENDIENTE | — | Pendiente | Pendiente | Sin entrada oversized vulnerable | — |
@@ -503,9 +520,8 @@ no explotabilidad. E-022 y E-025 siguen siendo evidencia histórica anterior.
 
 ### Punto de parada
 
-La implementación y validación están completadas. Detenerse tras el cierre Git;
-no iniciar Fase 2. Cualquier regresión de la separación nativa antes del commit
-bloquearía el cierre.
+La implementación, validación y cierre Git finalizaron en `26b0638`. Fase 2 se
+inició únicamente tras su aprobación.
 
 ### Checklist
 
@@ -513,8 +529,8 @@ bloquearía el cierre.
 - [x] Automática
 - [x] Manual
 - [x] Revisada
-- [ ] Commit
-- [ ] Push
+- [x] Commit
+- [x] Push
 
 ## 12. Fase 2 — Modelos y navegación
 
@@ -530,76 +546,91 @@ Introducir estado, datos ficticios y navegación sin completar todavía todos lo
 
 ### Alcance autorizado
 
-- `Contact`
-- `Message`
-- `CallRecord`
-- `CallDirection`: `INCOMING`, `OUTGOING`.
-- `CallOutcome`: `COMPLETED`, `REJECTED`, `MISSED`, `BLOCKED`, `INTERRUPTED`, `CANCELLED`.
-- `NativeParseResult` con checksum derivado opcional, no perteneciente al header ECLB.
-- Datos locales.
-- Conversaciones.
-- Chat.
-- Historial inicial.
-- Lab mode inicial.
-- Navegación.
+**IMPLEMENTADO Y VALIDADO.** Fase 2 incluyó:
+
+- `Contact`, `Message` y `CallRecord`;
+- `CallDirection`: `INCOMING`, `OUTGOING`;
+- `CallOutcome`: `COMPLETED`, `REJECTED`, `MISSED`, `BLOCKED`, `INTERRUPTED`,
+  `CANCELLED`;
+- `FakeEchoCallData` con cinco contactos y datos ficticios;
+- `EchoCallStateHolder` y `EchoCallUiState` como estado de producto en memoria;
+- `EchoCallApp` como raíz Compose;
+- Navigation Compose `2.9.8` y `EchoCallNavHost`;
+- `ConversationsScreen`, `ChatScreen`, `CallHistoryScreen`, `LabModeScreen` y
+  `AboutScreen`;
+- envío local, actualización de preview/timestamp, reordenación y reset con
+  confirmación.
 
 ### Fuera de alcance
 
-- Llamada activa completa.
-- Oversized.
-- Marcador persistente.
-- Entrada oversized en Vulnerable.
+- persistencia tras `process death`, DataStore y Room;
+- backend, cuentas y contactos reales;
+- llamadas reales o pantallas de llamada;
+- asociación UDP → Marta;
+- `OutgoingCallScreen`, `IncomingCallScreen`, `ActiveCallScreen`,
+  `BlockedCallScreen` e `InterruptedProcessingScreen`;
+- marcador persistente y `NativeParseResult` estructurado;
+- oversized y cualquier entrada oversized en Vulnerable.
 
 ### Archivos previstos
 
-- `android-app/app/src/main/java/com/echocall/lab/MainActivity.kt` como punto de partida que deberá descomponerse;
-- nuevos modelos, estado, navegación y pantallas compartidas bajo el package `com.echocall.lab`, con rutas definitivas pendientes de la auditoría de Fase 2;
-- recursos compartidos y recursos locales de los cinco contactos ficticios.
+Las 16 rutas funcionales validadas son `build.gradle.kts`, `MainActivity.kt` y
+los catorce Kotlin compartidos bajo `data/`, `model/`, `navigation/` y `ui/`.
+`MainActivity` ya no contiene la UI monolítica. No se crearon recursos de red:
+los avatares usan iniciales locales.
 
 ### Riesgos
 
-- Estado concentrado en la Activity.
-- Perder eventos UDP.
-- Navegación inconsistente.
+- Estado concentrado en la Activity: mitigado con `EchoCallStateHolder`.
+- Perder eventos UDP: no observado; la infraestructura y Lab mode se preservaron.
+- Navegación inconsistente: mitigado con rutas centralizadas y `contactId`.
+- Pérdida tras `process death`: limitación aceptada de esta fase.
 
 ### Validación automática
 
-- cuatro builds;
-- tests de modelos, incluida la separación `CallDirection`/`CallOutcome`;
-- tests de navegación;
-- compilación Compose.
+- `assembleVulnerableDebug`: correcto;
+- `assemblePatchedDebug`: correcto;
+- búsquedas estáticas de arquitectura y dependencias prohibidas;
+- `git diff --check`;
+- preservación por diff de UDP, JNI, CMake, Manifest, `native-core` y `samples`.
+
+No se añadieron tests en esta fase y no se construyeron ASan o Release.
 
 ### Prueba manual
 
-- abrir contactos;
-- escribir mensajes;
-- abrir historial;
-- abrir Lab mode;
-- volver;
-- tema claro/oscuro.
+`vulnerableDebug` y `patchedDebug` arrancaron en `ConversationsScreen`, mostraron
+los cinco contactos y navegaron a Chat, Llamadas, Modo Lab y Acerca de. El envío
+local actualizó preview y orden, persistió al navegar mientras vivía el proceso
+y desapareció al confirmar **Restablecer datos**. Cancelar el diálogo conservó
+los cambios. Lab mode mantuvo package, parser y estado UDP correctos.
+
+No se enviaron datagramas, no se pulsó la muestra válida, no se procesó
+oversized y no hubo crashes.
 
 ### Criterios de aceptación
 
-- [ ] Pantalla inicial correcta.
-- [ ] Cinco contactos.
-- [ ] Chats accesibles.
-- [ ] Mensaje local.
-- [ ] Historial y Lab accesibles.
-- [ ] Dirección y resultado de llamada no se mezclan.
-- [ ] `INCOMING` y `OUTGOING` no aparecen en `CallOutcome`.
-- [ ] Apps visualmente equivalentes.
-- [ ] UDP sigue compilando.
+- [x] Pantalla inicial correcta.
+- [x] Cinco contactos.
+- [x] Chats accesibles.
+- [x] Mensaje local, preview, timestamp y orden.
+- [x] Historial, Lab mode y Acerca de accesibles.
+- [x] Reset confirmado restaura el dataset inicial.
+- [x] Dirección y resultado de llamada no se mezclan.
+- [x] `INCOMING` y `OUTGOING` no aparecen en `CallOutcome`.
+- [x] Apps visualmente equivalentes.
+- [x] UDP y estado técnico preservados.
 
 ### Punto de parada
 
-Detenerse antes de implementar llamadas completas.
+Fase 2 está validada. Detenerse tras el cierre Git y no iniciar Fase 3 sin nueva
+autorización.
 
 ### Checklist
 
-- [ ] Implementada
-- [ ] Automática
-- [ ] Manual
-- [ ] Revisada
+- [x] Implementada
+- [x] Automática
+- [x] Manual
+- [x] Revisada
 - [ ] Commit
 - [ ] Push
 
@@ -1181,21 +1212,21 @@ Fase 8
 - [x] Diseño aprobado.
 - [x] Plan actualizado.
 - [x] Línea base preservada.
-- [ ] Rama publicada.
+- [x] Rama publicada.
 - [x] Cuatro variantes.
 - [x] Parser fijado.
 - [x] La separación nativa de Patched ha sido verificada en Gradle, CMake, fuentes compiladas, símbolos de la `.so` y contenido del APK; la implementación vulnerable no se empaqueta.
 - [x] La separación quedó razonablemente garantizada y Fase 1 no quedó bloqueada.
 - [x] Vulnerable conserva la condición deliberada.
-- [ ] Conversaciones.
-- [ ] Chat.
-- [ ] Historial.
+- [x] Conversaciones.
+- [x] Chat y mensajería local en memoria.
+- [x] Historial ficticio en memoria.
 - [ ] Llamada saliente.
 - [ ] Llamada entrante válida.
 - [ ] Llamada activa.
 - [ ] Llamada bloqueada.
 - [ ] Marcador prudente.
-- [ ] Lab mode.
+- [x] Lab mode inicial separado de la pantalla principal.
 - [ ] Regresión UDP/JNI.
 - [ ] Evidencias finales nuevas.
 - [ ] Limitaciones académicas.
@@ -1281,3 +1312,4 @@ Fase 8
 | 2026-08-05 | Auditoría documental: E-022/E-025, jerarquía Markdown, Fase 8, separación nativa y rutas internas | EN DISEÑO |
 | 2026-08-05 | Revisión final cruzada de diseño/plan, llamadas, checksum, UI histórica, RTCP y fuentes oficiales | EN DISEÑO — pendiente de aprobación |
 | 2026-08-07 | Consolidación del resultado validado de Fase 1 y preparación selectiva del cierre Git | VALIDADA — commit pendiente |
+| 2026-08-07 | Consolidación de UI de mensajería, navegación, estado local y reset de Fase 2 | VALIDADA — cierre Git autorizado |

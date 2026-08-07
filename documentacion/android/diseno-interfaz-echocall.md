@@ -1,14 +1,16 @@
 # Diseño final de interfaz y arquitectura de EchoCall Lab
 
-> Estado del documento: **FASE 1 — implementación y validación completadas; pendiente de cierre Git**
+> Estado del documento: **FASES 0, 1 Y 2 — VALIDADAS; FASE 3 — PENDIENTE**
 >
 > Rama de trabajo: `feature/echocall-ui`
 >
 > Línea base: `8b20ffed4ef3ef5fb4b4f22c67e8853ebef1065c`
 >
+> Cierre versionado de Fase 1: `26b0638442a5f31b134ba259a8afcbfc0d40d35d`
+>
 > Fecha de auditoría inicial del repositorio: 2026-08-04
 >
-> Fecha de revisión y consolidación documental: 2026-08-05
+> Fecha de revisión y consolidación documental: 2026-08-07
 
 ## Índice
 
@@ -231,27 +233,32 @@ determinista del simulador; ECLB no contiene un nombre de contacto.
 
 ## 5. Arquitectura Vulnerable/Patched
 
-**CONFIRMADO EN FASE 1.** Se mantiene un único módulo de aplicación Android
+**CONFIRMADO EN FASES 1 Y 2.** Se mantiene un único módulo de aplicación Android
 `:app` que genera cuatro variantes, con dos identidades de producto
-Vulnerable/Patched y una Activity compartida. La estructura futura prevista es:
+Vulnerable/Patched y una Activity compartida. La estructura implementada hasta
+Fase 2 es:
 
 ```text
-MainActivity (ciclo de vida UDP)
-└── EchoCallApp / NavHost
-    ├── UI compartida (pantallas Material 3)
-    ├── AppStateHolder o ViewModel
-    │   ├── repositorio simulado en memoria
-    │   ├── coordinador de llamadas
-    │   ├── estado UDP y eventos de laboratorio
-    │   └── repositorio del marcador persistente
-    └── NativeGateway
-        └── NativeBridge.parsePacket() -> libechocall_native.so
-            └── parser único fijado por flavor/CMake
+MainActivity (ciclo de vida UDP y setContent)
+└── EchoCallApp
+    ├── EchoCallStateHolder (estado simulado de producto en memoria)
+    ├── estado técnico del laboratorio, separado
+    └── EchoCallNavHost
+        ├── ConversationsScreen (destino inicial)
+        ├── ChatScreen(contactId)
+        ├── CallHistoryScreen
+        ├── LabModeScreen
+        └── AboutScreen
+
+NativeBridge.parsePacket() -> libechocall_native.so
+└── parser único fijado por flavor/CMake
 ```
 
-Se aplicará flujo unidireccional: el estado desciende hacia los composables y
-las acciones de usuario o eventos UDP ascienden al state holder. La UI no
-elegirá el parser ni invocará directamente dos rutas alternativas.
+El estado simulado desciende desde `EchoCallStateHolder` hacia los composables y
+las acciones ascienden mediante callbacks. `EchoCallNavHost` concentra la
+navegación y pasa solo `contactId` al chat; las pantallas no reciben directamente
+el `NavController`. El estado técnico de Lab mode no forma parte del state holder
+de producto. La UI no elige el parser ni invoca dos rutas alternativas.
 
 **DECISIÓN DE DISEÑO.** No se crearán dos módulos app ni dos copias manuales.
 Las diferencias por flavor se limitarán a identidad, recursos informativos y
@@ -309,17 +316,18 @@ variante `vulnerableAsan` y `patchedAsan`.
 
 ## 8. Base de código compartida
 
-**CONFIRMADO EN FASE 1.** El código Kotlin, JNI/C y la UI existentes permanecen
-compartidos en `src/main`. En las fases posteriores también residirá allí:
+**CONFIRMADO EN FASES 1 Y 2.** El código Kotlin, JNI/C y la UI permanecen
+compartidos en `src/main`. Fase 2 añadió allí:
 
-- Activity, tema, navegación y pantallas;
-- modelos y datos ficticios;
-- state holder/ViewModel y repositorios en memoria;
-- receptor UDP y coordinador de paquetes;
-- contrato Kotlin del gateway nativo;
-- modelos de resultado nativo y eventos;
-- persistencia del marcador;
-- recursos visuales comunes y avatares locales.
+- `EchoCallApp` como raíz Compose y `EchoCallNavHost` como grafo;
+- modelos y datos ficticios bajo `model/` y `data/`;
+- `EchoCallStateHolder` como única fuente mutable del estado simulado;
+- pantallas compartidas de conversaciones, chat, historial, Lab mode y acerca de;
+- avatares locales por iniciales.
+
+El receptor UDP, el contrato JNI y el estado técnico del laboratorio se
+conservaron. El coordinador de llamadas, el modelo estructurado de resultado
+nativo y la persistencia del marcador siguen pendientes.
 
 Los source sets `src/vulnerable` y `src/patched` contendrán solo recursos o
 constantes inevitables de variante. Los source sets de build type conservarán
@@ -397,28 +405,24 @@ JNI antes de implementarlo.
 
 ## 10. Modelo de datos
 
-**PROPUESTA PENDIENTE.** Modelos compartidos:
+**CONFIRMADO EN FASE 2.** Modelos compartidos mínimos:
 
 | Modelo | Campos mínimos |
 |---|---|
-| `Contact` | `id`, `displayName`, `avatarResource`, `fallbackInitials`, `preview`, `simulatedTimeLabel` |
-| `Message` | `id`, `contactId`, `sender`, `body`, `simulatedOrder`, `simulatedTimeLabel` |
-| `CallRecord` | `id`, `contactId`, `direction`, `outcome`, `startedAt`, `endedAt`, `durationSeconds`, `scenarioId` |
-| `NativeParseResult` | `implementation`, `status`, `code`, campos ECLB opcionales, `checksum` derivado opcional y texto original controlado |
-| `LabEvent` | `id` técnico exacto, etiqueta española, timestamp monotónico/real y detalles permitidos |
-| `UdpState` | estado, puerto, última fuente, tamaño, error recuperable y disponibilidad de retry |
-| `NativeOperationMarker` | `pending`, variante, origen, longitud, timestamp, `scenarioId` |
-| `EchoCallUiState` | sección/ruta, contactos, mensajes de sesión, historial, llamada, UDP, resultado y eventos |
+| `Contact` | `id`, `displayName`, `initials`, `preview`, `timestamp` |
+| `Message` | `id`, `contactId`, `text`, `isOutgoing`, `timestamp` |
+| `CallRecord` | `id`, `contactId`, `direction`, `outcome`, `timestamp` |
+| `EchoCallUiState` | contactos, mensajes e historial simulado |
 
-Enums previstos:
+Enums implementados:
 
-- `MessageSender`: `CONTACT`, `USER`;
 - `CallDirection`: `INCOMING`, `OUTGOING`;
 - `CallOutcome`: `COMPLETED`, `REJECTED`, `MISSED`, `BLOCKED`, `INTERRUPTED`,
-  `CANCELLED`;
-- `ParserImplementation`: `VULNERABLE`, `PATCHED`, solo lectura;
-- estados de llamada: `IDLE`, `DIALING`, `INCOMING`, `ACTIVE`, `BLOCKED`,
-  `INTERRUPTED`.
+  `CANCELLED`.
+
+**PROPUESTA PENDIENTE.** `NativeParseResult`, `LabEvent`, `UdpState`,
+`NativeOperationMarker`, los campos de duración/escenario y el autómata de
+llamadas se incorporarán únicamente en sus fases posteriores.
 
 **PROPUESTA PENDIENTE.** El autómata mantendrá dirección, estado y resultado
 como conceptos separados:
@@ -445,20 +449,19 @@ usar un reloj monotónico para no depender de cambios del reloj de pared.
 
 ## 11. Contactos simulados
 
-**DECISIÓN DE DISEÑO.** Contactos ficticios y estables:
+**CONFIRMADO EN FASE 2.** Contactos ficticios y estables:
 
-| ID propuesto | Nombre | Vista previa | Tiempo simulado |
+| ID | Nombre | Vista previa inicial | Tiempo simulado |
 |---|---|---|---|
-| `marta_soler` | Marta Soler | Te llamo cuando salga. | 12:18 |
-| `pau_ferrer` | Pau Ferrer | ¿Quedamos a las siete? | 11:42 |
-| `lucia_navarro` | Lucía Navarro | Te he enviado las fotos. | Ayer |
-| `dani_campos` | Dani Campos | Luego hablamos con calma. | Ayer |
-| `irene_vidal` | Irene Vidal | ¡Gracias! | Lun |
+| `marta_soler` | Marta Soler | ¿Puedes hablar ahora? | 09:42 |
+| `pau_ferrer` | Pau Ferrer | Vale, luego te llamo | Ayer |
+| `lucia_navarro` | Lucía Navarro | Perfecto 👍 | Ayer |
+| `dani_campos` | Dani Campos | Llamada perdida | Lun |
+| `irene_vidal` | Irene Vidal | Nos vemos luego | Dom |
 
-Los avatares serán recursos locales ficticios, coherentes visualmente y sin
-dependencias de red. El modelo aceptará una referencia de recurso opcional y
-siempre tendrá iniciales de respaldo (`MS`, `PF`, `LN`, `DC`, `IV`). Así podrá
-incorporar avatares ilustrados posteriores sin cambiar el contrato de datos.
+Los avatares implementados son círculos locales con iniciales (`MS`, `PF`, `LN`,
+`DC`, `IV`) y no tienen dependencias de red. Los datos iniciales residen en
+`FakeEchoCallData` y el estado de sesión trabaja con copias.
 
 **LIMITACIÓN.** No se usarán fotografías, nombres, teléfonos, correos ni otros
 datos reales. Marta Soler se asocia al escenario UDP por decisión del
@@ -466,41 +469,43 @@ simulador, no por contenido del paquete.
 
 ## 12. Pantalla principal
 
-**DECISIÓN DE DISEÑO.** `ConversationsScreen` será el destino inicial. Mostrará:
+**CONFIRMADO EN FASE 2.** `ConversationsScreen` es el destino inicial. Muestra:
 
 - barra superior con título **EchoCall**;
-- acción visible **Historial**;
-- menú de tres puntos con **Lab mode**, **Acerca de EchoCall** y
-  **Restablecer datos simulados**;
+- acción visible **Llamadas**;
+- menú de tres puntos con **Modo Lab**, **Acerca de** y **Restablecer datos**;
 - lista de los cinco contactos con avatar/iniciales, nombre, último mensaje y
-  hora o fecha simulada;
-- distintivo discreto **Vulnerable** o **Patched**, y **ASan** cuando proceda.
+  hora o fecha simulada.
 
 No mostrará JNI, UDP, ASan, offsets, heap, `memcpy`, `payload_too_large`, CVSS
 ni controles de explotación.
 
 ## 13. Conversación
 
-**DECISIÓN DE DISEÑO.** `ChatScreen(contactId)` incluirá volver, avatar, nombre,
-acción de llamada, mensajes precargados, campo de texto y enviar.
+**CONFIRMADO EN FASE 2.** `ChatScreen(contactId)` incluye volver, avatar, nombre,
+acción de llamada visualmente deshabilitada, mensajes precargados, campo de texto
+y envío local.
 
 Para Marta Soler se precargará, como mínimo:
 
-1. Marta: «¿Has llegado ya?»
-2. Tú: «Sí, acabo de llegar.»
-3. Marta: «Perfecto, te llamo cuando salga.»
+1. Marta: «Hola, ¿tienes un momento?»
+2. Tú: «Sí, dime»
+3. Marta: «¿Puedes hablar ahora?»
 
-Los mensajes nuevos se añadirán localmente a la conversación durante la
-sesión. No se enviarán por red ni se conservarán tras finalizar el proceso.
+Los mensajes nuevos se añaden localmente durante la sesión. El envío descarta
+texto vacío, actualiza preview y timestamp, reordena la conversación y conserva
+el mensaje al navegar mientras vive el proceso. No se envían por red ni se
+conservan tras finalizar el proceso.
 
 **LIMITACIÓN.** La mensajería es contexto visual de una app de comunicaciones;
 no representa el vector de CVE-2019-3568.
 
 ## 14. Historial
 
-**DECISIÓN DE DISEÑO.** `CallHistoryScreen` será accesible desde la barra
-superior y mostrará avatar, contacto, dirección y resultado como campos
-separados, fecha/hora simulada o de sesión y duración cuando exista.
+**CONFIRMADO EN FASE 2.** `CallHistoryScreen` es accesible desde la barra
+superior y muestra avatar, contacto, dirección y resultado separados, con
+fecha/hora ficticia. Sus registros iniciales forman parte del estado compartido
+en memoria y se restauran junto con conversaciones y mensajes.
 
 La dirección será `INCOMING` u `OUTGOING`. El resultado será `COMPLETED`,
 `REJECTED`, `MISSED`, `BLOCKED`, `INTERRUPTED` o `CANCELLED`. Los registros se
@@ -753,7 +758,7 @@ de iniciar la siguiente. Este procedimiento se verificó en Fase 1.
 
 ## 22. Persistencia
 
-**PROPUESTA PENDIENTE.** Política:
+**CONFIRMADO EN FASE 2 / PROPUESTA POSTERIOR.** Política:
 
 | Información | Persistencia |
 |---|---|
@@ -764,6 +769,11 @@ de iniciar la siguiente. Este procedimiento se verificó en Fase 1.
 | mute, altavoz y llamada activa | memoria/estado de UI |
 | configuración del parser | compilación; nunca almacenamiento runtime |
 | marcador nativo incompleto | Preferences DataStore privado por app |
+
+Fase 2 implementa únicamente las filas en memoria y los datos precargados. El
+comando **Restablecer datos** reconstruye mensajes, previews, orden e historial
+desde `FakeEchoCallData`, sin modificar parser, JNI, UDP ni resultados de Lab
+mode. No se implementaron DataStore, Room ni persistencia tras `process death`.
 
 Preferences DataStore se propone por ser clave-valor, pequeño, transaccional y
 compatible con coroutines. La API suspendida `edit` realiza una operación
@@ -860,7 +870,7 @@ autorización expresa.
 - auditar la línea base, las evidencias y las fuentes oficiales;
 - consolidar y revisar este diseño y el plan de implementación;
 - no modificar ni ejecutar código;
-- **estado: completada**.
+- **estado: validada**.
 
 ### Fase 1 — Arquitectura de variantes
 
@@ -869,15 +879,18 @@ autorización expresa.
 - seleccionar un único parser mediante Gradle/CMake/JNI;
 - conservar UDP `43568`;
 - eliminar el selector runtime, sin rediseñar todavía toda la UI.
-- **estado: implementación y validación completadas; pendiente únicamente de
-  cierre Git mediante el commit autorizado**.
+- **estado: validada y versionada en
+  `26b0638442a5f31b134ba259a8afcbfc0d40d35d`**.
 
 ### Fase 2 — Modelos y navegación
 
 - crear modelos, datos ficticios y estado de sesión;
-- crear tema, navegación, principal, conversación, historial y Lab mode inicial;
-- no conectar todavía todos los flujos UDP a las nuevas pantallas.
-- **estado: pendiente**.
+- crear navegación, principal, conversación, historial, Lab mode inicial y
+  pantalla Acerca de;
+- permitir mensajería local, actualización de preview/orden y reset confirmado;
+- mantener separados el estado simulado de producto y el estado técnico;
+- no conectar todavía los flujos UDP a pantallas normales de llamada.
+- **estado: validada**.
 
 ### Fase 3 — Mensajería y llamadas normales
 
@@ -983,13 +996,32 @@ E-025 siguen siendo evidencia histórica anterior a esta arquitectura.
 
 ### Fase 2 — Modelos y navegación
 
-Automáticas previstas: tests unitarios de datos y reducers/state holder,
-incluida la separación entre `CallDirection` y `CallOutcome`; tests Compose de
-destino inicial, lista, chat, envío local, historial, menú y Lab mode; tests de
-navegación con IDs estables.
+**VALIDADA.** Fase 2 añadió Navigation Compose
+`androidx.navigation:navigation-compose:2.9.8`, `EchoCallApp` como raíz,
+`EchoCallNavHost` con `ConversationsScreen` como destino inicial y las pantallas
+`ChatScreen`, `CallHistoryScreen`, `LabModeScreen` y `AboutScreen`. Las pantallas
+reciben callbacks en lugar del `NavController`; el chat se identifica solo por
+`contactId`.
 
-Manuales previstas: recorrer las pantallas, verificar textos y cinco contactos,
-enviar mensajes locales, restablecer datos y comparar visualmente ambos flavors.
+`Contact`, `Message`, `CallRecord`, `CallDirection` y `CallOutcome` modelan los
+datos ficticios. `EchoCallStateHolder` mantiene una única fuente mutable del
+estado de producto en memoria, separada del estado técnico de Lab mode. El envío
+local actualiza mensaje, preview, timestamp y orden. **Restablecer datos** exige
+confirmación y recupera el dataset inicial.
+
+`vulnerableDebug` y `patchedDebug` compilaron y arrancaron en conversaciones,
+mostraron los cinco contactos, navegaron a chat, historial, Lab mode y Acerca de,
+enviaron mensajes locales, conservaron el cambio al navegar y restauraron el
+dataset inicial. Lab mode mantuvo package, parser y estado UDP correctos. Durante
+estas pruebas no se enviaron datagramas, no se procesaron muestras y no hubo
+crashes.
+
+**LIMITACIÓN.** Fase 2 no implementa persistencia tras `process death`,
+DataStore, Room, backend, cuentas, contactos reales, llamadas reales, asociación
+UDP → Marta, pantallas de llamada ni comportamiento oversized. No demuestra
+explotación, RCE, seguridad general, reproducción exacta de WhatsApp o
+CVE-2019-3568 ni el escenario zero-click completo. La integración automática con
+la experiencia normal de llamada corresponde a Fase 3.
 
 ### Fase 3 — Mensajería y llamadas normales
 
@@ -1075,10 +1107,10 @@ stdout/stderr, exit codes, timestamps, PID, log íntegro y hashes.
 ### Experiencia compartida
 
 - [ ] misma interfaz, navegación, contactos, mensajes, llamadas y avatares;
-- [ ] lista de conversaciones como pantalla inicial;
-- [ ] cinco contactos ficticios y fallback de iniciales;
-- [ ] conversaciones y mensajes locales funcionales;
-- [ ] historial accesible;
+- [x] lista de conversaciones como pantalla inicial;
+- [x] cinco contactos ficticios y fallback de iniciales;
+- [x] conversaciones y mensajes locales funcionales;
+- [x] historial accesible;
 - [ ] llamada saliente simulada sin UDP/JNI;
 - [ ] llamada entrante solo tras paquete válido aceptado;
 - [ ] procesamiento nativo anterior a Aceptar/Rechazar;
@@ -1100,7 +1132,7 @@ stdout/stderr, exit codes, timestamps, PID, log íntegro y hashes.
 ### Comunicación y límites
 
 - [ ] Lab mode informa variante, app, parser, UDP, resultado, eventos y límites;
-- [ ] la experiencia normal no expone detalles técnicos innecesarios;
+- [x] la experiencia normal no expone detalles técnicos innecesarios;
 - [x] no existe botón de overflow/explotación/RCE;
 - [ ] no hay backend, cuentas, audio, telefonía real o red externa;
 - [x] no se afirma RCE, control del flujo o seguridad completa;
