@@ -9,5 +9,5 @@ internal object NativeBridge {
 
     external fun parsePacket(packet: ByteArray): String
 
-    external fun parsePacketVulnerable(packet: ByteArray): String
+    external fun getCompiledParserImplementation(): String
 }

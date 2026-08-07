@@ -7,27 +7,21 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,21 +30,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-
-private enum class ParserMode {
-    SAFE,
-    VULNERABLE
-}
 
 private const val UDP_PACKET_QUEUE_CAPACITY = 16
 
 private data class UdpPacketEvent(
     val packet: ReceivedUdpPacket,
-    val parserMode: ParserMode,
 )
 
 class MainActivity : ComponentActivity() {
@@ -59,7 +44,6 @@ class MainActivity : ComponentActivity() {
         Channel<UdpPacketEvent>(UDP_PACKET_QUEUE_CAPACITY)
     private var udpReceiverStatus by mutableStateOf("UDP stopped")
     private var udpRetryAvailable by mutableStateOf(false)
-    private val parserMode = MutableStateFlow(ParserMode.SAFE)
 
     private val udpReceiver = UdpPacketReceiver(
         onListening = { boundPort ->
@@ -71,13 +55,11 @@ class MainActivity : ComponentActivity() {
             }
         },
         onPacket = { packet ->
-            val parserModeSnapshot = parserMode.value
             runOnUiThread {
                 if (activityStarted) {
                     val sendResult = udpPacketEvents.trySend(
                         UdpPacketEvent(
                             packet = packet,
-                            parserMode = parserModeSnapshot,
                         ),
                     )
                     if (sendResult.isFailure) {
@@ -101,13 +83,15 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val nativeStatus = NativeBridge.nativeStatus()
+        val compiledParserImplementation =
+            NativeBridge.getCompiledParserImplementation()
         setContent {
             EchoCallLabScreen(
                 nativeStatus = nativeStatus,
+                compiledParserImplementation = compiledParserImplementation,
                 udpReceiverStatus = udpReceiverStatus,
                 udpRetryAvailable = udpRetryAvailable,
                 udpPacketEvents = udpPacketEvents,
-                parserMode = parserMode,
                 onRetryUdpReceiver = ::retryUdpReceiver,
             )
         }
@@ -152,10 +136,10 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun EchoCallLabScreen(
     nativeStatus: String,
+    compiledParserImplementation: String,
     udpReceiverStatus: String,
     udpRetryAvailable: Boolean,
     udpPacketEvents: Channel<UdpPacketEvent>,
-    parserMode: MutableStateFlow<ParserMode>,
     onRetryUdpReceiver: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -164,24 +148,19 @@ private fun EchoCallLabScreen(
     } else {
         "Debug"
     }
-    var safeResult by remember { mutableStateOf("Valid sample not parsed") }
-    var vulnerableResult by remember { mutableStateOf("Valid sample not parsed") }
-    val selectedMode by parserMode.collectAsState()
+    var validSampleResult by remember {
+        mutableStateOf("Muestra válida no procesada")
+    }
     var showIncomingCall by remember { mutableStateOf(false) }
-    var incomingCallResult by remember { mutableStateOf("Incoming call not simulated") }
+    var incomingCallResult by remember { mutableStateOf("Incoming call not received") }
     var incomingCallEvents by remember { mutableStateOf(emptyList<String>()) }
-    var incomingCallSource by remember { mutableStateOf("LOCAL ASSET") }
-    var incomingCallMode by remember { mutableStateOf(ParserMode.SAFE) }
+    var incomingCallSource by remember { mutableStateOf("UDP") }
     var callAction by remember { mutableStateOf("No user action required") }
-    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(udpPacketEvents) {
         for (event in udpPacketEvents) {
-            val parserModeSnapshot = event.parserMode
-
             showIncomingCall = true
             callAction = "No user action required"
-            incomingCallMode = parserModeSnapshot
             incomingCallSource =
                 "UDP ${event.packet.sourceAddress}:${event.packet.sourcePort} " +
                     "(${event.packet.bytes.size} bytes)"
@@ -196,21 +175,14 @@ private fun EchoCallLabScreen(
                 val result = withContext(Dispatchers.Default) {
                     Log.i(
                         UDP_LOG_TAG,
-                        "Dispatching datagram mode=${parserModeSnapshot.name} " +
-                            "length=${event.packet.bytes.size}",
+                        "Dispatching datagram length=${event.packet.bytes.size}",
                     )
-                    when (parserModeSnapshot) {
-                        ParserMode.SAFE ->
-                            NativeBridge.parsePacket(event.packet.bytes)
-                        ParserMode.VULNERABLE ->
-                            NativeBridge.parsePacketVulnerable(event.packet.bytes)
-                    }
+                    NativeBridge.parsePacket(event.packet.bytes)
                 }
 
                 Log.i(
                     UDP_LOG_TAG,
-                    "Parser returned mode=${parserModeSnapshot.name} " +
-                        "result=$result",
+                    "Parser returned result=$result",
                 )
                 incomingCallResult = result
                 incomingCallEvents += if (
@@ -246,72 +218,16 @@ private fun EchoCallLabScreen(
                     text = "Build: $buildVariant · ${context.packageName}",
                     style = MaterialTheme.typography.bodySmall,
                 )
+                Text(
+                    text = "Parser compilado: $compiledParserImplementation · " +
+                        "Fijado al compilar",
+                    style = MaterialTheme.typography.bodySmall,
+                )
                 Text(text = udpReceiverStatus)
                 if (udpRetryAvailable) {
                     Button(onClick = onRetryUdpReceiver) {
                         Text("Retry UDP receiver")
                     }
-                }
-                Text("Incoming parser mode")
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    RadioButton(
-                        selected = selectedMode == ParserMode.SAFE,
-                        onClick = { parserMode.value = ParserMode.SAFE },
-                    )
-                    Text("SAFE")
-                    Spacer(modifier = Modifier.width(16.dp))
-                    RadioButton(
-                        selected = selectedMode == ParserMode.VULNERABLE,
-                        onClick = { parserMode.value = ParserMode.VULNERABLE },
-                    )
-                    Text("VULNERABLE")
-                }
-                Button(
-                    onClick = {
-                        showIncomingCall = true
-                        callAction = "No user action required"
-                        incomingCallMode = selectedMode
-                        incomingCallSource =
-                            "LOCAL ASSET: oversized_complete_payload.bin"
-                        when (selectedMode) {
-                            ParserMode.SAFE -> {
-                                incomingCallEvents = listOf("CALL_INCOMING")
-                                val packet = context.assets
-                                    .open("oversized_complete_payload.bin")
-                                    .use { input -> input.readBytes() }
-                                incomingCallEvents += "CONTROL_PACKET_RECEIVED"
-                                incomingCallEvents += "NATIVE_PARSE_STARTED"
-                                incomingCallResult = NativeBridge.parsePacket(packet)
-                                incomingCallEvents +=
-                                    "PACKET_REJECTED_INVALID_LENGTH"
-                            }
-                            ParserMode.VULNERABLE -> {
-                                val packet = context.assets
-                                    .open("oversized_complete_payload.bin")
-                                    .use { input -> input.readBytes() }
-                                incomingCallResult = "Automatic native parsing started"
-                                coroutineScope.launch {
-                                    incomingCallEvents = listOf("CALL_INCOMING")
-                                    delay(250L)
-                                    incomingCallEvents = listOf(
-                                        "CALL_INCOMING",
-                                        "CONTROL_PACKET_RECEIVED",
-                                    )
-                                    delay(250L)
-                                    incomingCallEvents += "NATIVE_PARSE_STARTED"
-                                    delay(250L)
-                                    incomingCallResult =
-                                        NativeBridge.parsePacketVulnerable(packet)
-                                }
-                            }
-                        }
-                    },
-                ) {
-                    Text("Simulate incoming call")
                 }
                 if (showIncomingCall) {
                     Card(modifier = Modifier.fillMaxWidth()) {
@@ -342,38 +258,24 @@ private fun EchoCallLabScreen(
                         }
                     }
                     Text("SOURCE: $incomingCallSource")
-                    Text("AUTOMATIC RESULT (${incomingCallMode.name})")
+                    Text("AUTOMATIC RESULT")
                     Text(incomingCallResult)
                     Text("EVENTS")
                     incomingCallEvents.forEach { event -> Text(event) }
                 }
                 Button(
                     onClick = {
-                        safeResult = context.assets
+                        validSampleResult = context.assets
                             .open("valid_call_control.bin")
                             .use { input ->
                                 NativeBridge.parsePacket(input.readBytes())
                             }
                     },
                 ) {
-                    Text(text = "Parse valid sample")
+                    Text(text = "Procesar muestra válida")
                 }
-                Text(text = "SAFE")
-                Text(text = safeResult)
-                Button(
-                    onClick = {
-                        vulnerableResult = context.assets
-                            .open("valid_call_control.bin")
-                            .use { input ->
-                                NativeBridge.parsePacketVulnerable(input.readBytes())
-                            }
-                    },
-                ) {
-                    Text(text = "Parse valid sample (vulnerable)")
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(text = "VULNERABLE")
-                Text(text = vulnerableResult)
+                Text(text = "Resultado de la muestra válida")
+                Text(text = validSampleResult)
             }
         }
     }

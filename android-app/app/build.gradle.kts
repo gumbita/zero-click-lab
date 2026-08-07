@@ -19,6 +19,34 @@ android {
         versionName = "0.1.0"
     }
 
+    flavorDimensions += "security"
+
+    productFlavors {
+        create("vulnerable") {
+            dimension = "security"
+            applicationId = "com.echocall.lab.vulnerable"
+
+            externalNativeBuild {
+                cmake {
+                    arguments +=
+                        "-DECHOCALL_PARSER_IMPLEMENTATION=VULNERABLE"
+                }
+            }
+        }
+
+        create("patched") {
+            dimension = "security"
+            applicationId = "com.echocall.lab.patched"
+
+            externalNativeBuild {
+                cmake {
+                    arguments +=
+                        "-DECHOCALL_PARSER_IMPLEMENTATION=PATCHED"
+                }
+            }
+        }
+    }
+
     buildTypes {
         create("asan") {
             initWith(getByName("debug"))
@@ -101,12 +129,19 @@ val prepareAsanRuntime by tasks.registering(Sync::class) {
 }
 
 tasks.configureEach {
-    if (name == "preAsanBuild") {
+    if (
+        name == "preVulnerableAsanBuild" ||
+        name == "prePatchedAsanBuild"
+    ) {
         dependsOn(prepareAsanRuntime)
     }
 }
 
 androidComponents {
+    beforeVariants(selector().withBuildType("release")) {
+        it.enable = false
+    }
+
     onVariants(selector().withBuildType("asan")) { variant ->
         variant.packaging.jniLibs.useLegacyPackaging.set(true)
         variant.packaging.jniLibs.keepDebugSymbols.add(
