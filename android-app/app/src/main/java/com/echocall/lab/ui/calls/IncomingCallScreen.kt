@@ -2,26 +2,22 @@ package com.echocall.lab.ui.calls
 
 import android.util.Log
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.echocall.lab.R
 import com.echocall.lab.model.Contact
 import com.echocall.lab.UDP_LOG_TAG
-import com.echocall.lab.ui.ContactAvatar
 
 @Composable
 fun IncomingCallScreen(
@@ -39,49 +35,35 @@ fun IncomingCallScreen(
         )
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceEvenly,
+    CallScreenLayout(
+        contact = contact,
+        headline = "Llamada entrante",
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+        Button(
+            onClick = onAccept,
+            modifier = Modifier
+                .widthIn(min = 200.dp, max = 320.dp)
+                .heightIn(min = 52.dp),
         ) {
-            ContactAvatar(contact = contact, size = 112.dp)
-            Text(
-                text = contact.displayName,
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.SemiBold,
+            Icon(
+                painter = painterResource(R.drawable.ic_call),
+                contentDescription = null,
             )
-            Text(
-                text = "Llamada entrante",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Aceptar")
         }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly,
+        OutlinedButton(
+            onClick = onReject,
+            modifier = Modifier
+                .widthIn(min = 200.dp, max = 320.dp)
+                .heightIn(min = 52.dp),
         ) {
-            Button(
-                onClick = onReject,
-                modifier = Modifier.semantics {
-                    contentDescription = "Rechazar llamada"
-                },
-            ) {
-                Text("Rechazar")
-            }
-            Button(
-                onClick = onAccept,
-                modifier = Modifier.semantics {
-                    contentDescription = "Aceptar llamada"
-                },
-            ) {
-                Text("Aceptar")
-            }
+            Icon(
+                painter = painterResource(R.drawable.ic_call_end),
+                contentDescription = null,
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Rechazar")
         }
     }
 }

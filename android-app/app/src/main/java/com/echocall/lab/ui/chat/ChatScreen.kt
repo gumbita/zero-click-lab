@@ -6,12 +6,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -26,8 +28,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -35,6 +38,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import com.echocall.lab.model.Contact
 import com.echocall.lab.model.Message
+import com.echocall.lab.R
 import com.echocall.lab.ui.ContactAvatar
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -71,23 +75,19 @@ fun ChatScreen(
                     }
                 },
                 navigationIcon = {
-                    IconButton(
-                        onClick = onBack,
-                        modifier = Modifier.semantics {
-                            contentDescription = "Atrás"
-                        },
-                    ) {
-                        Text("‹", style = MaterialTheme.typography.headlineMedium)
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_arrow_back),
+                            contentDescription = "Volver",
+                        )
                     }
                 },
                 actions = {
-                    IconButton(
-                        onClick = onStartCall,
-                        modifier = Modifier.semantics {
-                            contentDescription = "Llamar a ${contact.displayName}"
-                        },
-                    ) {
-                        Text("☎", style = MaterialTheme.typography.titleLarge)
+                    IconButton(onClick = onStartCall) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_call),
+                            contentDescription = "Llamar a ${contact.displayName}",
+                        )
                     }
                 },
             )
@@ -123,7 +123,7 @@ fun ChatScreen(
                     value = draft,
                     onValueChange = { draft = it },
                     modifier = Modifier.weight(1f),
-                    placeholder = { Text("Mensaje") },
+                    label = { Text("Mensaje") },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
                         imeAction = ImeAction.Send,
@@ -132,14 +132,15 @@ fun ChatScreen(
                         onSend = { sendDraft() },
                     ),
                 )
-                Button(
+                FilledIconButton(
                     onClick = sendDraft,
                     enabled = draft.isNotBlank(),
-                    modifier = Modifier.semantics {
-                        contentDescription = "Enviar mensaje"
-                    },
+                    modifier = Modifier.size(56.dp),
                 ) {
-                    Text("Enviar")
+                    Icon(
+                        painter = painterResource(R.drawable.ic_send),
+                        contentDescription = "Enviar mensaje",
+                    )
                 }
             }
         }
@@ -157,7 +158,15 @@ private fun MessageBubble(message: Message) {
         },
     ) {
         Surface(
-            modifier = Modifier.widthIn(max = 300.dp),
+            modifier = Modifier
+                .widthIn(max = 320.dp)
+                .clearAndSetSemantics {
+                    contentDescription = if (message.isOutgoing) {
+                        "Mensaje enviado: ${message.text}. ${message.timestamp}"
+                    } else {
+                        "Mensaje recibido: ${message.text}. ${message.timestamp}"
+                    }
+                },
             shape = RoundedCornerShape(18.dp),
             color = if (message.isOutgoing) {
                 MaterialTheme.colorScheme.primaryContainer

@@ -1,6 +1,6 @@
 # Plan de implementación de EchoCall Lab Vulnerable/Patched
 
-- **Estado general:** FASES 0, 1, 2, 3, 4 Y 5 VALIDADAS; FASE 6 PENDIENTE.
+- **Estado general:** FASES 0 A 6 VALIDADAS; FASES 7 Y 8 PENDIENTES.
 - **Rama prevista:** `feature/echocall-ui`.
 - **Línea base protegida:** `8b20ffed4ef3ef5fb4b4f22c67e8853ebef1065c`.
 - **Cierre versionado de Fase 1:** `26b0638442a5f31b134ba259a8afcbfc0d40d35d`.
@@ -8,11 +8,13 @@
 - **Cierre versionado de Fase 3:** `aa69cba406fa78fd088019ec75dcd33a0ff05856`.
 - **Cierre versionado de Fase 4:** `8d7add26aa22b5884b1ae401e5abe6c4429fd5d6`
   (`8d7add2 Add patched blocked-call handling`).
+- **Cierre versionado de Fase 5:** `e1da09eaea29a1f9f2ab0e395a6bb5c829c478f1`
+  (`e1da09e Track incomplete native operations`).
 - **Documento asociado:** `documentacion/android/diseno-interfaz-echocall.md`.
 - **Auditoría inicial del repositorio:** 2026-08-04.
 - **Revisión y consolidación documental:** 2026-08-10.
-- **Alcance de este cierre:** Fase 5, sus nueve rutas funcionales aprobadas y
-  los dos documentos vinculantes; Fase 6 permanece fuera de alcance.
+- **Alcance de este cierre:** Fase 6, sus 26 rutas funcionales aprobadas y los
+  dos documentos vinculantes; Fase 7 permanece fuera de alcance.
 
 > Ninguna fase posterior debe iniciarse sin autorización expresa después de revisar la fase anterior.
 
@@ -151,6 +153,29 @@ La lectura de startup navega centralizadamente a
 no crea un `CallRecord`, no reconstruye historial y no atribuye automáticamente
 `CallOutcome.INTERRUPTED`.
 
+Fase 5 quedó cerrada y publicada en
+`e1da09eaea29a1f9f2ab0e395a6bb5c829c478f1`
+(`e1da09e Track incomplete native operations`).
+
+### 2.12. Resultado consolidado de Fase 6
+
+**HECHO VALIDADO.** `EchoCallTheme` aplica Material 3 con esquemas locales
+claro y oscuro seleccionados mediante `isSystemInDarkTheme()`. El Manifest usa
+`@style/Theme.EchoCall`; las pantallas comparten iconografía vectorial local,
+jerarquía visual, touch targets y semántica accesible. `CallScreenLayout`
+centraliza la presentación desplazable de las pantallas de llamada.
+
+El historial expresa dirección y resultado mediante texto, los mensajes
+publican dirección entrante/saliente y Silenciar/Altavoz exponen rol y estado.
+Lab y Acerca de se reorganizaron visualmente sin cambiar sus acciones ni el
+contrato técnico. Vulnerable y Patched conservaron una experiencia equivalente.
+
+La accesibilidad se comprobó mediante inspección estática, semántica Compose,
+UI Automator, revisión visual, contraste, touch targets, font scale 1.3 y
+estados checkable. No se realizó una auditoría completa con TalkBack ni se
+añadió una suite automatizada Compose; por tanto, Fase 6 no acredita
+cumplimiento total de accesibilidad.
+
 ## 3. Reglas generales
 
 1. Una fase por cambio lógico.
@@ -186,7 +211,7 @@ APK existentes
 XLSX pendiente
 ```
 
-En el cierre de Fase 5 se autorizan las nueve rutas funcionales auditadas y estos
+En el cierre de Fase 6 se autorizan las 26 rutas funcionales auditadas y estos
 dos documentos:
 
 ```text
@@ -366,8 +391,8 @@ Un commit por fase validada. No crear commit antes de la revisión de la usuaria
 | 2 — Modelos y navegación | VALIDADA | `ece2e13` | Completada | Completada | Capturas temporales | Cerrada y publicada; sin UDP ni muestras |
 | 3 — Mensajería y llamadas normales | VALIDADA | `aa69cba` | Completada | Completada | Entrada válida | Cerrada y publicada; cero oversized |
 | 4 — Integración Patched | VALIDADA | `8d7add2` | Completada | Completada | Patched Debug oversized | Cerrada y publicada |
-| 5 — Operación nativa incompleta | VALIDADA | Commit que contiene esta revisión | Completada | Completada | Simulación segura, sin UDP ni muestras | Marker persistente prudente; sin `CallRecord` automático |
-| 6 — Visual y accesibilidad | PENDIENTE | — | Pendiente | Pendiente | Capturas | — |
+| 5 — Operación nativa incompleta | VALIDADA | `e1da09e` | Completada | Completada | Simulación segura, sin UDP ni muestras | Cerrada y publicada; marker prudente sin `CallRecord` automático |
+| 6 — Visual y accesibilidad | VALIDADA | Commit que contiene esta revisión | Completada | Completada | Capturas temporales | Claro/oscuro y font scale; sin TalkBack completo |
 | 7 — Congelación y regresión no destructiva | PENDIENTE | — | Pendiente | Pendiente | Patched oversized y controles válidos | — |
 | 8 — Evidencia final y única ejecución vulnerable | PENDIENTE | — | Pendiente | Pendiente | Comparación final nueva | Una única ejecución Vulnerable ASan |
 
@@ -1015,8 +1040,10 @@ encontrado tampoco identifica por sí solo por qué terminó el procesamiento.
 
 ### Punto de parada
 
-Fase 5 validada; versionada en el commit que contiene esta revisión. Detenerse
-sin iniciar Fase 6.
+Fase 5 validada, cerrada y publicada en
+`e1da09eaea29a1f9f2ab0e395a6bb5c829c478f1`
+(`e1da09e Track incomplete native operations`). Fase 6 se inició únicamente
+después de su aprobación.
 
 ### Checklist
 
@@ -1024,8 +1051,8 @@ sin iniciar Fase 6.
 - [x] Automática
 - [x] Manual
 - [x] Revisada
-- [x] Commit incluido en este cierre
-- [x] Push incluido en este cierre
+- [x] Commit
+- [x] Push
 
 ## 16. Fase 6 — Visual y accesibilidad
 
@@ -1041,18 +1068,19 @@ Refinar la presentación sin cambiar la semántica técnica.
 
 ### Alcance autorizado
 
-- tema;
-- espaciado;
-- tipografía;
-- avatares;
-- iconos;
-- contraste;
-- descripciones;
-- áreas táctiles;
-- estados vacíos;
-- rotación;
-- textos;
-- distintivos.
+**IMPLEMENTADO Y VALIDADO.** Fase 6 incluyó:
+
+- `EchoCallTheme` Material 3 con claro/oscuro automático del sistema;
+- `Theme.EchoCall` y fondos de ventana `values`/`values-night`;
+- paletas y ocho vectores locales;
+- `CallScreenLayout` compartido y desplazable;
+- jerarquía, espaciado y touch targets Material;
+- descripciones de iconos y mensajes entrantes/salientes;
+- `Role.Switch`, `stateDescription` y estado visible de mute/speaker;
+- dirección y resultado textuales en historial;
+- reorganización visual de Lab y Acerca de;
+- soporte comprobado con font scale 1.3;
+- equivalencia visual Vulnerable/Patched.
 
 ### Fuera de alcance
 
@@ -1064,8 +1092,10 @@ Refinar la presentación sin cambiar la semántica técnica.
 
 ### Archivos previstos
 
-- tema, recursos, componentes y pantallas compartidos creados en fases anteriores;
-- `android-app/app/src/main/AndroidManifest.xml` si la auditoría confirma que el tema base debe adaptarse.
+Las 26 rutas funcionales validadas son 12 archivos compartidos modificados
+—Manifest, raíz Compose y pantallas— y 14 archivos nuevos de tema, layout,
+colores, estilos e iconos. Gradle, estado, navegación, JNI, UDP, CMake, parsers,
+`native-core` y `samples` permanecieron sin cambios.
 
 ### Riesgos
 
@@ -1075,40 +1105,67 @@ Refinar la presentación sin cambiar la semántica técnica.
 
 ### Validación automática
 
-- build;
-- pruebas Compose disponibles;
-- lint;
-- recursos.
+- `assembleVulnerableDebug`: `BUILD SUCCESSFUL`, 43 tareas, APK provisional de
+  33104622 bytes y SHA-256
+  `9C173998CF4E4B85712923AE9FABB321D1BE2753D0B2A267682A29AAF35C5135`;
+- `assemblePatchedDebug`: `BUILD SUCCESSFUL`, 43 tareas, APK provisional de
+  33104242 bytes y SHA-256
+  `ABE656B5BD96F55377B718555D6031485C09383DACBAB8BA1B23642AEF11D16D`;
+- XML bien formado, UTF-8 sin BOM ni espacios finales;
+- búsquedas estáticas de tema, semántica y preservación técnica;
+- `git diff --check` correcto.
+
+Los hashes corresponden a artefactos de validación de Fase 6, no a los APK
+finales congelados. No se añadió una suite automatizada Compose.
 
 ### Prueba manual
 
-- claro/oscuro;
-- rotación;
-- volver;
-- textos largos;
-- todas las pantallas;
-- comparación entre apps.
+- claro y oscuro del sistema;
+- cambio de tema manteniendo el PID Patched 10300;
+- font scale 1.3 y restauración a 1.0;
+- Conversations, Chat, ActiveCall, Lab e InterruptedProcessing;
+- labels, orden semántico y estados checkable mediante UI Automator;
+- comparación visual Vulnerable/Patched.
+
+Los pares principales evaluados dieron contrastes de 7.25:1 a 16.36:1 en
+claro y de 5.55:1 a 14.36:1 en oscuro. No se generalizan a cualquier
+combinación posible. No se utilizó TalkBack.
+
+Incidencias no funcionales: el primer lanzamiento Patched intentó resolver
+`.MainActivity` bajo el `applicationId` y recibió `Activity not found`; se usó
+después `com.echocall.lab.MainActivity`, sin que el intento fallido abriese una
+app o generase tráfico. Un primer intento del hook se detuvo antes de observar
+el marker; la repetición autoritativa confirmó una única marca y su limpieza,
+sin JNI.
 
 ### Criterios de aceptación
 
-- [ ] UI coherente.
-- [ ] Apps equivalentes.
-- [ ] Iconos accesibles.
-- [ ] Estado estable.
-- [ ] Sin estética de hacking.
+- [x] UI coherente.
+- [x] Apps equivalentes.
+- [x] Iconos accesibles.
+- [x] Estado estable.
+- [x] Sin estética de hacking.
+
+**LIMITACIÓN.** Fase 6 no ejecutó UDP, muestras, oversized o ASan, no modificó
+parser/JNI/CMake/UDP y no revalidó la vulnerabilidad. La comprobación de
+accesibilidad se limitó a inspección estática, semántica Compose, UI Automator,
+revisión visual, contraste, touch targets, font scale 1.3 y estados checkable.
+No realizó una auditoría completa con TalkBack y no acredita cumplimiento total
+de accesibilidad. La regresión técnica completa corresponde a Fase 7.
 
 ### Punto de parada
 
-Detenerse antes de la congelación.
+Fase 6 validada; versionada en el commit que contiene esta revisión. Detenerse
+sin iniciar Fase 7.
 
 ### Checklist
 
-- [ ] Implementada
-- [ ] Automática
-- [ ] Manual
-- [ ] Revisada
-- [ ] Commit
-- [ ] Push
+- [x] Implementada
+- [x] Automática
+- [x] Manual
+- [x] Revisada
+- [x] Commit incluido en este cierre
+- [x] Push incluido en este cierre
 
 ## 17. Fase 7 — Congelación y regresión no destructiva
 
@@ -1126,16 +1183,18 @@ Congelar candidatos y verificar todo sin ejecutar Vulnerable ASan con una entrad
 
 - clean builds;
 - hashes candidatos;
-- entrada válida;
+- entrada válida en la matriz autorizada;
 - Patched oversized;
-- ciclo de vida;
-- `EADDRINUSE`;
+- ciclo de vida UDP;
+- `EADDRINUSE` y retry;
 - navegación;
 - historial;
-- marcador con simulación segura;
+- marker benigno con simulación segura;
 - auditoría de si el hook debuggable
   `com.echocall.lab.extra.PENDING_MARKER_TEST_COMMAND` se conserva o se retira
   antes de congelar los APK candidatos;
+- smoke test limitado con TalkBack si resulta práctico;
+- equivalencia visual final Vulnerable/Patched;
 - revisión documental.
 
 ### Fuera de alcance
@@ -1158,7 +1217,7 @@ No se prevé introducir arquitectura nueva en esta fase.
 
 ### Validación automática
 
-- cuatro clean builds;
+- cuatro builds candidatos desde el estado autorizado;
 - tests completos;
 - manifests;
 - símbolos;
@@ -1172,9 +1231,12 @@ No se prevé introducir arquitectura nueva en esta fase.
 - entrada válida;
 - Patched oversized;
 - segundo plano/primer plano;
-- `EADDRINUSE`;
+- `EADDRINUSE` y retry;
 - navegación;
-- llamadas locales.
+- llamadas locales;
+- marker benigno;
+- smoke TalkBack limitado si resulta práctico;
+- equivalencia visual final.
 
 ### Criterios de aceptación
 
@@ -1374,6 +1436,8 @@ Fase 8
 - [x] Llamada bloqueada.
 - [x] Marcador prudente.
 - [x] Lab mode inicial separado de la pantalla principal.
+- [x] Tema Material 3 claro/oscuro y presentación visual compartida.
+- [x] Iconografía, touch targets y semántica de estados auditados en Fase 6.
 - [ ] Regresión UDP/JNI.
 - [ ] Evidencias finales nuevas.
 - [ ] Limitaciones académicas.
@@ -1463,4 +1527,5 @@ Fase 8
 | 2026-08-07 | Consolidación de UI de mensajería, navegación, estado local y reset de Fase 2 | VALIDADA — cierre Git autorizado |
 | 2026-08-10 | Consolidación de llamadas simuladas y flujo UDP válido de Fase 3 | VALIDADA — cierre Git autorizado |
 | 2026-08-10 | Consolidación del rechazo Patched y pantalla de llamada bloqueada de Fase 4 | VALIDADA, CERRADA Y PUBLICADA — `8d7add2` |
-| 2026-08-10 | Persistencia pre-JNI, marker técnico e InterruptedProcessingScreen de Fase 5 | VALIDADA — versionada en el commit que contiene esta revisión |
+| 2026-08-10 | Persistencia pre-JNI, marker técnico e InterruptedProcessingScreen de Fase 5 | VALIDADA, CERRADA Y PUBLICADA — `e1da09e` |
+| 2026-08-10 | Tema Material 3, claro/oscuro, iconografía y accesibilidad de Fase 6 | VALIDADA — versionada en el commit que contiene esta revisión |

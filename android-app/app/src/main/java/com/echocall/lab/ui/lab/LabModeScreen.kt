@@ -2,24 +2,31 @@ package com.echocall.lab.ui.lab
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.echocall.lab.R
 import com.echocall.lab.model.PendingProcessingMarker
 
 data class LabModeUiState(
@@ -52,13 +59,11 @@ fun LabModeScreen(
             TopAppBar(
                 title = { Text("Modo Lab") },
                 navigationIcon = {
-                    IconButton(
-                        onClick = onBack,
-                        modifier = Modifier.semantics {
-                            contentDescription = "Atrás"
-                        },
-                    ) {
-                        Text("‹", style = MaterialTheme.typography.headlineMedium)
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_arrow_back),
+                            contentDescription = "Volver",
+                        )
                     }
                 },
             )
@@ -68,80 +73,156 @@ fun LabModeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(24.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Text(
-                text = state.nativeStatus,
-                style = MaterialTheme.typography.titleMedium,
-            )
-            Text(
-                text = "Build: ${state.buildVariant} · ${state.packageName}",
-                style = MaterialTheme.typography.bodySmall,
-            )
-            Text(
-                text = "Parser compilado: " +
-                    "${state.compiledParserImplementation} · Fijado al compilar",
-                style = MaterialTheme.typography.bodySmall,
-            )
-            Text(text = state.udpReceiverStatus)
-            if (state.udpRetryAvailable) {
-                Button(onClick = onRetryUdpReceiver) {
-                    Text("Retry UDP receiver")
-                }
+            LabSection(title = "Aplicación") {
+                Text(
+                    text = state.nativeStatus,
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                LabValue(label = "Build", value = state.buildVariant)
+                LabValue(label = "Package", value = state.packageName)
             }
-            Text(
-                text = "Último procesamiento pendiente/interrumpido",
-                style = MaterialTheme.typography.titleMedium,
-            )
-            Text(state.pendingProcessingStatus)
-            state.pendingProcessingMarker?.let { marker ->
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp),
-                    ) {
-                        Text("scenarioId: ${marker.scenarioId}")
-                        Text("variant: ${marker.variant}")
-                        Text("packetLength: ${marker.packetLength}")
-                        Text("timestamp: ${marker.timestamp}")
-                        Text("source: ${marker.source}")
-                        Text(
-                            "El marker indica que un procesamiento comenzó y no " +
-                                "alcanzó la limpieza posterior al retorno normal. " +
-                                "No identifica por sí solo la causa.",
-                        )
+
+            LabSection(title = "Implementación del parser") {
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                ) {
+                    Text(
+                        text = "${state.compiledParserImplementation} · Fijado al compilar",
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+                Text(
+                    text = "Solo lectura. La interfaz no permite seleccionar el parser.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+
+            LabSection(title = "Receptor UDP") {
+                Text(state.udpReceiverStatus)
+                LabValue(label = "Puerto", value = "43568")
+                if (state.udpRetryAvailable) {
+                    Button(onClick = onRetryUdpReceiver) {
+                        Text("Retry UDP receiver")
                     }
                 }
             }
-            if (state.showIncomingCall) {
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        Text(
-                            text = "Señal de llamada recibida",
-                            style = MaterialTheme.typography.titleMedium,
-                        )
-                        Text("Llamada simulada: Marta Soler")
-                        Text("Asociación local del simulador; ECLB no contiene el nombre")
-                        Text("El paquete se procesa automáticamente antes de la UI de llamada")
-                        Text(state.callAction)
-                    }
+
+            LabSection(title = "Procesamiento pendiente o interrumpido") {
+                Text(state.pendingProcessingStatus)
+                state.pendingProcessingMarker?.let { marker ->
+                    LabValue(label = "scenarioId", value = marker.scenarioId)
+                    LabValue(label = "variant", value = marker.variant)
+                    LabValue(label = "packetLength", value = marker.packetLength.toString())
+                    LabValue(label = "timestamp", value = marker.timestamp)
+                    LabValue(label = "source", value = marker.source)
+                    Text(
+                        text = "El marker indica que un procesamiento comenzó y no " +
+                            "alcanzó la limpieza posterior al retorno normal. " +
+                            "No identifica por sí solo la causa.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
-                Text("SOURCE: ${state.incomingCallSource}")
+            }
+
+            LabSection(title = "Escenario simulado") {
+                Text("Llamada simulada: Marta Soler")
+                Text(
+                    text = "Asociación local del simulador; ECLB no contiene el nombre.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                if (state.showIncomingCall) {
+                    Text("Señal de llamada recibida")
+                    Text("El paquete se procesa automáticamente antes de la UI de llamada")
+                    Text(state.callAction)
+                    LabValue(label = "SOURCE", value = state.incomingCallSource)
+                }
+            }
+
+            LabSection(title = "Último resultado automático") {
                 Text("RESULTADO JNI COMPLETO")
                 Text(state.incomingCallResult)
-                Text("EVENTS")
-                state.incomingCallEvents.forEach { event -> Text(event) }
+                Text(
+                    text = "EVENTS",
+                    style = MaterialTheme.typography.labelLarge,
+                )
+                if (state.incomingCallEvents.isEmpty()) {
+                    Text(
+                        text = "Sin eventos registrados",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                } else {
+                    state.incomingCallEvents.forEach { event -> Text(event) }
+                }
             }
-            Button(onClick = onProcessValidSample) {
-                Text("Procesar muestra válida")
+
+            LabSection(title = "Muestra válida local") {
+                Button(onClick = onProcessValidSample) {
+                    Text("Procesar muestra válida")
+                }
+                LabValue(
+                    label = "Resultado de la muestra válida",
+                    value = state.validSampleResult,
+                )
             }
-            Text("Resultado de la muestra válida")
-            Text(state.validSampleResult)
+
+            LabSection(title = "Limitaciones") {
+                Text(
+                    text = "Laboratorio local sin audio, backend ni telefonía real. " +
+                        "ECLB es sintético y no demuestra RCE, control del flujo " +
+                        "ni equivalencia exacta con CVE-2019-3568.",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
         }
+    }
+}
+
+@Composable
+private fun LabSection(
+    title: String,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Text(
+                text = title,
+                modifier = Modifier.semantics { heading() },
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+            )
+            content()
+        }
+    }
+}
+
+@Composable
+private fun LabValue(
+    label: String,
+    value: String,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyMedium,
+        )
     }
 }

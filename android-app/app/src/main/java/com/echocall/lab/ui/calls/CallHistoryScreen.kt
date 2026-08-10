@@ -6,12 +6,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -20,8 +22,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.echocall.lab.model.CallDirection
@@ -29,6 +30,7 @@ import com.echocall.lab.model.CallOutcome
 import com.echocall.lab.model.CallRecord
 import com.echocall.lab.model.Contact
 import com.echocall.lab.ui.ContactAvatar
+import com.echocall.lab.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,13 +46,11 @@ fun CallHistoryScreen(
             TopAppBar(
                 title = { Text("Llamadas") },
                 navigationIcon = {
-                    IconButton(
-                        onClick = onBack,
-                        modifier = Modifier.semantics {
-                            contentDescription = "Atrás"
-                        },
-                    ) {
-                        Text("‹", style = MaterialTheme.typography.headlineMedium)
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_arrow_back),
+                            contentDescription = "Volver",
+                        )
                     }
                 },
             )
@@ -85,6 +85,7 @@ private fun CallHistoryRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .heightIn(min = 76.dp)
             .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -120,14 +121,18 @@ private fun CallHistoryRow(
     }
 }
 
-private fun CallRecord.displayStatus(): String = when (outcome) {
-    CallOutcome.REJECTED -> "Rechazada"
-    CallOutcome.MISSED -> "Perdida"
-    CallOutcome.BLOCKED -> "Bloqueada"
-    CallOutcome.INTERRUPTED -> "Interrumpida"
-    CallOutcome.CANCELLED -> "Cancelada"
-    CallOutcome.COMPLETED -> when (direction) {
+private fun CallRecord.displayStatus(): String {
+    val directionText = when (direction) {
         CallDirection.INCOMING -> "Entrante"
         CallDirection.OUTGOING -> "Saliente"
     }
+    val outcomeText = when (outcome) {
+        CallOutcome.COMPLETED -> "Completada"
+        CallOutcome.REJECTED -> "Rechazada"
+        CallOutcome.MISSED -> "Perdida"
+        CallOutcome.BLOCKED -> "Bloqueada"
+        CallOutcome.INTERRUPTED -> "Interrumpida"
+        CallOutcome.CANCELLED -> "Cancelada"
+    }
+    return "$directionText · $outcomeText"
 }

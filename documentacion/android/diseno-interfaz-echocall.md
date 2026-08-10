@@ -1,6 +1,6 @@
 # Diseño final de interfaz y arquitectura de EchoCall Lab
 
-> Estado del documento: **FASES 0, 1, 2, 3, 4 Y 5 — VALIDADAS; FASE 6 — PENDIENTE**
+> Estado del documento: **FASES 0 A 6 — VALIDADAS; FASES 7 Y 8 — PENDIENTES**
 >
 > Rama de trabajo: `feature/echocall-ui`
 >
@@ -14,6 +14,9 @@
 >
 > Cierre versionado de Fase 4: `8d7add26aa22b5884b1ae401e5abe6c4429fd5d6`
 > (`8d7add2 Add patched blocked-call handling`)
+>
+> Cierre versionado de Fase 5: `e1da09eaea29a1f9f2ab0e395a6bb5c829c478f1`
+> (`e1da09e Track incomplete native operations`)
 >
 > Fecha de auditoría inicial del repositorio: 2026-08-04
 >
@@ -240,10 +243,10 @@ determinista del simulador; ECLB no contiene un nombre de contacto.
 
 ## 5. Arquitectura Vulnerable/Patched
 
-**CONFIRMADO EN FASES 1, 2, 3, 4 Y 5.** Se mantiene un único módulo de aplicación Android
+**CONFIRMADO EN FASES 1 A 6.** Se mantiene un único módulo de aplicación Android
 `:app` que genera cuatro variantes, con dos identidades de producto
 Vulnerable/Patched y una Activity compartida. La estructura implementada hasta
-Fase 5 es:
+Fase 6 es:
 
 ```text
 MainActivity (ciclo de vida UDP, PendingProcessingStore y setContent)
@@ -331,7 +334,7 @@ variante `vulnerableAsan` y `patchedAsan`.
 
 ## 8. Base de código compartida
 
-**CONFIRMADO EN FASES 1 A 5.** El código Kotlin, JNI/C y la UI permanecen
+**CONFIRMADO EN FASES 1 A 6.** El código Kotlin, JNI/C y la UI permanecen
 compartidos en `src/main`. Fases 2 a 5 añadieron allí:
 
 - `EchoCallApp` como raíz Compose y `EchoCallNavHost` como grafo;
@@ -341,6 +344,8 @@ compartidos en `src/main`. Fases 2 a 5 añadieron allí:
 - modelo, estado y pantallas compartidas para llamadas simuladas;
 - estado y pantalla separados para intentos bloqueados antes de establecer llamada;
 - store, marker técnico persistente y pantalla de procesamiento interrumpido;
+- tema Material 3 claro/oscuro, recursos vectoriales locales y presentación
+  accesible compartida;
 - avatares locales por iniciales.
 
 El receptor UDP, el contrato JNI y el estado técnico del laboratorio se
@@ -666,7 +671,7 @@ controladas intentan limpiar el marker; una terminación sin retorno lo conserva
 
 ## 20. Lab mode
 
-**CONFIRMADO HASTA FASE 5.** `LabModeScreen` está separado y contiene:
+**CONFIRMADO HASTA FASE 6.** `LabModeScreen` está separado y contiene:
 
 ### A. Escenario
 
@@ -851,26 +856,34 @@ nativo ni la causa de una interrupción.
 
 ## 23. Tema y accesibilidad
 
-**PROPUESTA PENDIENTE.** Crear un tema Material 3 Compose con esquemas claro y
-oscuro seleccionados mediante `isSystemInDarkTheme()`, y sustituir el tema claro
-forzado del Manifest por una base DayNight compatible.
+**VALIDADO EN FASE 6.** `EchoCallTheme` aplica Material 3 con esquemas locales
+claro y oscuro seleccionados mediante `isSystemInDarkTheme()`. El Manifest usa
+`@style/Theme.EchoCall`, con recursos `values` y `values-night` coherentes con
+el fondo Compose. No existe selector manual de tema y Vulnerable/Patched
+comparten la misma identidad visual.
 
-Requisitos:
+La presentación usa roles de `MaterialTheme.colorScheme`, vectores locales y
+`CallScreenLayout` como estructura común desplazable para las pantallas de
+llamada. Se eliminaron los glifos usados como iconos, se añadieron descripciones
+a acciones, objetivos táctiles Material y semántica de dirección para los
+mensajes. El historial expresa dirección y resultado mediante texto y no
+depende solo del color. Silenciar y Altavoz exponen `Role.Switch`, estado
+`Activado`/`Desactivado` y una etiqueta visible.
 
-- no codificar colores directamente en pantallas;
-- no diferenciar Vulnerable/Patched solo mediante rojo/verde;
-- usar texto y distintivos discretos además del color;
-- tamaños táctiles Material, contraste suficiente y soporte de font scale;
-- `contentDescription` para iconos accionables y estado descriptivo para mute
-  y altavoz;
-- orden de foco coherente y agrupación semántica de avatar/nombre/resumen;
-- navegación atrás consistente;
-- recomposición sin duplicar temporizadores, eventos o llamadas JNI;
-- revisión en tema claro/oscuro, rotación y tamaños compactos.
+Lab mode y Acerca de se reorganizaron en secciones legibles sin alterar sus
+acciones o límites. La validación manual cubrió claro y oscuro, el cambio de
+tema con el mismo PID Patched 10300, font scale 1.3 y su restauración a 1.0,
+Conversations, Chat, ActiveCall, Lab e InterruptedProcessing, además de la
+equivalencia visual Vulnerable/Patched. Los pares principales calculados dieron
+contrastes de 7.25:1 a 16.36:1 en claro y 5.55:1 a 14.36:1 en oscuro; esos
+intervalos no se generalizan a toda combinación posible.
 
-Los avatares decorativos podrán ocultarse del árbol semántico cuando el nombre
-adyacente ya identifique al contacto; los avatares accionables deberán tener
-descripción.
+**LIMITACIÓN.** Fase 6 no realizó una validación completa con TalkBack ni
+incorporó una suite automatizada Compose. La comprobación de accesibilidad se
+limitó a inspección estática, semántica Compose, árbol de UI mediante UI
+Automator, revisión visual, contraste, touch targets, font scale 1.3 y estados
+checkable. Esto no acredita cumplimiento total de accesibilidad. Fase 7 podrá
+incluir un smoke test limitado con TalkBack si resulta práctico.
 
 ## 24. Seguridad y límites
 
@@ -971,14 +984,15 @@ autorización expresa.
 - mostrar aviso, Lab mode y descarte prudentes;
 - validar con simulación no corruptora cuando sea posible;
 - no ejecutar una entrada oversized en Vulnerable.
-- **estado: validada; versionada en el commit que contiene esta revisión**.
+- **estado: validada, cerrada y publicada en
+  `e1da09eaea29a1f9f2ab0e395a6bb5c829c478f1`**.
 
 ### Fase 6 — Visual y accesibilidad
 
 - tema claro/oscuro, contraste, tamaños, descripciones y foco;
 - rotación, recomposición, estados vacíos, textos e iconos;
 - equivalencia visual entre Vulnerable y Patched.
-- **estado: pendiente**.
+- **estado: validada; versionada en el commit que contiene esta revisión**.
 
 ### Fase 7 — Congelación y regresión no destructiva
 
@@ -987,6 +1001,8 @@ autorización expresa.
 - ciclo de vida, `EADDRINUSE`, historial, Lab mode y marcador simulado;
 - auditar si el hook debuggable del marker se conserva o se retira de los APK
   candidatos finales;
+- realizar un smoke test limitado con TalkBack si resulta práctico;
+- revisar la equivalencia visual final Vulnerable/Patched;
 - fijar los APK candidatos y sus hashes.
 - **estado: pendiente**.
 
@@ -1150,7 +1166,7 @@ o CVE-2019-3568. ECLB y la muestra pertenecen al laboratorio.
 
 ### Fase 5 — Operación nativa incompleta
 
-**VALIDADA.** Se incorporó
+**VALIDADA, CERRADA Y PUBLICADA.** Se incorporó
 `androidx.datastore:datastore-preferences:1.2.1`,
 `PendingProcessingMarker`, `PendingProcessingStore`, lectura al iniciar,
 `InterruptedProcessingScreen` e integración en Lab mode. La única ruta Kotlin
@@ -1181,13 +1197,39 @@ Vulnerable ni equivalencia exacta con WhatsApp o CVE-2019-3568; no validó el
 escenario vulnerable real y no crea automáticamente un registro
 `CallOutcome.INTERRUPTED`.
 
+El cierre quedó versionado en
+`e1da09eaea29a1f9f2ab0e395a6bb5c829c478f1`
+(`e1da09e Track incomplete native operations`).
+
 ### Fase 6 — Visual y accesibilidad
 
-Automáticas previstas: tests Compose semánticos, labels, estados toggle,
-navegación y accessibility checks compatibles con las versiones fijadas.
+**VALIDADA.** Se implementaron `EchoCallTheme`, esquemas Material 3 claro y
+oscuro del sistema, `Theme.EchoCall`, paletas y vectores locales, además de
+`CallScreenLayout`. Las pantallas comparten jerarquía visual, scroll cuando
+pueden desbordar, objetivos táctiles adecuados y semántica de accesibilidad.
+Silenciar y Altavoz publican rol y estado; el historial expresa dirección y
+resultado en texto; Lab y Acerca de se reorganizaron sin modificar el
+comportamiento técnico.
 
-Manuales previstas: claro/oscuro del sistema, font scale, TalkBack, contraste,
-rotación, back, áreas táctiles, contadores y comparación visual flavor a flavor.
+`assembleVulnerableDebug` y `assemblePatchedDebug` finalizaron correctamente
+con 43 tareas cada uno. Los APK provisionales de validación midieron 33104622 y
+33104242 bytes, con SHA-256
+`9C173998CF4E4B85712923AE9FABB321D1BE2753D0B2A267682A29AAF35C5135` y
+`ABE656B5BD96F55377B718555D6031485C09383DACBAB8BA1B23642AEF11D16D`,
+respectivamente. No son los artefactos finales congelados.
+
+La validación manual cubrió claro y oscuro, el cambio con el mismo PID Patched
+10300, font scale 1.3 y vuelta a 1.0, las pantallas principales, estados
+checkable mediante UI Automator y equivalencia visual Vulnerable/Patched. No se
+usó TalkBack. Las incidencias de lanzamiento con un componente abreviado y de
+captura inicial del marker fueron operativas y se resolvieron sin abrir tráfico,
+JNI o muestras.
+
+**LIMITACIÓN.** Fase 6 no ejecutó UDP, muestras, oversized ni ASan; no modificó
+parser, JNI, CMake o UDP ni revalidó la vulnerabilidad. Tampoco realizó una
+auditoría completa con TalkBack ni añadió tests Compose, por lo que no acredita
+cumplimiento total de accesibilidad. La regresión técnica completa corresponde
+a Fase 7.
 
 ### Fase 7 — Congelación y regresión no destructiva
 
@@ -1242,8 +1284,8 @@ stdout/stderr, exit codes, timestamps, PID, log íntegro y hashes.
 - [x] llamada entrante solo tras paquete válido aceptado;
 - [x] procesamiento nativo anterior a Aceptar/Rechazar;
 - [x] llamada activa con avatar, nombre, duración, mute, altavoz y finalizar;
-- [ ] interfaz en español y tema del sistema;
-- [ ] diferencias visuales discretas, no basadas solo en color.
+- [x] interfaz en español y tema del sistema;
+- [x] diferencias visuales discretas, no basadas solo en color.
 
 ### Comportamiento técnico
 
@@ -1258,10 +1300,10 @@ stdout/stderr, exit codes, timestamps, PID, log íntegro y hashes.
 
 ### Comunicación y límites
 
-- [ ] Lab mode informa variante, app, parser, UDP, resultado, eventos y límites;
+- [x] Lab mode informa variante, app, parser, UDP, resultado, eventos y límites;
 - [x] la experiencia normal no expone detalles técnicos innecesarios;
 - [x] no existe botón de overflow/explotación/RCE;
-- [ ] no hay backend, cuentas, audio, telefonía real o red externa;
+- [x] no hay backend, cuentas, audio, telefonía real o red externa;
 - [x] no se afirma RCE, control del flujo o seguridad completa;
 - [x] no se afirma equivalencia exacta con CVE-2019-3568;
 - [x] E-022/E-025 se mantienen como evidencia histórica, no final;

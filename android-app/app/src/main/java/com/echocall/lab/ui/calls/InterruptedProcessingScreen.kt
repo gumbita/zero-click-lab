@@ -1,22 +1,17 @@
 package com.echocall.lab.ui.calls
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.echocall.lab.model.Contact
-import com.echocall.lab.ui.ContactAvatar
 
 @Composable
 fun InterruptedProcessingScreen(
@@ -26,28 +21,10 @@ fun InterruptedProcessingScreen(
 ) {
     BackHandler(onBack = onClose)
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceEvenly,
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            ContactAvatar(contact = contact, size = 112.dp)
-            Text(
-                text = contact.displayName,
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.SemiBold,
-            )
-            Text(
-                text = "Procesamiento interrumpido",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Medium,
-            )
+    CallScreenLayout(
+        contact = contact,
+        headline = "Procesamiento interrumpido",
+        supportingContent = {
             Text(
                 text = "El procesamiento anterior no devolvió el control a EchoCall.",
                 style = MaterialTheme.typography.bodyLarge,
@@ -61,17 +38,23 @@ fun InterruptedProcessingScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )
-        }
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+        },
+    ) {
+        Button(
+            onClick = onOpenLab,
+            modifier = Modifier
+                .widthIn(min = 200.dp, max = 320.dp)
+                .heightIn(min = 52.dp),
         ) {
-            Button(onClick = onOpenLab) {
-                Text("Abrir Modo Lab")
-            }
-            OutlinedButton(onClick = onClose) {
-                Text("Cerrar y continuar")
-            }
+            Text("Abrir Modo Lab")
+        }
+        OutlinedButton(
+            onClick = onClose,
+            modifier = Modifier
+                .widthIn(min = 200.dp, max = 320.dp)
+                .heightIn(min = 52.dp),
+        ) {
+            Text("Cerrar y continuar")
         }
     }
 }
