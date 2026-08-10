@@ -46,6 +46,7 @@ fun ConversationsScreen(
     onOpenLab: () -> Unit,
     onOpenAbout: () -> Unit,
     onResetData: () -> Unit,
+    resetEnabled: Boolean,
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
     var showResetDialog by remember { mutableStateOf(false) }
@@ -94,6 +95,7 @@ fun ConversationsScreen(
                         )
                         DropdownMenuItem(
                             text = { Text("Restablecer datos") },
+                            enabled = resetEnabled,
                             onClick = {
                                 menuExpanded = false
                                 showResetDialog = true

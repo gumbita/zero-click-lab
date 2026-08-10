@@ -63,6 +63,9 @@ internal fun EchoCallApp(
                 "NATIVE_PARSE_STARTED",
             )
             incomingCallResult = "Automatic native parsing started"
+            Log.i(UDP_LOG_TAG, "CALL_INCOMING")
+            Log.i(UDP_LOG_TAG, "CONTROL_PACKET_RECEIVED")
+            Log.i(UDP_LOG_TAG, "NATIVE_PARSE_STARTED")
 
             try {
                 val result = withContext(Dispatchers.Default) {
@@ -78,16 +81,35 @@ internal fun EchoCallApp(
                     "Parser returned result=$result",
                 )
                 incomingCallResult = result
-                incomingCallEvents += if (
-                    result.startsWith("status=accepted code=ok")
-                ) {
-                    "NATIVE_PARSE_OK"
+                if (result.startsWith("status=accepted code=ok")) {
+                    incomingCallEvents += "NATIVE_PARSE_OK"
+                    Log.i(UDP_LOG_TAG, "NATIVE_PARSE_OK")
+                    if (productStateHolder.startIncomingCallFromAcceptedUdp()) {
+                        callAction =
+                            "Incoming call UI requested after NATIVE_PARSE_OK"
+                        Log.i(
+                            UDP_LOG_TAG,
+                            "Incoming call state created for simulator contact " +
+                                "Marta Soler after NATIVE_PARSE_OK",
+                        )
+                    } else {
+                        callAction =
+                            "Accepted packet not presented: call already in progress"
+                        Log.i(
+                            UDP_LOG_TAG,
+                            "Accepted datagram retained in Lab: call already in progress",
+                        )
+                    }
                 } else {
-                    "PACKET_REJECTED"
+                    incomingCallEvents += "PACKET_REJECTED"
+                    callAction = "Rejected packet retained in Lab"
+                    Log.i(UDP_LOG_TAG, "PACKET_REJECTED")
                 }
             } catch (_: RuntimeException) {
                 incomingCallResult = "status=error code=udp_parse_failed"
                 incomingCallEvents += "NATIVE_PARSE_ERROR"
+                callAction = "Native parsing failed"
+                Log.e(UDP_LOG_TAG, "NATIVE_PARSE_ERROR")
             }
         }
     }
@@ -111,13 +133,13 @@ internal fun EchoCallApp(
             ),
             onSendMessage = productStateHolder::sendMessage,
             onResetData = productStateHolder::resetSimulatedData,
+            onStartOutgoingCall = productStateHolder::startOutgoingCall,
+            onActivateOutgoingCall = productStateHolder::activateOutgoingCall,
+            onCancelOutgoingCall = productStateHolder::cancelOutgoingCall,
+            onAcceptIncomingCall = productStateHolder::acceptIncomingCall,
+            onRejectIncomingCall = productStateHolder::rejectIncomingCall,
+            onEndActiveCall = productStateHolder::endActiveCall,
             onRetryUdpReceiver = onRetryUdpReceiver,
-            onAcceptIncoming = {
-                callAction = "Accepted after automatic processing"
-            },
-            onRejectIncoming = {
-                callAction = "Rejected after automatic processing"
-            },
             onProcessValidSample = {
                 validSampleResult = context.assets
                     .open("valid_call_control.bin")

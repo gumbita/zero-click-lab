@@ -6,6 +6,9 @@ object EchoCallDestination {
     const val CALL_HISTORY = "callHistory"
     const val LAB = "lab"
     const val ABOUT = "about"
+    const val OUTGOING_CALL = "outgoingCall"
+    const val INCOMING_CALL = "incomingCall"
+    const val ACTIVE_CALL = "activeCall"
 
     fun chat(contactId: String): String = "chat/$contactId"
 }

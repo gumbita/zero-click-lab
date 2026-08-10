@@ -1,14 +1,15 @@
 # Plan de implementación de EchoCall Lab Vulnerable/Patched
 
-- **Estado general:** FASES 0, 1 Y 2 VALIDADAS; FASE 3 PENDIENTE.
+- **Estado general:** FASES 0, 1, 2 Y 3 VALIDADAS; FASE 4 PENDIENTE.
 - **Rama prevista:** `feature/echocall-ui`.
 - **Línea base protegida:** `8b20ffed4ef3ef5fb4b4f22c67e8853ebef1065c`.
 - **Cierre versionado de Fase 1:** `26b0638442a5f31b134ba259a8afcbfc0d40d35d`.
+- **Cierre versionado de Fase 2:** `ece2e13584838d1e56da117a634ff53b51faa17b`.
 - **Documento asociado:** `documentacion/android/diseno-interfaz-echocall.md`.
 - **Auditoría inicial del repositorio:** 2026-08-04.
-- **Revisión y consolidación documental:** 2026-08-07.
-- **Alcance de este cierre:** Fase 2, sus dos documentos vinculantes y las 16
-  rutas funcionales aprobadas; Fase 3 permanece fuera de alcance.
+- **Revisión y consolidación documental:** 2026-08-10.
+- **Alcance de este cierre:** Fase 3, sus dos documentos vinculantes y las 12
+  rutas funcionales aprobadas; Fase 4 permanece fuera de alcance.
 
 > Ninguna fase posterior debe iniciarse sin autorización expresa después de revisar la fase anterior.
 
@@ -83,8 +84,9 @@ que:
 
 La matriz de variantes, las identidades y la separación CMake/JNI dejaron de ser
 objetivos futuros al completarse la Fase 1. La navegación y el estado simulado en
-memoria se implementaron en Fase 2. El marcador persistente, las pantallas de
-llamada y los APK finales congelados siguen pendientes de fases posteriores.
+memoria se implementaron en Fase 2. Fase 3 añadió las pantallas y el estado de
+llamada simulada. El marcador persistente, los flujos oversized y los APK
+finales congelados siguen pendientes de fases posteriores.
 
 ### 2.7. Resultado consolidado de Fase 1
 
@@ -106,6 +108,20 @@ Navigation Compose, los cinco contactos ficticios, chat, historial, envío local
 actualización de preview/timestamp/orden y reset confirmado fueron validados en
 `vulnerableDebug` y `patchedDebug`. No se enviaron datagramas ni se procesaron
 muestras durante la validación de Fase 2.
+
+### 2.9. Resultado consolidado de Fase 3
+
+**HECHO VALIDADO.** `CurrentCall` separa dirección, fase y resultado. Las
+pantallas `OutgoingCallScreen`, `IncomingCallScreen` y `ActiveCallScreen`
+implementan llamadas simuladas sin audio ni telefonía real. La llamada saliente
+es completamente local; el flujo entrante solo crea `currentCall` después de
+que `NativeBridge.parsePacket()` devuelve `status=accepted code=ok` y se registra
+`NATIVE_PARSE_OK`.
+
+Marta Soler es un mapping fijo del simulador para la entrada ECLB válida; su
+nombre no está contenido en el datagrama. Aceptar y Rechazar operan sobre el
+estado compartido y no vuelven a ejecutar JNI. Los resultados `COMPLETED`,
+`REJECTED` y la cancelación local `CANCELLED` se integran en el historial.
 
 ## 3. Reglas generales
 
@@ -229,10 +245,9 @@ los bytes del payload módulo 256 calculada por cada parser; no es un campo del
 header ECLB. La futura representación `NativeParseResult` podrá exponerlo como
 valor derivado opcional con ese significado explícito.
 
-**DECISIÓN DE DISEÑO APROBADA.** El evento o estado visual `CALL_INCOMING` puede
-registrarse antes del retorno del parser en la línea base histórica; la futura
-`IncomingCallScreen` todavía no existe y solo podrá mostrarse después de
-`status=accepted code=ok`.
+**HECHO VALIDADO EN FASE 3.** El evento técnico `CALL_INCOMING` puede registrarse
+al recibir la señal, pero `IncomingCallScreen` solo se muestra después de
+`status=accepted code=ok` y `NATIVE_PARSE_OK`.
 
 ## 6. Validación
 
@@ -302,8 +317,8 @@ Un commit por fase validada. No crear commit antes de la revisión de la usuaria
 |---|---|---|---|---|---|---|
 | 0 — Diseño y planificación | VALIDADA | — | Completada | No aplica | Markdown | Completada |
 | 1 — Arquitectura de variantes | VALIDADA | `26b0638` | Completada | Completada | Entrada válida; sin oversized | Cerrada y publicada |
-| 2 — Modelos y navegación | VALIDADA | Cierre actual | Completada | Completada | Capturas temporales | UI, estado local y reset validados; sin UDP ni muestras |
-| 3 — Mensajería y llamadas normales | PENDIENTE | — | Pendiente | Pendiente | Entrada válida | — |
+| 2 — Modelos y navegación | VALIDADA | `ece2e13` | Completada | Completada | Capturas temporales | Cerrada y publicada; sin UDP ni muestras |
+| 3 — Mensajería y llamadas normales | VALIDADA | Cierre actual | Completada | Completada | Entrada válida | Flujos local y UDP válido; cero oversized |
 | 4 — Integración Patched | PENDIENTE | — | Pendiente | Pendiente | Patched oversized | — |
 | 5 — Operación nativa incompleta | PENDIENTE | — | Pendiente | Pendiente | Sin entrada oversized vulnerable | — |
 | 6 — Visual y accesibilidad | PENDIENTE | — | Pendiente | Pendiente | Capturas | — |
@@ -622,8 +637,7 @@ oversized y no hubo crashes.
 
 ### Punto de parada
 
-Fase 2 está validada. Detenerse tras el cierre Git y no iniciar Fase 3 sin nueva
-autorización.
+Fase 2 está validada y versionada en `ece2e13`.
 
 ### Checklist
 
@@ -631,8 +645,8 @@ autorización.
 - [x] Automática
 - [x] Manual
 - [x] Revisada
-- [ ] Commit
-- [ ] Push
+- [x] Commit
+- [x] Push
 
 ## 13. Fase 3 — Mensajería y llamadas normales
 
@@ -648,15 +662,16 @@ Completar flujos cotidianos y conectar solo entradas UDP válidas.
 
 ### Alcance autorizado
 
-- llamada saliente;
-- `Llamando…`;
-- llamada entrante tras `accepted`;
-- Aceptar/Rechazar;
-- llamada activa;
-- contador;
-- Silenciar/Altavoz;
-- Finalizar;
-- historial de sesión.
+**IMPLEMENTADO Y VALIDADO.** Fase 3 incluyó:
+
+- `CurrentCall` y `CallPhase`: `OUTGOING`, `INCOMING`, `ACTIVE`;
+- `OutgoingCallScreen`, transición local determinista desde **Llamando…** y
+  cancelación `OUTGOING/CANCELLED`;
+- `IncomingCallScreen` únicamente después de `accepted/ok`;
+- Aceptar y Rechazar sin segunda invocación JNI;
+- `ActiveCallScreen`, contador local, Silenciar y Altavoz visuales;
+- Finalizar y actualizar historial con `COMPLETED` o `REJECTED`;
+- asociación local de una entrada ECLB válida aceptada con Marta Soler.
 
 ### Fuera de alcance
 
@@ -666,10 +681,10 @@ Completar flujos cotidianos y conectar solo entradas UDP válidas.
 
 ### Archivos previstos
 
-- pantallas y estado compartidos creados en Fase 2;
-- `android-app/app/src/main/java/com/echocall/lab/UdpPacketReceiver.kt`;
-- `android-app/app/src/main/java/com/echocall/lab/NativeBridge.kt`;
-- coordinador o gateway compartido cuya ruta definitiva se establezca tras la auditoría.
+Las 12 rutas funcionales validadas son `CurrentCall.kt`, las tres pantallas de
+llamada y ocho archivos compartidos bajo `data/`, `navigation/` y `ui/`.
+`NativeBridge.kt`, `UdpPacketReceiver.kt`, JNI, CMake y los parsers permanecieron
+sin cambios.
 
 ### Riesgos
 
@@ -680,43 +695,76 @@ Completar flujos cotidianos y conectar solo entradas UDP válidas.
 
 ### Validación automática
 
-- builds;
-- tests de estados y del autómata de llamada;
-- tests de historial y mapeos `COMPLETED`, `REJECTED`, `MISSED` y `CANCELLED`;
-- test de que Aceptar/Rechazar no invocan JNI.
+- `assembleVulnerableDebug`: correcto;
+- `assemblePatchedDebug`: correcto;
+- búsquedas estáticas del flujo, pantallas y preservación técnica;
+- `git diff --check`.
 
 ### Prueba manual
 
-- llamada saliente;
-- finalizar;
-- muestra válida en Vulnerable;
-- muestra válida en Patched;
-- aceptar;
-- rechazar;
-- PID vivo;
-- eventos coherentes.
+La llamada saliente a Pau Ferrer transitó localmente de **Llamando…** a activa;
+se observaron temporizador, mute y speaker visuales, y finalizar produjo
+`OUTGOING/COMPLETED`. La cancelación `OUTGOING/CANCELLED` está implementada, pero
+su validación visual no fue suficientemente sólida para usarla como evidencia
+principal.
+
+Con `samples/benign/valid_call_control.bin` (17 bytes, SHA-256
+`912B5F7F858A790D4C49AE2860CD421F0B70C8DD8E582ABE99AB6D6640965B8E`):
+
+- Vulnerable Debug mantuvo el PID 4723; `NATIVE_PARSE_OK` 14:53:00.643,
+  `currentCall` 14:53:00.644 e `IncomingCallScreen` 14:53:00.946; Rechazar
+  produjo `INCOMING/REJECTED`;
+- Patched Debug mantuvo el PID 4973; `NATIVE_PARSE_OK` 14:54:55.246,
+  `currentCall` 14:54:55.247 e `IncomingCallScreen` 14:54:55.439; Aceptar y
+  Finalizar produjeron `INCOMING/COMPLETED`.
+
+Los timestamps son observaciones concretas, no una garantía universal del
+scheduler. El balance fue dos datagramas válidos, dos `NATIVE_PARSE_STARTED`,
+dos `NATIVE_PARSE_OK`, cero rechazos del parser, cero crashes y cero oversized.
+
+La secuencia validada fue:
+
+```text
+UDP
+→ CONTROL_PACKET_RECEIVED
+→ NATIVE_PARSE_STARTED
+→ NativeBridge.parsePacket()
+→ status=accepted code=ok
+→ NATIVE_PARSE_OK
+→ currentCall INCOMING para Marta Soler
+→ IncomingCallScreen
+```
+
+Marta Soler es un mapping fijo del simulador; ECLB no contiene ese nombre.
+Aceptar y Rechazar ocurren después del procesamiento nativo y no reejecutan JNI.
+
+**LIMITACIÓN.** Fase 3 no demuestra comportamiento oversized, mitigación
+Patched, `heap-buffer-overflow` en las nuevas variantes, crash ASan, RCE,
+explotación, telefonía o audio reales, protocolo RTCP real, ni equivalencia
+exacta con WhatsApp o CVE-2019-3568. Solo valida el flujo normal con esa entrada
+válida concreta.
 
 ### Criterios de aceptación
 
-- [ ] Llamada saliente.
-- [ ] Llamada entrante por entrada válida.
-- [ ] Procesamiento previo.
-- [ ] Aceptar abre llamada activa.
-- [ ] Rechazar registra dirección `INCOMING` y resultado `REJECTED`.
-- [ ] Finalizar o cancelar registra dirección y resultado por separado.
-- [ ] Proceso vivo.
-- [ ] Sin oversized.
+- [x] Llamada saliente.
+- [x] Llamada entrante por entrada válida.
+- [x] Procesamiento previo.
+- [x] Aceptar abre llamada activa.
+- [x] Rechazar registra dirección `INCOMING` y resultado `REJECTED`.
+- [x] Finalizar o cancelar registra dirección y resultado por separado.
+- [x] Proceso vivo.
+- [x] Sin oversized.
 
 ### Punto de parada
 
-Detenerse antes de Patched oversized.
+Fase 3 está validada. Detenerse tras el cierre Git y no iniciar Fase 4.
 
 ### Checklist
 
-- [ ] Implementada
-- [ ] Automática
-- [ ] Manual
-- [ ] Revisada
+- [x] Implementada
+- [x] Automática
+- [x] Manual
+- [x] Revisada
 - [ ] Commit
 - [ ] Push
 
@@ -1313,3 +1361,4 @@ Fase 8
 | 2026-08-05 | Revisión final cruzada de diseño/plan, llamadas, checksum, UI histórica, RTCP y fuentes oficiales | EN DISEÑO — pendiente de aprobación |
 | 2026-08-07 | Consolidación del resultado validado de Fase 1 y preparación selectiva del cierre Git | VALIDADA — commit pendiente |
 | 2026-08-07 | Consolidación de UI de mensajería, navegación, estado local y reset de Fase 2 | VALIDADA — cierre Git autorizado |
+| 2026-08-10 | Consolidación de llamadas simuladas y flujo UDP válido de Fase 3 | VALIDADA — cierre Git autorizado |

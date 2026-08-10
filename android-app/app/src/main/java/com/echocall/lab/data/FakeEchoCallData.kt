@@ -7,6 +7,8 @@ import com.echocall.lab.model.Contact
 import com.echocall.lab.model.Message
 
 object FakeEchoCallData {
+    const val UDP_SCENARIO_CONTACT_ID = "marta_soler"
+
     val contacts = listOf(
         Contact(
             id = "marta_soler",

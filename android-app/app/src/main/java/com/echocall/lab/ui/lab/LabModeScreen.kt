@@ -2,7 +2,6 @@ package com.echocall.lab.ui.lab
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -43,8 +42,6 @@ fun LabModeScreen(
     state: LabModeUiState,
     onBack: () -> Unit,
     onRetryUdpReceiver: () -> Unit,
-    onAcceptIncoming: () -> Unit,
-    onRejectIncoming: () -> Unit,
     onProcessValidSample: () -> Unit,
 ) {
     Scaffold(
@@ -98,19 +95,12 @@ fun LabModeScreen(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         Text(
-                            text = "Incoming call (simulated)",
+                            text = "Señal de llamada recibida",
                             style = MaterialTheme.typography.titleMedium,
                         )
-                        Text("Caller: EchoCall Test")
-                        Text("Control packet processed automatically")
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Button(onClick = onAcceptIncoming) {
-                                Text("Accept")
-                            }
-                            Button(onClick = onRejectIncoming) {
-                                Text("Reject")
-                            }
-                        }
+                        Text("Llamada simulada: Marta Soler")
+                        Text("Asociación local del simulador; ECLB no contiene el nombre")
+                        Text("El paquete se procesa automáticamente antes de la UI de llamada")
                         Text(state.callAction)
                     }
                 }

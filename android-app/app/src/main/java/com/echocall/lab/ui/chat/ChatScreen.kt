@@ -43,6 +43,7 @@ fun ChatScreen(
     contact: Contact,
     messages: List<Message>,
     onSendMessage: (String) -> Unit,
+    onStartCall: () -> Unit,
     onBack: () -> Unit,
 ) {
     var draft by rememberSaveable(contact.id) { mutableStateOf("") }
@@ -81,10 +82,9 @@ fun ChatScreen(
                 },
                 actions = {
                     IconButton(
-                        onClick = { },
-                        enabled = false,
+                        onClick = onStartCall,
                         modifier = Modifier.semantics {
-                            contentDescription = "Llamar, disponible próximamente"
+                            contentDescription = "Llamar a ${contact.displayName}"
                         },
                     ) {
                         Text("☎", style = MaterialTheme.typography.titleLarge)

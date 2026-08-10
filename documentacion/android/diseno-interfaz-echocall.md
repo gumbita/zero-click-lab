@@ -1,6 +1,6 @@
 # Diseño final de interfaz y arquitectura de EchoCall Lab
 
-> Estado del documento: **FASES 0, 1 Y 2 — VALIDADAS; FASE 3 — PENDIENTE**
+> Estado del documento: **FASES 0, 1, 2 Y 3 — VALIDADAS; FASE 4 — PENDIENTE**
 >
 > Rama de trabajo: `feature/echocall-ui`
 >
@@ -8,9 +8,11 @@
 >
 > Cierre versionado de Fase 1: `26b0638442a5f31b134ba259a8afcbfc0d40d35d`
 >
+> Cierre versionado de Fase 2: `ece2e13584838d1e56da117a634ff53b51faa17b`
+>
 > Fecha de auditoría inicial del repositorio: 2026-08-04
 >
-> Fecha de revisión y consolidación documental: 2026-08-07
+> Fecha de revisión y consolidación documental: 2026-08-10
 
 ## Índice
 
@@ -204,8 +206,8 @@ todavía no satisfacía el contrato final:
 `CONTROL_PACKET_RECEIVED` y `NATIVE_PARSE_STARTED` se establecen antes de que
 JNI devuelva el resultado.
 
-**DECISIÓN DE DISEÑO.** La futura `IncomingCallScreen` solo se mostrará después
-de un retorno `status=accepted code=ok`.
+**DECISIÓN CUMPLIDA EN FASE 3.** `IncomingCallScreen` solo se muestra después de
+un retorno `status=accepted code=ok`.
 
 **RIESGO.** El rediseño deberá impedir que el estado visual previo o el nombre
 histórico `CALL_INCOMING` provoquen navegación anticipada.
@@ -233,22 +235,26 @@ determinista del simulador; ECLB no contiene un nombre de contacto.
 
 ## 5. Arquitectura Vulnerable/Patched
 
-**CONFIRMADO EN FASES 1 Y 2.** Se mantiene un único módulo de aplicación Android
+**CONFIRMADO EN FASES 1, 2 Y 3.** Se mantiene un único módulo de aplicación Android
 `:app` que genera cuatro variantes, con dos identidades de producto
 Vulnerable/Patched y una Activity compartida. La estructura implementada hasta
-Fase 2 es:
+Fase 3 es:
 
 ```text
 MainActivity (ciclo de vida UDP y setContent)
 └── EchoCallApp
     ├── EchoCallStateHolder (estado simulado de producto en memoria)
+    │   └── CurrentCall (OUTGOING, INCOMING o ACTIVE)
     ├── estado técnico del laboratorio, separado
     └── EchoCallNavHost
         ├── ConversationsScreen (destino inicial)
         ├── ChatScreen(contactId)
         ├── CallHistoryScreen
         ├── LabModeScreen
-        └── AboutScreen
+        ├── AboutScreen
+        ├── OutgoingCallScreen
+        ├── IncomingCallScreen
+        └── ActiveCallScreen
 
 NativeBridge.parsePacket() -> libechocall_native.so
 └── parser único fijado por flavor/CMake
@@ -316,18 +322,20 @@ variante `vulnerableAsan` y `patchedAsan`.
 
 ## 8. Base de código compartida
 
-**CONFIRMADO EN FASES 1 Y 2.** El código Kotlin, JNI/C y la UI permanecen
-compartidos en `src/main`. Fase 2 añadió allí:
+**CONFIRMADO EN FASES 1, 2 Y 3.** El código Kotlin, JNI/C y la UI permanecen
+compartidos en `src/main`. Fases 2 y 3 añadieron allí:
 
 - `EchoCallApp` como raíz Compose y `EchoCallNavHost` como grafo;
 - modelos y datos ficticios bajo `model/` y `data/`;
 - `EchoCallStateHolder` como única fuente mutable del estado simulado;
 - pantallas compartidas de conversaciones, chat, historial, Lab mode y acerca de;
+- modelo, estado y pantallas compartidas para llamadas simuladas;
 - avatares locales por iniciales.
 
 El receptor UDP, el contrato JNI y el estado técnico del laboratorio se
-conservaron. El coordinador de llamadas, el modelo estructurado de resultado
-nativo y la persistencia del marcador siguen pendientes.
+conservaron. El estado coordinado de llamada se implementó sin modificar JNI ni
+UDP. El modelo estructurado de resultado nativo y la persistencia del marcador
+siguen pendientes.
 
 Los source sets `src/vulnerable` y `src/patched` contendrán solo recursos o
 constantes inevitables de variante. Los source sets de build type conservarán
@@ -405,7 +413,7 @@ JNI antes de implementarlo.
 
 ## 10. Modelo de datos
 
-**CONFIRMADO EN FASE 2.** Modelos compartidos mínimos:
+**CONFIRMADO EN FASES 2 Y 3.** Modelos compartidos mínimos:
 
 | Modelo | Campos mínimos |
 |---|---|
@@ -413,26 +421,28 @@ JNI antes de implementarlo.
 | `Message` | `id`, `contactId`, `text`, `isOutgoing`, `timestamp` |
 | `CallRecord` | `id`, `contactId`, `direction`, `outcome`, `timestamp` |
 | `EchoCallUiState` | contactos, mensajes e historial simulado |
+| `CurrentCall` | `contactId`, `direction`, `phase`, `startedAtMillis` |
 
 Enums implementados:
 
 - `CallDirection`: `INCOMING`, `OUTGOING`;
 - `CallOutcome`: `COMPLETED`, `REJECTED`, `MISSED`, `BLOCKED`, `INTERRUPTED`,
   `CANCELLED`.
+- `CallPhase`: `OUTGOING`, `INCOMING`, `ACTIVE`.
 
-**PROPUESTA PENDIENTE.** `NativeParseResult`, `LabEvent`, `UdpState`,
-`NativeOperationMarker`, los campos de duración/escenario y el autómata de
-llamadas se incorporarán únicamente en sus fases posteriores.
+**PROPUESTA PENDIENTE.** `NativeParseResult`, `LabEvent`, `UdpState` y
+`NativeOperationMarker` se incorporarán únicamente en sus fases posteriores.
 
-**PROPUESTA PENDIENTE.** El autómata mantendrá dirección, estado y resultado
-como conceptos separados:
+**CONFIRMADO EN FASE 3.** El estado de llamada mantiene dirección, fase y
+resultado como conceptos separados:
 
-- `DIALING → ACTIVE → COMPLETED` para una llamada saliente completada;
-- `DIALING → CANCELLED` si la llamada saliente se finaliza antes de activarse;
+- `OUTGOING → ACTIVE → COMPLETED` para una llamada saliente completada;
+- `OUTGOING → CANCELLED` si la llamada saliente se finaliza antes de activarse;
 - `INCOMING → ACTIVE → COMPLETED` después de aceptar y finalizar;
-- `INCOMING → REJECTED` al rechazar y `INCOMING → MISSED` si expira sin acción;
-- un rechazo nativo Patched produce `BLOCKED` y una operación anterior sin
-  retorno produce `INTERRUPTED`.
+- `INCOMING → REJECTED` al rechazar.
+
+Los resultados `MISSED`, `BLOCKED` e `INTERRUPTED` permanecen preparados en el
+modelo, pero sus transiciones funcionales corresponden a fases posteriores.
 
 **CONFIRMADO.** El header ECLB solo contiene `MAGIC`, `VERSION`, `FLAGS`,
 `PACKET_TYPE`, `LENGTH` y `SSRC`, seguido del payload. El campo C
@@ -482,9 +492,9 @@ ni controles de explotación.
 
 ## 13. Conversación
 
-**CONFIRMADO EN FASE 2.** `ChatScreen(contactId)` incluye volver, avatar, nombre,
-acción de llamada visualmente deshabilitada, mensajes precargados, campo de texto
-y envío local.
+**CONFIRMADO EN FASE 3.** `ChatScreen(contactId)` incluye volver, avatar, nombre,
+acción de llamada local habilitada, mensajes precargados, campo de texto y envío
+local.
 
 Para Marta Soler se precargará, como mínimo:
 
@@ -502,10 +512,12 @@ no representa el vector de CVE-2019-3568.
 
 ## 14. Historial
 
-**CONFIRMADO EN FASE 2.** `CallHistoryScreen` es accesible desde la barra
+**CONFIRMADO EN FASES 2 Y 3.** `CallHistoryScreen` es accesible desde la barra
 superior y muestra avatar, contacto, dirección y resultado separados, con
 fecha/hora ficticia. Sus registros iniciales forman parte del estado compartido
-en memoria y se restauran junto con conversaciones y mensajes.
+en memoria y se restauran junto con conversaciones y mensajes. Fase 3 incorpora
+primero los registros locales `COMPLETED`, `REJECTED` y `CANCELLED` generados por
+los flujos simulados.
 
 La dirección será `INCOMING` u `OUTGOING`. El resultado será `COMPLETED`,
 `REJECTED`, `MISSED`, `BLOCKED`, `INTERRUPTED` o `CANCELLED`. Los registros se
@@ -516,7 +528,7 @@ No habrá agenda del sistema, telefonía real ni estadísticas avanzadas.
 
 ## 15. Llamada saliente
 
-**DECISIÓN DE DISEÑO.** Desde `ChatScreen`, la acción de teléfono navegará a
+**CONFIRMADO EN FASE 3.** Desde `ChatScreen`, la acción de teléfono navega a
 `OutgoingCallScreen(contactId)`:
 
 ```text
@@ -524,9 +536,9 @@ teléfono → “Llamando…” → transición determinista → llamada activa
          → Finalizar → registro en historial
 ```
 
-La pantalla mostrará avatar, nombre, estado y **Finalizar**. La transición se
-controlará con un temporizador local y cancelable asociado al ciclo de vida.
-Finalizar durante `DIALING` registrará dirección `OUTGOING` y resultado
+La pantalla muestra avatar, nombre, estado y **Finalizar**. La transición se
+controla con un temporizador local y cancelable asociado al ciclo de vida.
+Finalizar durante `OUTGOING` registra dirección `OUTGOING` y resultado
 `CANCELLED`; finalizar después de llegar a `ACTIVE` registrará `OUTGOING` y
 `COMPLETED`.
 
@@ -535,30 +547,30 @@ vulnerabilidad.
 
 ## 16. Llamada entrante
 
-**DECISIÓN DE DISEÑO.** `IncomingCallScreen` solo se mostrará cuando el parser
+**CONFIRMADO EN FASE 3.** `IncomingCallScreen` solo se muestra cuando el parser
 nativo haya devuelto `status=accepted code=ok` para un datagrama UDP válido.
-Mostrará a Marta Soler, **Llamada entrante**, **Aceptar** y **Rechazar**.
+Muestra a Marta Soler, **Llamada entrante**, **Aceptar** y **Rechazar**.
 
 - **Aceptar:** abre `ActiveCallScreen` sin volver a ejecutar el parser.
 - **Rechazar:** cierra la llamada y añade `REJECTED` al historial, sin volver a
   ejecutar el parser.
 
-La dirección registrada será `INCOMING`. Una llamada aceptada y posteriormente
-finalizada tendrá resultado `COMPLETED`; una llamada que expire sin acción tendrá
-resultado `MISSED`.
+La dirección registrada es `INCOMING`. Una llamada aceptada y posteriormente
+finalizada tiene resultado `COMPLETED`. La expiración automática a `MISSED` no
+se implementó en Fase 3.
 
-El evento técnico `CALL_INCOMING` podrá conservarse como indicación de señal
+El evento técnico `CALL_INCOMING` se conserva como indicación de señal
 recibida, pero no autoriza la navegación antes del retorno `accepted`.
 
 ## 17. Llamada activa
 
-**DECISIÓN DE DISEÑO.** `ActiveCallScreen` será común a llamadas salientes y
-entrantes aceptadas. Mostrará avatar, nombre, contador de duración, **Silenciar**,
+**CONFIRMADO EN FASE 3.** `ActiveCallScreen` es común a llamadas salientes y
+entrantes aceptadas. Muestra avatar, nombre, contador de duración, **Silenciar**,
 **Altavoz** y **Finalizar**.
 
 Silenciar y Altavoz modificarán solo su estado visual y su descripción
-accesible. El contador avanzará mientras el estado sea activo. Finalizar
-detendrá el contador, navegará fuera de la llamada y registrará la duración.
+accesible. El contador avanza mientras el estado es activo. Finalizar detiene el
+contador, navega fuera de la llamada y registra el resultado `COMPLETED`.
 
 **LIMITACIÓN.** No existe audio, conexión VoIP, vídeo, teclado numérico ni
 llamada del sistema operativo.
@@ -705,25 +717,30 @@ el emisor UDP externo y en las fases autorizadas.
 
 ### 21.1 Entrada válida
 
-**DECISIÓN DE DISEÑO.** Orden causal:
+**CONFIRMADO EN FASE 3.** Orden causal implementado y validado para una entrada
+válida:
 
 ```text
 Datagrama UDP en 43568
-→ UdpPacketReceiver copia bytes y fuente
-→ cola FIFO / coordinador de ingreso
-→ registra eventos técnicos
-→ persiste NativeOperationMarker(pending=true)
-→ NativeGateway llama a NativeBridge.parsePacket()
+→ CONTROL_PACKET_RECEIVED
+→ NATIVE_PARSE_STARTED
+→ NativeBridge.parsePacket()
 → libechocall_native.so llama al único parser compilado
-→ retorna accepted
-→ persiste pending=false
-→ actualiza resultado/eventos
-→ navega a IncomingCallScreen(Marta Soler)
+→ retorna status=accepted code=ok
+→ NATIVE_PARSE_OK
+→ crea currentCall INCOMING para Marta Soler
+→ navega a IncomingCallScreen
 → la persona acepta o rechaza
 ```
 
 El procesamiento técnico termina antes de mostrar las acciones Aceptar y
-Rechazar.
+Rechazar. Aceptar y Rechazar cambian únicamente el estado de producto y no
+vuelven a ejecutar JNI. Marta Soler es un mapping fijo del simulador: su nombre
+no procede de ECLB.
+
+**PROPUESTA PENDIENTE PARA FASE 5.** El marcador persistente `pending=true`
+antes de JNI y su limpieza tras retorno normal se añadirán sin alterar este
+orden causal.
 
 ### 21.2 Oversized en Patched
 
@@ -897,7 +914,7 @@ autorización expresa.
 - implementar saliente, entrante válida, aceptar, rechazar y activa;
 - contador, mute, altavoz, finalizar e historial;
 - integrar solo control válido UDP; ninguna oversized.
-- **estado: pendiente**.
+- **estado: validada**.
 
 ### Fase 4 — Integración Patched
 
@@ -1025,14 +1042,35 @@ la experiencia normal de llamada corresponde a Fase 3.
 
 ### Fase 3 — Mensajería y llamadas normales
 
-Automáticas previstas: tests del autómata de llamada, reloj inyectable,
-aceptar/rechazar/finalizar, mapeos `COMPLETED`, `REJECTED`, `MISSED` y
-`CANCELLED`, historial y garantía de que las acciones salientes no llaman al
-gateway nativo.
+**VALIDADA.** Se implementaron `CurrentCall`, las fases `OUTGOING`, `INCOMING` y
+`ACTIVE`, y las pantallas `OutgoingCallScreen`, `IncomingCallScreen` y
+`ActiveCallScreen`. La llamada saliente de Pau Ferrer transitó localmente de
+**Llamando…** a activa; se observaron temporizador, mute y altavoz visuales, y
+finalizar añadió `OUTGOING/COMPLETED`. La cancelación
+`OUTGOING/CANCELLED` está implementada, pero no se usa como evidencia
+experimental principal porque su validación visual no fue suficientemente
+sólida.
 
-Manuales previstas: llamada saliente completa; paquete válido secuencial en
-Patched y Vulnerable; verificar que la UI entrante aparece después de
-`NATIVE_PARSE_OK`; aceptar y rechazar sin segundo parse; comprobar proceso vivo.
+En las ejecuciones autorizadas con la muestra válida de 17 bytes, Vulnerable
+Debug mantuvo el PID 4723: `NATIVE_PARSE_OK` se registró a las 14:53:00.643,
+`currentCall` a las 14:53:00.644 e `IncomingCallScreen` a las 14:53:00.946; el
+rechazo añadió `INCOMING/REJECTED`. Patched Debug mantuvo el PID 4973:
+`NATIVE_PARSE_OK` se registró a las 14:54:55.246, `currentCall` a las
+14:54:55.247 e `IncomingCallScreen` a las 14:54:55.439; aceptar y finalizar
+añadió `INCOMING/COMPLETED`. Estos timestamps son observaciones de ejecuciones
+concretas, no una garantía universal del scheduler.
+
+El balance fue dos datagramas válidos, dos `NATIVE_PARSE_STARTED`, dos
+`NATIVE_PARSE_OK`, cero rechazos del parser, cero crashes y cero oversized. Se
+utilizó exclusivamente `samples/benign/valid_call_control.bin` (17 bytes,
+SHA-256 `912B5F7F858A790D4C49AE2860CD421F0B70C8DD8E582ABE99AB6D6640965B8E`).
+Aceptar y Rechazar no reejecutaron JNI.
+
+**LIMITACIÓN.** Fase 3 no demuestra comportamiento oversized, mitigación
+Patched, `heap-buffer-overflow` en las nuevas variantes, crash ASan, RCE,
+explotación, telefonía o audio reales, protocolo RTCP real, ni equivalencia
+exacta con WhatsApp o CVE-2019-3568. Solo valida el flujo normal con esa entrada
+válida concreta.
 
 ### Fase 4 — Integración Patched
 
@@ -1106,15 +1144,15 @@ stdout/stderr, exit codes, timestamps, PID, log íntegro y hashes.
 
 ### Experiencia compartida
 
-- [ ] misma interfaz, navegación, contactos, mensajes, llamadas y avatares;
+- [x] misma interfaz, navegación, contactos, mensajes, llamadas y avatares;
 - [x] lista de conversaciones como pantalla inicial;
 - [x] cinco contactos ficticios y fallback de iniciales;
 - [x] conversaciones y mensajes locales funcionales;
 - [x] historial accesible;
-- [ ] llamada saliente simulada sin UDP/JNI;
-- [ ] llamada entrante solo tras paquete válido aceptado;
-- [ ] procesamiento nativo anterior a Aceptar/Rechazar;
-- [ ] llamada activa con avatar, nombre, duración, mute, altavoz y finalizar;
+- [x] llamada saliente simulada sin UDP/JNI;
+- [x] llamada entrante solo tras paquete válido aceptado;
+- [x] procesamiento nativo anterior a Aceptar/Rechazar;
+- [x] llamada activa con avatar, nombre, duración, mute, altavoz y finalizar;
 - [ ] interfaz en español y tema del sistema;
 - [ ] diferencias visuales discretas, no basadas solo en color.
 
@@ -1152,7 +1190,7 @@ stdout/stderr, exit codes, timestamps, PID, log íntegro y hashes.
 | source sets de flavor/build type pisan recursos | nombre o distintivo incorrecto | mitigado en Fase 1 con recursos de variante ASan explícitos e inspección del resultado |
 | ASan está obsoleto/no soportado desde 2023 y podría contener errores | fragilidad en toolchains futuras | congelar NDK/ABI actual, documentar el límite y mantener HWASan como recomendación para entornos compatibles |
 | las dos apps compiten por UDP 43568 | `EADDRINUSE` esperado | ejecución secuencial y retry conservado; no cambiar el puerto |
-| navegación a Incoming antes de `accepted` | rompe la propiedad central | coordinador único y test causal de orden/eventos |
+| navegación a Incoming antes de `accepted` | rompe la propiedad central | mitigado en Fase 3: orden causal observado `NATIVE_PARSE_OK → currentCall → IncomingCallScreen` |
 | callbacks UDP duplicados tras recomposición | doble parse o historial duplicado | receptor fuera de composables y consumo FIFO con identidad de evento |
 | temporizadores sobreviven a la pantalla | duración/estado incorrectos | reloj inyectable y jobs cancelados por estado/ciclo de vida |
 | marcador no llega a disco antes del abort | falso negativo | esperar transacción DataStore antes de JNI y probar el orden |
