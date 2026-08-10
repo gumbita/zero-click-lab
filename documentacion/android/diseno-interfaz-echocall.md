@@ -1,6 +1,6 @@
 # Diseño final de interfaz y arquitectura de EchoCall Lab
 
-> Estado del documento: **FASES 0 A 6 — VALIDADAS; FASES 7 Y 8 — PENDIENTES**
+> Estado del documento: **FASES 0 A 7 — VALIDADAS; FASE 8 — PENDIENTE**
 >
 > Rama de trabajo: `feature/echocall-ui`
 >
@@ -17,6 +17,10 @@
 >
 > Cierre versionado de Fase 5: `e1da09eaea29a1f9f2ab0e395a6bb5c829c478f1`
 > (`e1da09e Track incomplete native operations`)
+>
+> Cierre versionado de Fase 6 y commit fuente de los candidatos de Fase 7:
+> `7bbb5ba984c55edfe2d0c6254253fb0ed9f2065d`
+> (`7bbb5ba Refine EchoCall UI and accessibility`)
 >
 > Fecha de auditoría inicial del repositorio: 2026-08-04
 >
@@ -992,7 +996,8 @@ autorización expresa.
 - tema claro/oscuro, contraste, tamaños, descripciones y foco;
 - rotación, recomposición, estados vacíos, textos e iconos;
 - equivalencia visual entre Vulnerable y Patched.
-- **estado: validada; versionada en el commit que contiene esta revisión**.
+- **estado: validada, cerrada y publicada en
+  `7bbb5ba984c55edfe2d0c6254253fb0ed9f2065d`**.
 
 ### Fase 7 — Congelación y regresión no destructiva
 
@@ -1004,7 +1009,8 @@ autorización expresa.
 - realizar un smoke test limitado con TalkBack si resulta práctico;
 - revisar la equivalencia visual final Vulnerable/Patched;
 - fijar los APK candidatos y sus hashes.
-- **estado: pendiente**.
+- **estado: validada; candidatos congelados desde `7bbb5ba` y preservados fuera
+  de Temp sin reconstrucción**.
 
 ### Fase 8 — Evidencia final y única ejecución vulnerable
 
@@ -1203,7 +1209,7 @@ El cierre quedó versionado en
 
 ### Fase 6 — Visual y accesibilidad
 
-**VALIDADA.** Se implementaron `EchoCallTheme`, esquemas Material 3 claro y
+**VALIDADA, CERRADA Y PUBLICADA.** Se implementaron `EchoCallTheme`, esquemas Material 3 claro y
 oscuro del sistema, `Theme.EchoCall`, paletas y vectores locales, además de
 `CallScreenLayout`. Las pantallas comparten jerarquía visual, scroll cuando
 pueden desbordar, objetivos táctiles adecuados y semántica de accesibilidad.
@@ -1231,24 +1237,73 @@ auditoría completa con TalkBack ni añadió tests Compose, por lo que no acredi
 cumplimiento total de accesibilidad. La regresión técnica completa corresponde
 a Fase 7.
 
+El cierre quedó versionado en
+`7bbb5ba984c55edfe2d0c6254253fb0ed9f2065d`
+(`7bbb5ba Refine EchoCall UI and accessibility`).
+
 ### Fase 7 — Congelación y regresión no destructiva
 
-Automáticas previstas: los cuatro builds, tests unitarios/instrumentados,
-`diff --check`, inspección de APK/ABI/parser y regresiones no destructivas.
+**VALIDADA — CANDIDATOS CONGELADOS.** Fase 7 no produjo cambios funcionales.
+Los cuatro candidatos proceden del commit fuente
+`7bbb5ba984c55edfe2d0c6254253fb0ed9f2065d` y se preservaron, sin
+reconstrucción, fuera de Temp en
+`C:\Users\Angels\Documents\EchoCall-TFM-Evidence\phase7-frozen-candidates\echocall-phase7-20260810T162009Z`.
+El manifiesto candidato tiene SHA-256
+`59E04A43D1170DF9DD2D50E4346A464CF1900CE0822B9CF339508D82A5B97B7E`.
+Fase 8 deberá usar exactamente esos bytes: no se podrán recompilar, modificar,
+resignar, reempaquetar ni regenerar, y sus hashes se comprobarán de nuevo antes
+de utilizarlos.
 
-Manuales previstas: matriz completa válida, Patched oversized, ciclo de vida,
-ráfaga controlada, `EADDRINUSE`, retry, historial, Lab mode y marcador simulado.
+| Variante | `applicationId` | Parser | Build type | ABI | Tamaño | SHA-256 | Commit fuente |
+|---|---|---|---|---|---:|---|---|
+| Vulnerable Debug | `com.echocall.lab.vulnerable` | VULNERABLE | Debug | `arm64-v8a`, `armeabi-v7a`, `x86`, `x86_64` | 28141106 bytes | `B3E6F8EABACE1B1FE66E5559996098196AAB2207537B2054BDA11263A1BB4953` | `7bbb5ba` |
+| Patched Debug | `com.echocall.lab.patched` | PATCHED | Debug | `arm64-v8a`, `armeabi-v7a`, `x86`, `x86_64` | 28140722 bytes | `1A3A8C7860594E8BE344B1E3ED1AC6D490E0828B71BFE1E1F3CBBDB853A780F0` | `7bbb5ba` |
+| Vulnerable ASan | `com.echocall.lab.vulnerable.asan` | VULNERABLE | ASan | `x86_64` | 26933964 bytes | `DD8018E5D4B31AB778E479087C51E5D23DBC41F927D6D2F9F615255959B74BE5` | `7bbb5ba` |
+| Patched ASan | `com.echocall.lab.patched.asan` | PATCHED | ASan | `x86_64` | 26933752 bytes | `0F5DC5B9DE28FB26DEF2F8A97CA8EA2F89F305EFCECCC42952D4FF13D5B01F4C` | `7bbb5ba` |
+
+La inspección acreditó las identidades y ABI declaradas, un único
+`vulnerable_parser.c` en Vulnerable y un único `safe_parser.c` en Patched;
+`parsePacketVulnerable` continuó ausente. Ambos candidatos ASan contenían la
+instrumentación esperada, y las ejecuciones benignas confirmaron la carga del
+runtime ASan y de `libechocall_native.so`.
+
+Cada candidato recibió exactamente una entrada válida. Los cuatro devolvieron
+`status=accepted code=ok version=1 flags=0 type=1 declared_length=4
+actual_length=4 ssrc=0x10203040 checksum=28`, conservaron su PID y persistieron
+el marker antes de JNI, limpiándolo tras el retorno normal.
+
+Patched Debug recibió además exactamente una muestra oversized y devolvió
+`status=rejected code=payload_too_large declared_length=64 actual_length=64
+maximum=32`. Su PID permaneció `13338 → 13338`, se mostró
+`BlockedCallScreen` y el historial añadió **Marta Soler · Entrante ·
+Bloqueada**. Para esa muestra hubo cero `IncomingCallScreen` y cero
+`NATIVE_PARSE_OK`. No se ejecutó oversized en Vulnerable Debug, Vulnerable ASan
+ni Patched ASan.
+
+La regresión confirmó el ciclo de vida UDP, reprodujo `EADDRINUSE` de forma
+controlada y verificó que **Retry** recuperaba la escucha sin callbacks
+duplicados. El marker benigno se validó mediante el hook de test, sin JNI,
+datagramas ni crash; ese hook puede crear el marker artificialmente y, por sí
+solo, no acredita un crash. TalkBack no se ejecutó y permanece como limitación.
+
+**LIMITACIÓN.** Fase 7 no demuestra RCE, control del flujo, ejecución
+arbitraria, explotación completa, seguridad general de Patched ni equivalencia
+exacta con WhatsApp o CVE-2019-3568. La ausencia de informe ASan para una
+entrada válida describe únicamente esas ejecuciones benignas concretas.
 
 ### Fase 8 — Evidencia final y única ejecución vulnerable
 
 Automáticas previstas: SHA-256 previo de APK/muestra, captura de versión y
 entorno, verificación de package/ABI/parser y simbolización del log.
 
-Manuales previstas: captura final Patched ASan oversized sobre el APK congelado
-y, solo tras nueva autorización expresa, una única ejecución Vulnerable ASan
-oversized sobre su APK final congelado. Ambas ejecuciones ASan oversized quedan
-reservadas para Fase 8. Conservar comandos,
-stdout/stderr, exit codes, timestamps, PID, log íntegro y hashes.
+Manuales previstas: sobre los mismos bytes preservados en Fase 7, verificar
+hashes de APK y muestra; usar Patched ASan congelado; ejecutar exactamente una
+muestra oversized; capturar rechazo, PID, marker, logs y firmas ASan; revisar
+que la captura Patched esté completa; detenerse y solicitar autorización
+explícita; usar Vulnerable ASan congelado; ejecutar oversized una única vez;
+capturar ASan íntegro y terminación; relanzar y correlacionar marker;
+simbolizar; no repetir; y comparar Patched/Vulnerable. Ninguno de estos pasos
+se ejecutó durante el cierre de Fase 7.
 
 ## 28. Criterios de aceptación
 
@@ -1290,7 +1345,7 @@ stdout/stderr, exit codes, timestamps, PID, log íntegro y hashes.
 ### Comportamiento técnico
 
 - [x] ambas apps conservan `43568/UDP` y se prueban secuencialmente;
-- [ ] se preservan ciclo de vida, cola, escucha única, `EADDRINUSE` y Retry;
+- [x] se preservan ciclo de vida, cola, escucha única, `EADDRINUSE` y Retry;
 - [x] Patched acepta entrada válida y rechaza oversized antes de la copia;
 - [x] Patched muestra llamada bloqueada y registra `BLOCKED`;
 - [x] Vulnerable acepta entrada válida;
@@ -1326,7 +1381,7 @@ stdout/stderr, exit codes, timestamps, PID, log íntegro y hashes.
 | temporizadores sobreviven a la pantalla | duración/estado incorrectos | reloj inyectable y jobs cancelados por estado/ciclo de vida |
 | marcador no llega a disco antes del abort | falso negativo | esperar transacción DataStore antes de JNI y probar el orden |
 | marcador queda pendiente por fallo no nativo | falso positivo | situarlo junto al gateway y redactar inferencia limitada |
-| hook interno debuggable del marker permanece en candidatos finales | superficie de prueba innecesaria | auditar en Fase 7 si se conserva o retira tras cumplir su función |
+| hook interno debuggable del marker permanece en candidatos finales | superficie de prueba innecesaria | conservado y auditado en Fase 7; puede crear el marker artificialmente y no acredita por sí solo un crash |
 | reset borra evidencia diagnóstica | pérdida de contexto | descarte explícito separado del reset simulado |
 | estado solo en memoria se pierde al matar proceso | mensajes/historial desaparecen | comportamiento aceptado y explicado; solo el marcador persiste |
 | detalles técnicos filtran a UI normal | experiencia incoherente | modelos normalizados para UI y detalles completos solo en Lab mode |

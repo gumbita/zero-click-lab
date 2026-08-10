@@ -1,6 +1,6 @@
 # Plan de implementación de EchoCall Lab Vulnerable/Patched
 
-- **Estado general:** FASES 0 A 6 VALIDADAS; FASES 7 Y 8 PENDIENTES.
+- **Estado general:** FASES 0 A 7 VALIDADAS; FASE 8 PENDIENTE.
 - **Rama prevista:** `feature/echocall-ui`.
 - **Línea base protegida:** `8b20ffed4ef3ef5fb4b4f22c67e8853ebef1065c`.
 - **Cierre versionado de Fase 1:** `26b0638442a5f31b134ba259a8afcbfc0d40d35d`.
@@ -10,11 +10,14 @@
   (`8d7add2 Add patched blocked-call handling`).
 - **Cierre versionado de Fase 5:** `e1da09eaea29a1f9f2ab0e395a6bb5c829c478f1`
   (`e1da09e Track incomplete native operations`).
+- **Cierre versionado de Fase 6 y commit fuente de los candidatos de Fase 7:**
+  `7bbb5ba984c55edfe2d0c6254253fb0ed9f2065d`
+  (`7bbb5ba Refine EchoCall UI and accessibility`).
 - **Documento asociado:** `documentacion/android/diseno-interfaz-echocall.md`.
 - **Auditoría inicial del repositorio:** 2026-08-04.
 - **Revisión y consolidación documental:** 2026-08-10.
-- **Alcance de este cierre:** Fase 6, sus 26 rutas funcionales aprobadas y los
-  dos documentos vinculantes; Fase 7 permanece fuera de alcance.
+- **Alcance de este cierre:** preservación y consolidación documental de Fase
+  7; Fase 8 permanece pendiente y fuera de alcance.
 
 > Ninguna fase posterior debe iniciarse sin autorización expresa después de revisar la fase anterior.
 
@@ -175,6 +178,30 @@ UI Automator, revisión visual, contraste, touch targets, font scale 1.3 y
 estados checkable. No se realizó una auditoría completa con TalkBack ni se
 añadió una suite automatizada Compose; por tanto, Fase 6 no acredita
 cumplimiento total de accesibilidad.
+
+Fase 6 quedó validada, cerrada y publicada en
+`7bbb5ba984c55edfe2d0c6254253fb0ed9f2065d`
+(`7bbb5ba Refine EchoCall UI and accessibility`).
+
+### 2.13. Resultado consolidado de Fase 7
+
+**HECHO VALIDADO — CANDIDATOS CONGELADOS.** Fase 7 no introdujo cambios
+funcionales. Los cuatro APK proceden del commit fuente
+`7bbb5ba984c55edfe2d0c6254253fb0ed9f2065d`, quedaron fijados por tamaño y
+SHA-256 y se preservaron fuera de Temp, sin reconstrucción, en
+`C:\Users\Angels\Documents\EchoCall-TFM-Evidence\phase7-frozen-candidates\echocall-phase7-20260810T162009Z`.
+`candidate-manifest.txt` tiene SHA-256
+`59E04A43D1170DF9DD2D50E4346A464CF1900CE0822B9CF339508D82A5B97B7E`.
+Fase 8 deberá operar sobre esos mismos bytes, previa comprobación de hashes,
+sin recompilar, modificar, resignar, reempaquetar ni regenerar los APK.
+
+La regresión confirmó identidades, ABI y separación de parser; una entrada
+válida por candidato produjo `accepted/ok` y mantuvo los cuatro PID. Patched
+Debug rechazó una única muestra oversized con `payload_too_large`, mantuvo el
+PID y mostró el flujo bloqueado. Se preservaron ciclo de vida UDP,
+`EADDRINUSE`/Retry e inexistencia de callbacks duplicados. El marker benigno se
+validó mediante el hook de test, sin JNI, datagramas ni crash. TalkBack no se
+ejecutó.
 
 ## 3. Reglas generales
 
@@ -392,8 +419,8 @@ Un commit por fase validada. No crear commit antes de la revisión de la usuaria
 | 3 — Mensajería y llamadas normales | VALIDADA | `aa69cba` | Completada | Completada | Entrada válida | Cerrada y publicada; cero oversized |
 | 4 — Integración Patched | VALIDADA | `8d7add2` | Completada | Completada | Patched Debug oversized | Cerrada y publicada |
 | 5 — Operación nativa incompleta | VALIDADA | `e1da09e` | Completada | Completada | Simulación segura, sin UDP ni muestras | Cerrada y publicada; marker prudente sin `CallRecord` automático |
-| 6 — Visual y accesibilidad | VALIDADA | Commit que contiene esta revisión | Completada | Completada | Capturas temporales | Claro/oscuro y font scale; sin TalkBack completo |
-| 7 — Congelación y regresión no destructiva | PENDIENTE | — | Pendiente | Pendiente | Patched oversized y controles válidos | — |
+| 6 — Visual y accesibilidad | VALIDADA | `7bbb5ba` | Completada | Completada | Capturas temporales | Cerrada y publicada; claro/oscuro y font scale; sin TalkBack completo |
+| 7 — Congelación y regresión no destructiva | VALIDADA | Candidatos desde `7bbb5ba` | Completada | Completada | Patched oversized y controles válidos | Candidatos congelados; cierre documental actual |
 | 8 — Evidencia final y única ejecución vulnerable | PENDIENTE | — | Pendiente | Pendiente | Comparación final nueva | Una única ejecución Vulnerable ASan |
 
 Estados permitidos:
@@ -1151,12 +1178,14 @@ parser/JNI/CMake/UDP y no revalidó la vulnerabilidad. La comprobación de
 accesibilidad se limitó a inspección estática, semántica Compose, UI Automator,
 revisión visual, contraste, touch targets, font scale 1.3 y estados checkable.
 No realizó una auditoría completa con TalkBack y no acredita cumplimiento total
-de accesibilidad. La regresión técnica completa corresponde a Fase 7.
+de accesibilidad. La regresión técnica prevista se completó en Fase 7, sin
+incluir TalkBack.
 
 ### Punto de parada
 
-Fase 6 validada; versionada en el commit que contiene esta revisión. Detenerse
-sin iniciar Fase 7.
+Fase 6 validada, cerrada y publicada en
+`7bbb5ba984c55edfe2d0c6254253fb0ed9f2065d`
+(`7bbb5ba Refine EchoCall UI and accessibility`).
 
 ### Checklist
 
@@ -1181,21 +1210,11 @@ Congelar candidatos y verificar todo sin ejecutar Vulnerable ASan con una entrad
 
 ### Alcance autorizado
 
-- clean builds;
-- hashes candidatos;
-- entrada válida en la matriz autorizada;
-- Patched oversized;
-- ciclo de vida UDP;
-- `EADDRINUSE` y retry;
-- navegación;
-- historial;
-- marker benigno con simulación segura;
-- auditoría de si el hook debuggable
-  `com.echocall.lab.extra.PENDING_MARKER_TEST_COMMAND` se conserva o se retira
-  antes de congelar los APK candidatos;
-- smoke test limitado con TalkBack si resulta práctico;
-- equivalencia visual final Vulnerable/Patched;
-- revisión documental.
+**COMPLETADO SIN CAMBIOS FUNCIONALES:** cuatro builds candidatos, hashes,
+entrada válida en la matriz, Patched oversized, ciclo de vida UDP,
+`EADDRINUSE` y Retry, navegación, historial, marker benigno con simulación
+segura, auditoría del hook debuggable y equivalencia visual final. TalkBack no
+se ejecutó y permanece como limitación.
 
 ### Fuera de alcance
 
@@ -1217,48 +1236,68 @@ No se prevé introducir arquitectura nueva en esta fase.
 
 ### Validación automática
 
-- cuatro builds candidatos desde el estado autorizado;
-- tests completos;
-- manifests;
-- símbolos;
-- hashes;
-- `git diff --check`;
-- estado Git controlado.
+Los cuatro candidatos proceden de `7bbb5ba984c55edfe2d0c6254253fb0ed9f2065d`:
+
+| Variante | `applicationId` | Parser | Build type | ABI | Tamaño | SHA-256 | Commit fuente |
+|---|---|---|---|---|---:|---|---|
+| Vulnerable Debug | `com.echocall.lab.vulnerable` | VULNERABLE | Debug | `arm64-v8a`, `armeabi-v7a`, `x86`, `x86_64` | 28141106 bytes | `B3E6F8EABACE1B1FE66E5559996098196AAB2207537B2054BDA11263A1BB4953` | `7bbb5ba` |
+| Patched Debug | `com.echocall.lab.patched` | PATCHED | Debug | `arm64-v8a`, `armeabi-v7a`, `x86`, `x86_64` | 28140722 bytes | `1A3A8C7860594E8BE344B1E3ED1AC6D490E0828B71BFE1E1F3CBBDB853A780F0` | `7bbb5ba` |
+| Vulnerable ASan | `com.echocall.lab.vulnerable.asan` | VULNERABLE | ASan | `x86_64` | 26933964 bytes | `DD8018E5D4B31AB778E479087C51E5D23DBC41F927D6D2F9F615255959B74BE5` | `7bbb5ba` |
+| Patched ASan | `com.echocall.lab.patched.asan` | PATCHED | ASan | `x86_64` | 26933752 bytes | `0F5DC5B9DE28FB26DEF2F8A97CA8EA2F89F305EFCECCC42952D4FF13D5B01F4C` | `7bbb5ba` |
+
+Vulnerable contiene únicamente `vulnerable_parser.c`; Patched, únicamente
+`safe_parser.c`; `parsePacketVulnerable` sigue ausente. Los candidatos ASan
+contienen la instrumentación prevista y las ejecuciones benignas confirmaron
+el runtime ASan y `libechocall_native.so` cargados.
 
 ### Prueba manual
 
-- smoke test;
-- entrada válida;
-- Patched oversized;
-- segundo plano/primer plano;
-- `EADDRINUSE` y retry;
-- navegación;
-- llamadas locales;
-- marker benigno;
-- smoke TalkBack limitado si resulta práctico;
-- equivalencia visual final.
+Cada candidato recibió exactamente una entrada válida y devolvió
+`status=accepted code=ok version=1 flags=0 type=1 declared_length=4
+actual_length=4 ssrc=0x10203040 checksum=28`. Los cuatro PID permanecieron
+estables; los cuatro markers se persistieron antes de JNI y se limpiaron tras
+el retorno normal.
+
+Patched Debug recibió exactamente una muestra oversized: devolvió
+`status=rejected code=payload_too_large declared_length=64 actual_length=64
+maximum=32`, mantuvo el PID `13338 → 13338`, mostró `BlockedCallScreen` y añadió
+**Marta Soler · Entrante · Bloqueada** al historial. Hubo cero
+`IncomingCallScreen` y cero `NATIVE_PARSE_OK` para esa muestra. Hubo cero
+ejecuciones oversized en Vulnerable Debug, Vulnerable ASan y Patched ASan.
+
+El ciclo de vida UDP fue correcto; `EADDRINUSE` se reprodujo controladamente y
+Retry recuperó la escucha sin callbacks duplicados. El marker benigno se validó
+con `com.echocall.lab.extra.PENDING_MARKER_TEST_COMMAND`, sin JNI, datagramas ni
+crash. El hook puede crear el marker artificialmente y este no acredita por sí
+solo un crash. TalkBack no se ejecutó.
 
 ### Criterios de aceptación
 
-- [ ] Cuatro APK congelados.
-- [ ] Hashes.
-- [ ] Regresión no destructiva completa.
-- [ ] Patched oversized.
-- [ ] Sin ejecución Vulnerable ASan + oversized.
-- [ ] Sin cambios de código pendientes.
+- [x] Cuatro APK congelados.
+- [x] Hashes.
+- [x] Regresión no destructiva completa dentro del alcance autorizado.
+- [x] Patched Debug oversized.
+- [x] Sin ejecución Vulnerable ASan + oversized.
+- [x] Sin cambios de código pendientes.
+
+**LIMITACIÓN.** Fase 7 no demuestra RCE, control del flujo, ejecución
+arbitraria, explotación completa, seguridad general de Patched ni equivalencia
+exacta con WhatsApp o CVE-2019-3568. La ausencia de informe ASan con una entrada
+válida solo describe esas ejecuciones benignas concretas.
 
 ### Punto de parada
 
-Solicitar autorización para Fase 8.
+Fase 7 validada y candidatos congelados. Preservar los mismos bytes y solicitar
+autorización expresa antes de iniciar Fase 8.
 
 ### Checklist
 
-- [ ] Implementada
-- [ ] Automática
-- [ ] Manual
-- [ ] Revisada
-- [ ] Commit
-- [ ] Push
+- [x] Implementada
+- [x] Automática
+- [x] Manual
+- [x] Revisada
+- [ ] Commit documental
+- [ ] Push documental
 
 ## 18. Fase 8 — Evidencia final y única ejecución vulnerable
 
@@ -1287,13 +1326,26 @@ requiere autorización expresa.
 
 ### Alcance autorizado
 
-1. Capturar Patched ASan + oversized sobre el APK final congelado.
-2. Verificar rechazo y proceso vivo.
-3. Ejecutar Vulnerable ASan + oversized una única vez y solo tras la autorización expresa.
-4. Capturar ASan y terminación.
-5. Simbolizar.
-6. Comparar.
-7. Documentar hashes, PID y limitaciones.
+Orden futuro obligatorio, no ejecutado durante este cierre:
+
+1. Verificar hashes de APK y muestra.
+2. Instalar y usar Patched ASan congelado.
+3. Ejecutar exactamente una muestra oversized.
+4. Capturar rechazo, PID, marker, logs y ausencia/presencia de firmas ASan.
+5. Revisar que la captura Patched esté completa.
+6. Detenerse.
+7. Solicitar autorización explícita.
+8. Instalar y usar Vulnerable ASan congelado.
+9. Ejecutar oversized una única vez.
+10. Capturar ASan íntegro y terminación.
+11. Relanzar y correlacionar marker.
+12. Simbolizar.
+13. No repetir.
+14. Comparar Patched/Vulnerable.
+
+Los APK serán exactamente los bytes preservados en Fase 7. No se podrán
+recompilar, modificar, resignar, reempaquetar ni regenerar; cualquier hash
+distinto invalida el artefacto como candidato congelado.
 
 ### Fuera de alcance
 
@@ -1438,7 +1490,7 @@ Fase 8
 - [x] Lab mode inicial separado de la pantalla principal.
 - [x] Tema Material 3 claro/oscuro y presentación visual compartida.
 - [x] Iconografía, touch targets y semántica de estados auditados en Fase 6.
-- [ ] Regresión UDP/JNI.
+- [x] Regresión UDP/JNI.
 - [ ] Evidencias finales nuevas.
 - [ ] Limitaciones académicas.
 
@@ -1451,7 +1503,7 @@ Fase 8
 | Selector runtime residual | Media | Medio | Eliminado y verificado estática y funcionalmente en Fase 1 |
 | ASan obsoleto/no soportado desde 2023 y con posibles errores | Media | Alto | Entorno y limitación documentados; HWASan como recomendación actual en entornos compatibles |
 | Falso positivo del marcador | Media | Medio | Texto prudente |
-| Hook debuggable del marker en APK candidatos | Baja | Medio | Auditar en Fase 7 si se conserva o retira |
+| Hook debuggable del marker en APK candidatos | Baja | Medio | Conservado y auditado en Fase 7; puede crear el marker artificialmente y no acredita por sí solo un crash |
 | Estado duplicado | Media | Medio | UDF/ViewModel adaptados |
 | Alcance excesivo | Alta | Medio | Sin backend/audio/plugins |
 | Confusión con CVE real | Media | Alto | Fuentes y ECLB explícito |
@@ -1523,9 +1575,10 @@ Fase 8
 | 2026-08-05 | Borrador inicial consolidado | Pendiente de incorporación y auditoría |
 | 2026-08-05 | Auditoría documental: E-022/E-025, jerarquía Markdown, Fase 8, separación nativa y rutas internas | EN DISEÑO |
 | 2026-08-05 | Revisión final cruzada de diseño/plan, llamadas, checksum, UI histórica, RTCP y fuentes oficiales | EN DISEÑO — pendiente de aprobación |
-| 2026-08-07 | Consolidación del resultado validado de Fase 1 y preparación selectiva del cierre Git | VALIDADA — commit pendiente |
-| 2026-08-07 | Consolidación de UI de mensajería, navegación, estado local y reset de Fase 2 | VALIDADA — cierre Git autorizado |
-| 2026-08-10 | Consolidación de llamadas simuladas y flujo UDP válido de Fase 3 | VALIDADA — cierre Git autorizado |
+| 2026-08-07 | Consolidación del resultado validado de Fase 1 y preparación selectiva del cierre Git | VALIDADA, CERRADA Y PUBLICADA — `26b0638` |
+| 2026-08-07 | Consolidación de UI de mensajería, navegación, estado local y reset de Fase 2 | VALIDADA, CERRADA Y PUBLICADA — `ece2e13` |
+| 2026-08-10 | Consolidación de llamadas simuladas y flujo UDP válido de Fase 3 | VALIDADA, CERRADA Y PUBLICADA — `aa69cba` |
 | 2026-08-10 | Consolidación del rechazo Patched y pantalla de llamada bloqueada de Fase 4 | VALIDADA, CERRADA Y PUBLICADA — `8d7add2` |
 | 2026-08-10 | Persistencia pre-JNI, marker técnico e InterruptedProcessingScreen de Fase 5 | VALIDADA, CERRADA Y PUBLICADA — `e1da09e` |
-| 2026-08-10 | Tema Material 3, claro/oscuro, iconografía y accesibilidad de Fase 6 | VALIDADA — versionada en el commit que contiene esta revisión |
+| 2026-08-10 | Tema Material 3, claro/oscuro, iconografía y accesibilidad de Fase 6 | VALIDADA, CERRADA Y PUBLICADA — `7bbb5ba` |
+| 2026-08-10 | Regresión no destructiva, congelación y preservación externa de cuatro candidatos de Fase 7 | VALIDADA — CANDIDATOS CONGELADOS desde `7bbb5ba` |
