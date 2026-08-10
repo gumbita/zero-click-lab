@@ -1,6 +1,6 @@
 # Diseño final de interfaz y arquitectura de EchoCall Lab
 
-> Estado del documento: **FASES 0, 1, 2, 3 Y 4 — VALIDADAS; FASE 5 — PENDIENTE**
+> Estado del documento: **FASES 0, 1, 2, 3, 4 Y 5 — VALIDADAS; FASE 6 — PENDIENTE**
 >
 > Rama de trabajo: `feature/echocall-ui`
 >
@@ -11,6 +11,9 @@
 > Cierre versionado de Fase 2: `ece2e13584838d1e56da117a634ff53b51faa17b`
 >
 > Cierre versionado de Fase 3: `aa69cba406fa78fd088019ec75dcd33a0ff05856`
+>
+> Cierre versionado de Fase 4: `8d7add26aa22b5884b1ae401e5abe6c4429fd5d6`
+> (`8d7add2 Add patched blocked-call handling`)
 >
 > Fecha de auditoría inicial del repositorio: 2026-08-04
 >
@@ -237,17 +240,18 @@ determinista del simulador; ECLB no contiene un nombre de contacto.
 
 ## 5. Arquitectura Vulnerable/Patched
 
-**CONFIRMADO EN FASES 1, 2, 3 Y 4.** Se mantiene un único módulo de aplicación Android
+**CONFIRMADO EN FASES 1, 2, 3, 4 Y 5.** Se mantiene un único módulo de aplicación Android
 `:app` que genera cuatro variantes, con dos identidades de producto
 Vulnerable/Patched y una Activity compartida. La estructura implementada hasta
-Fase 4 es:
+Fase 5 es:
 
 ```text
-MainActivity (ciclo de vida UDP y setContent)
+MainActivity (ciclo de vida UDP, PendingProcessingStore y setContent)
 └── EchoCallApp
     ├── EchoCallStateHolder (estado simulado de producto en memoria)
     │   ├── CurrentCall (OUTGOING, INCOMING o ACTIVE)
     │   └── BlockedCallAttempt (rechazo previo a establecer llamada)
+    ├── PendingProcessingMarker (estado técnico persistente, separado)
     ├── estado técnico del laboratorio, separado
     └── EchoCallNavHost
         ├── ConversationsScreen (destino inicial)
@@ -258,7 +262,8 @@ MainActivity (ciclo de vida UDP y setContent)
         ├── OutgoingCallScreen
         ├── IncomingCallScreen
         ├── ActiveCallScreen
-        └── BlockedCallScreen
+        ├── BlockedCallScreen
+        └── InterruptedProcessingScreen
 
 NativeBridge.parsePacket() -> libechocall_native.so
 └── parser único fijado por flavor/CMake
@@ -326,8 +331,8 @@ variante `vulnerableAsan` y `patchedAsan`.
 
 ## 8. Base de código compartida
 
-**CONFIRMADO EN FASES 1, 2, 3 Y 4.** El código Kotlin, JNI/C y la UI permanecen
-compartidos en `src/main`. Fases 2, 3 y 4 añadieron allí:
+**CONFIRMADO EN FASES 1 A 5.** El código Kotlin, JNI/C y la UI permanecen
+compartidos en `src/main`. Fases 2 a 5 añadieron allí:
 
 - `EchoCallApp` como raíz Compose y `EchoCallNavHost` como grafo;
 - modelos y datos ficticios bajo `model/` y `data/`;
@@ -335,12 +340,13 @@ compartidos en `src/main`. Fases 2, 3 y 4 añadieron allí:
 - pantallas compartidas de conversaciones, chat, historial, Lab mode y acerca de;
 - modelo, estado y pantallas compartidas para llamadas simuladas;
 - estado y pantalla separados para intentos bloqueados antes de establecer llamada;
+- store, marker técnico persistente y pantalla de procesamiento interrumpido;
 - avatares locales por iniciales.
 
 El receptor UDP, el contrato JNI y el estado técnico del laboratorio se
 conservaron. El estado coordinado de llamada se implementó sin modificar JNI ni
-UDP. El modelo estructurado de resultado nativo y la persistencia del marcador
-siguen pendientes.
+UDP. Preferences DataStore conserva exclusivamente el marker técnico entre
+procesos; no persiste mensajes, conversaciones ni historial.
 
 Los source sets `src/vulnerable` y `src/patched` contendrán solo recursos o
 constantes inevitables de variante. Los source sets de build type conservarán
@@ -418,7 +424,7 @@ JNI antes de implementarlo.
 
 ## 10. Modelo de datos
 
-**CONFIRMADO EN FASES 2 Y 3.** Modelos compartidos mínimos:
+**CONFIRMADO EN FASES 2 A 5.** Modelos compartidos mínimos:
 
 | Modelo | Campos mínimos |
 |---|---|
@@ -428,6 +434,7 @@ JNI antes de implementarlo.
 | `EchoCallUiState` | contactos, mensajes e historial simulado |
 | `CurrentCall` | `contactId`, `direction`, `phase`, `startedAtMillis` |
 | `BlockedCallAttempt` | `id`, `contactId` |
+| `PendingProcessingMarker` | `scenarioId`, `variant`, `packetLength`, `timestamp`, `source` |
 
 Enums implementados:
 
@@ -436,8 +443,8 @@ Enums implementados:
   `CANCELLED`.
 - `CallPhase`: `OUTGOING`, `INCOMING`, `ACTIVE`.
 
-**PROPUESTA PENDIENTE.** `NativeParseResult`, `LabEvent`, `UdpState` y
-`NativeOperationMarker` se incorporarán únicamente en sus fases posteriores.
+**PROPUESTA PENDIENTE.** `NativeParseResult`, `LabEvent` y `UdpState` se
+incorporarán únicamente si una fase posterior los necesita y audita.
 
 **CONFIRMADO EN FASE 3.** El estado de llamada mantiene dirección, fase y
 resultado como conceptos separados:
@@ -450,7 +457,8 @@ resultado como conceptos separados:
 **CONFIRMADO EN FASE 4.** `BLOCKED` se registra sin crear `CurrentCall` cuando
 Patched devuelve `payload_too_large`; `BlockedCallAttempt` representa solo el
 aviso visual asociado. `MISSED` e `INTERRUPTED` permanecen preparados en el
-modelo, pero sus transiciones funcionales corresponden a fases posteriores.
+modelo. Fase 5 no crea automáticamente un `CallRecord` ni una transición
+`INTERRUPTED` al encontrar un marker pendiente.
 
 **CONFIRMADO.** El header ECLB solo contiene `MAGIC`, `VERSION`, `FLAGS`,
 `PACKET_TYPE`, `LENGTH` y `SSRC`, seguido del payload. El campo C
@@ -529,8 +537,9 @@ los registros locales `COMPLETED`, `REJECTED` y `CANCELLED`; Fase 4 incorpora
 
 La dirección será `INCOMING` u `OUTGOING`. El resultado será `COMPLETED`,
 `REJECTED`, `MISSED`, `BLOCKED`, `INTERRUPTED` o `CANCELLED`. Los registros se
-mantendrán solo en memoria de la sesión, salvo la reconstrucción puntual de un
-registro interrumpido desde el marcador persistente al reiniciar.
+mantendrán solo en memoria de la sesión. El marker persistente de Fase 5 es
+estado técnico independiente: no reconstruye historial ni genera
+automáticamente `CallOutcome.INTERRUPTED`.
 
 No habrá agenda del sistema, telefonía real ni estadísticas avanzadas.
 
@@ -615,29 +624,32 @@ garantiza una manifestación concreta.
 
 ### 19.1 Semántica
 
-**DECISIÓN DE DISEÑO.** Justo antes de entrar en JNI se persistirá:
+**CONFIRMADO EN FASE 5.** Antes de entrar en JNI se persiste:
 
 ```text
 pending = true
-variant = VULNERABLE|PATCHED
-origin = UDP
+variant = <applicationId actual>
+source = udp|local_sample|test
 packetLength = <bytes>
 timestamp = <instante>
 scenarioId = voip_control_packet
 ```
 
-Solo tras un retorno normal de JNI se persistirá `pending = false`. Si al
-arrancar permanece `true`, se construirá un registro de sesión
-`INTERRUPTED` y se mostrará `InterruptedProcessingScreen`:
+Solo tras un retorno normal de JNI se completa `clearPending()`. Si al arrancar
+el marker permanece, se crea exclusivamente estado técnico visual y se muestra
+`InterruptedProcessingScreen`; no se construye `CallRecord` ni se añade
+`INTERRUPTED` al historial:
 
-> **Procesamiento anterior interrumpido**
+> **Procesamiento interrumpido**
 >
-> La ejecución anterior no devolvió el control desde el componente nativo.
+> El procesamiento anterior no devolvió el control a EchoCall.
 >
-> Consulta Lab mode y el informe instrumental para determinar la causa.
+> Esto no determina por sí solo la causa de la interrupción. Consulta el Modo
+> Lab y la instrumentación de la ejecución para más detalles.
 
-Acciones: **Abrir Lab mode**, **Descartar aviso** y **Volver a la aplicación**.
-Descartar limpiará explícitamente el marcador pendiente.
+Acciones: **Abrir Modo Lab** y **Cerrar y continuar**. Abrir Lab no limpia el
+marker. Cerrar espera `clearPending()`, elimina el estado visual y vuelve a
+Conversaciones.
 
 ### 19.2 Interpretación prudente
 
@@ -646,16 +658,15 @@ registró un retorno normal. No atribuye por sí solo la causa a ASan,
 `heap-buffer-overflow`, CVE-2019-3568, explotación o RCE. La atribución requiere
 evidencia instrumental externa.
 
-**DECISIÓN DE DISEÑO.** En FASE 5, el gateway escribirá el marcador desde una
-coroutine apropiada y esperará a que la persistencia termine correctamente
+**CONFIRMADO EN FASE 5.** El helper compartido escribe el marker desde una
+coroutine apropiada y espera a que la persistencia termine correctamente
 antes de entrar en JNI, sin bloquear el hilo principal. Tras un retorno normal
-de JNI esperará también la limpieza persistente del marcador. Debe verificarse
-que no quedan falsos positivos por excepciones Kotlin previas a la entrada real;
-el límite del marcador se situará lo más cerca posible de la llamada externa.
+de JNI espera también la limpieza persistente. Las excepciones Kotlin
+controladas intentan limpiar el marker; una terminación sin retorno lo conserva.
 
 ## 20. Lab mode
 
-**DECISIÓN DE DISEÑO.** `LabModeScreen` estará separado y contendrá:
+**CONFIRMADO HASTA FASE 5.** `LabModeScreen` está separado y contiene:
 
 ### A. Escenario
 
@@ -710,8 +721,13 @@ renombran.
 
 - sección actual;
 - último resultado visible;
-- operación anterior incompleta;
+- operación anterior incompleta, con `scenarioId`, `variant`, `packetLength`,
+  `timestamp` y `source` cuando existe marker;
 - Marta Soler como contacto asociado por el simulador.
+
+El texto de Fase 5 aclara que el marker indica que comenzó un procesamiento y
+no se alcanzó la limpieza posterior al retorno normal, sin identificar por sí
+solo la causa.
 
 ### H. Limitaciones
 
@@ -735,10 +751,12 @@ válida:
 ```text
 Datagrama UDP en 43568
 → CONTROL_PACKET_RECEIVED
+→ markPending() completado
 → NATIVE_PARSE_STARTED
 → NativeBridge.parsePacket()
 → libechocall_native.so llama al único parser compilado
 → retorna status=accepted code=ok
+→ clearPending() completado
 → NATIVE_PARSE_OK
 → crea currentCall INCOMING para Marta Soler
 → navega a IncomingCallScreen
@@ -750,24 +768,24 @@ Rechazar. Aceptar y Rechazar cambian únicamente el estado de producto y no
 vuelven a ejecutar JNI. Marta Soler es un mapping fijo del simulador: su nombre
 no procede de ECLB.
 
-**PROPUESTA PENDIENTE PARA FASE 5.** El marcador persistente `pending=true`
-antes de JNI y su limpieza tras retorno normal se añadirán sin alterar este
-orden causal.
+**CONFIRMADO EN FASE 5.** Antes de `NATIVE_PARSE_STARTED`, EchoCall espera a
+que Preferences DataStore complete `markPending()`. Tras el retorno normal JNI
+espera igualmente `clearPending()` antes de tratar `accepted` o `rejected`.
 
 ### 21.2 Oversized en Patched
 
 **CONFIRMADO EN FASE 4.** El orden implementado y validado es:
 
 ```text
-UDP → CONTROL_PACKET_RECEIVED → NATIVE_PARSE_STARTED
-→ NativeBridge.parsePacket() → status=rejected code=payload_too_large
+UDP → CONTROL_PACKET_RECEIVED → markPending() completado
+→ NATIVE_PARSE_STARTED → NativeBridge.parsePacket()
+→ status=rejected code=payload_too_large → clearPending() completado
 → PACKET_REJECTED_INVALID_LENGTH → BlockedCallAttempt
 → BlockedCallScreen + historial INCOMING/BLOCKED
 ```
 
-No se crea `CurrentCall INCOMING` ni se muestra `IncomingCallScreen`. El marcador
-persistente permanece pendiente de Fase 5 y, por tanto, no forma parte de esta
-secuencia validada.
+No se crea `CurrentCall INCOMING` ni se muestra `IncomingCallScreen`. Fase 5
+incorporó el marker sin cambiar el resultado funcional validado en Fase 4.
 
 ### 21.3 Oversized en Vulnerable
 
@@ -794,7 +812,7 @@ de iniciar la siguiente. Este procedimiento se verificó en Fase 1.
 
 ## 22. Persistencia
 
-**CONFIRMADO EN FASE 2 / PROPUESTA POSTERIOR.** Política:
+**CONFIRMADO EN FASES 2 Y 5.** Política:
 
 | Información | Persistencia |
 |---|---|
@@ -806,12 +824,13 @@ de iniciar la siguiente. Este procedimiento se verificó en Fase 1.
 | configuración del parser | compilación; nunca almacenamiento runtime |
 | marcador nativo incompleto | Preferences DataStore privado por app |
 
-Fase 2 implementa únicamente las filas en memoria y los datos precargados. El
+Fase 2 implementó las filas en memoria y los datos precargados. El
 comando **Restablecer datos** reconstruye mensajes, previews, orden e historial
 desde `FakeEchoCallData`, sin modificar parser, JNI, UDP ni resultados de Lab
-mode. No se implementaron DataStore, Room ni persistencia tras `process death`.
+mode. Fase 5 añadió Preferences DataStore solo para
+`PendingProcessingMarker`; no se introdujeron Room ni persistencia de producto.
 
-Preferences DataStore se propone por ser clave-valor, pequeño, transaccional y
+Preferences DataStore se usa por ser clave-valor, pequeño, transaccional y
 compatible con coroutines. La API suspendida `edit` realiza una operación
 read-modify-write atómica; la coroutine completa después de que los datos se
 hayan persistido duraderamente en disco y lanza una excepción si falla la
@@ -823,11 +842,12 @@ normal se esperará igualmente la persistencia de `pending=false`.
 **DECISIÓN DE DISEÑO.** No se introducirá Room. Cada `applicationId` tendrá su
 propio sandbox y marcador. **Restablecer datos simulados** reiniciará mensajes e
 historial de sesión, pero no borrará silenciosamente un marcador pendiente; la
-acción explícita **Descartar aviso** será responsable de ello.
+acción explícita **Cerrar y continuar** es responsable de ello.
 
-**RIESGO.** La semántica de durabilidad y los fallos de escritura se validarán
-antes de depender del marcador. Si DataStore no puede confirmar la escritura,
-no se invocará JNI y Lab mode mostrará un error técnico prudente.
+**CONFIRMADO EN FASE 5.** Si DataStore no confirma la escritura, no se invoca
+JNI. El marker sobrevivió a un `force-stop` y fue detectado al relanzar; esta
+prueba acredita persistencia entre procesos, no protección frente a un crash
+nativo ni la causa de una interrupción.
 
 ## 23. Tema y accesibilidad
 
@@ -941,7 +961,8 @@ autorización expresa.
 - completar detalles de Lab mode;
 - conservar la recuperación UDP;
 - probar oversized únicamente en Patched.
-- **estado: validada; cierre Git pendiente**.
+- **estado: validada, cerrada y publicada en
+  `8d7add26aa22b5884b1ae401e5abe6c4429fd5d6`**.
 
 ### Fase 5 — Operación nativa incompleta
 
@@ -950,7 +971,7 @@ autorización expresa.
 - mostrar aviso, Lab mode y descarte prudentes;
 - validar con simulación no corruptora cuando sea posible;
 - no ejecutar una entrada oversized en Vulnerable.
-- **estado: pendiente**.
+- **estado: validada; versionada en el commit que contiene esta revisión**.
 
 ### Fase 6 — Visual y accesibilidad
 
@@ -964,6 +985,8 @@ autorización expresa.
 - builds desde estado limpio sin borrar artefactos ajenos;
 - muestra válida en ambas apps, oversized solo Patched;
 - ciclo de vida, `EADDRINUSE`, historial, Lab mode y marcador simulado;
+- auditar si el hook debuggable del marker se conserva o se retira de los APK
+  candidatos finales;
 - fijar los APK candidatos y sus hashes.
 - **estado: pendiente**.
 
@@ -972,8 +995,8 @@ autorización expresa.
 - realizar una captura final Patched ASan + oversized sobre el APK congelado;
 - ejecutar Vulnerable ASan + oversized sobre el APK final congelado una única
   vez y solo con autorización expresa;
-- mantener explícito que Patched ASan + oversized también puede ejecutarse en
-  las Fases 4 y 7, sin aplicar a Patched la restricción de ejecución única;
+- mantener Patched ASan + oversized y la única ejecución Vulnerable ASan +
+  oversized reservadas para la evidencia final de Fase 8;
 - hashes previos de APK y muestra, PID antes/después, log completo,
   simbolización y comparación;
 - no reutilizar E-022/E-025 como evidencia de los APK finales.
@@ -1127,14 +1150,36 @@ o CVE-2019-3568. ECLB y la muestra pertenecen al laboratorio.
 
 ### Fase 5 — Operación nativa incompleta
 
-Automáticas previstas: serialización del marcador, orden
-`write pending → JNI → clear`, fallo de persistencia, retorno normal, detección
-al iniciar, descarte y reconstrucción de historial; gateway falso que simule no
-limpiar el marcador sin corromper memoria.
+**VALIDADA.** Se incorporó
+`androidx.datastore:datastore-preferences:1.2.1`,
+`PendingProcessingMarker`, `PendingProcessingStore`, lectura al iniciar,
+`InterruptedProcessingScreen` e integración en Lab mode. La única ruta Kotlin
+de parseo espera `markPending()` antes de `NATIVE_PARSE_STARTED` y JNI; después
+de todo retorno normal espera `clearPending()` antes de tratar `accepted` o
+`rejected`.
 
-Manuales previstas: sembrar el estado interrumpido mediante mecanismo de test
-no destructivo, reiniciar, leer el aviso, abrir Lab mode y descartarlo. No
-ejecutar overflow.
+La validación controlada utilizó el extra interno debuggable
+`com.echocall.lab.extra.PENDING_MARKER_TEST_COMMAND`, con las operaciones seguras
+`mark`, `read` y `clear`. No ejecuta JNI ni está expuesto como botón. El estado
+inicial fue `marker=null` y Conversaciones. Se persistió
+`scenarioId=voip_control_packet`, `variant=com.echocall.lab.patched`,
+`packetLength=17` y `source=test`; tras `force-stop` y relanzamiento apareció
+`InterruptedProcessingScreen`, Lab mostró sus campos y la interpretación
+prudente, y **Cerrar y continuar** registró
+`INTERRUPTED_MARKER_CLEARED_BY_USER`. El siguiente relanzamiento volvió a
+`marker=null` y Conversaciones.
+
+Los PID observados fueron 8790, 8878, 8948 y 9139. Los cambios se debieron a
+`force-stop` y relanzamientos controlados, no a un crash. No se usaron UDP, JNI
+en la simulación, muestras, oversized ni ASan.
+
+**LIMITACIÓN.** El marker demuestra solo que un procesamiento marcado comenzó
+y no alcanzó el punto normal de limpieza. No identifica la causa ni acredita
+crash nativo, `heap-buffer-overflow`, `SIGABRT`, ASan, explotación, RCE o
+control del flujo. Fase 5 tampoco demuestra comportamiento oversized
+Vulnerable ni equivalencia exacta con WhatsApp o CVE-2019-3568; no validó el
+escenario vulnerable real y no crea automáticamente un registro
+`CallOutcome.INTERRUPTED`.
 
 ### Fase 6 — Visual y accesibilidad
 
@@ -1159,8 +1204,8 @@ entorno, verificación de package/ABI/parser y simbolización del log.
 
 Manuales previstas: captura final Patched ASan oversized sobre el APK congelado
 y, solo tras nueva autorización expresa, una única ejecución Vulnerable ASan
-oversized sobre su APK final congelado. Patched ASan + oversized puede ejecutarse
-en las Fases 4, 7 y 8 y no está sujeto a unicidad. Conservar comandos,
+oversized sobre su APK final congelado. Ambas ejecuciones ASan oversized quedan
+reservadas para Fase 8. Conservar comandos,
 stdout/stderr, exit codes, timestamps, PID, log íntegro y hashes.
 
 ## 28. Criterios de aceptación
@@ -1207,9 +1252,9 @@ stdout/stderr, exit codes, timestamps, PID, log íntegro y hashes.
 - [x] Patched acepta entrada válida y rechaza oversized antes de la copia;
 - [x] Patched muestra llamada bloqueada y registra `BLOCKED`;
 - [x] Vulnerable acepta entrada válida;
-- [ ] el marcador se escribe antes de JNI, se limpia tras retorno y se detecta
+- [x] el marcador se escribe antes de JNI, se limpia tras retorno y se detecta
       después de un no retorno;
-- [ ] el aviso interrumpido no atribuye automáticamente una causa.
+- [x] el aviso interrumpido no atribuye automáticamente una causa.
 
 ### Comunicación y límites
 
@@ -1239,6 +1284,7 @@ stdout/stderr, exit codes, timestamps, PID, log íntegro y hashes.
 | temporizadores sobreviven a la pantalla | duración/estado incorrectos | reloj inyectable y jobs cancelados por estado/ciclo de vida |
 | marcador no llega a disco antes del abort | falso negativo | esperar transacción DataStore antes de JNI y probar el orden |
 | marcador queda pendiente por fallo no nativo | falso positivo | situarlo junto al gateway y redactar inferencia limitada |
+| hook interno debuggable del marker permanece en candidatos finales | superficie de prueba innecesaria | auditar en Fase 7 si se conserva o retira tras cumplir su función |
 | reset borra evidencia diagnóstica | pérdida de contexto | descarte explícito separado del reset simulado |
 | estado solo en memoria se pierde al matar proceso | mensajes/historial desaparecen | comportamiento aceptado y explicado; solo el marcador persiste |
 | detalles técnicos filtran a UI normal | experiencia incoherente | modelos normalizados para UI y detalles completos solo en Lab mode |

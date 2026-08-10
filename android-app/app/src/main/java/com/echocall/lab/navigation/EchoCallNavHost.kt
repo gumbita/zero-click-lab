@@ -2,6 +2,7 @@ package com.echocall.lab.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -12,18 +13,24 @@ import com.echocall.lab.ui.calls.ActiveCallScreen
 import com.echocall.lab.ui.calls.BlockedCallScreen
 import com.echocall.lab.ui.calls.CallHistoryScreen
 import com.echocall.lab.ui.calls.IncomingCallScreen
+import com.echocall.lab.ui.calls.InterruptedProcessingScreen
 import com.echocall.lab.ui.calls.OutgoingCallScreen
 import com.echocall.lab.ui.chat.ChatScreen
 import com.echocall.lab.ui.conversations.ConversationsScreen
 import com.echocall.lab.ui.lab.LabModeScreen
 import com.echocall.lab.ui.lab.LabModeUiState
 import com.echocall.lab.model.CallPhase
+import com.echocall.lab.data.FakeEchoCallData
+import com.echocall.lab.model.PendingProcessingMarker
+import com.echocall.lab.model.VOIP_CONTROL_PACKET_SCENARIO_ID
 import com.echocall.lab.ui.state.EchoCallUiState
+import kotlinx.coroutines.launch
 
 @Composable
 fun EchoCallNavHost(
     productUiState: EchoCallUiState,
     labModeUiState: LabModeUiState,
+    interruptedProcessingMarker: PendingProcessingMarker?,
     onSendMessage: (String, String) -> Unit,
     onResetData: () -> Unit,
     onStartOutgoingCall: (String) -> Boolean,
@@ -33,12 +40,22 @@ fun EchoCallNavHost(
     onRejectIncomingCall: () -> Unit,
     onEndActiveCall: () -> Unit,
     onCloseBlockedCall: () -> Unit,
+    onClearInterruptedProcessing: suspend () -> Boolean,
     onRetryUdpReceiver: () -> Unit,
     onProcessValidSample: () -> Unit,
 ) {
     val navController = rememberNavController()
     val currentCall = productUiState.currentCall
     val blockedCallAttempt = productUiState.blockedCallAttempt
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(interruptedProcessingMarker?.timestamp) {
+        if (interruptedProcessingMarker != null) {
+            navController.navigate(EchoCallDestination.INTERRUPTED_PROCESSING) {
+                launchSingleTop = true
+            }
+        }
+    }
 
     LaunchedEffect(blockedCallAttempt?.id) {
         if (blockedCallAttempt != null) {
@@ -92,7 +109,9 @@ fun EchoCallNavHost(
                     navController.navigate(EchoCallDestination.ABOUT)
                 },
                 onResetData = onResetData,
-                resetEnabled = currentCall == null && blockedCallAttempt == null,
+                resetEnabled = currentCall == null &&
+                    blockedCallAttempt == null &&
+                    interruptedProcessingMarker == null,
             )
         }
         composable(
@@ -199,6 +218,33 @@ fun EchoCallNavHost(
                     onClose = {
                         onCloseBlockedCall()
                         navController.returnToConversations()
+                    },
+                )
+            }
+        }
+        composable(EchoCallDestination.INTERRUPTED_PROCESSING) {
+            val marker = interruptedProcessingMarker
+            val contact = marker
+                ?.takeIf {
+                    it.scenarioId == VOIP_CONTROL_PACKET_SCENARIO_ID
+                }
+                ?.let {
+                    productUiState.contact(
+                        FakeEchoCallData.UDP_SCENARIO_CONTACT_ID,
+                    )
+                }
+            if (marker != null && contact != null) {
+                InterruptedProcessingScreen(
+                    contact = contact,
+                    onOpenLab = {
+                        navController.navigate(EchoCallDestination.LAB)
+                    },
+                    onClose = {
+                        coroutineScope.launch {
+                            if (onClearInterruptedProcessing()) {
+                                navController.returnToConversations()
+                            }
+                        }
                     },
                 )
             }

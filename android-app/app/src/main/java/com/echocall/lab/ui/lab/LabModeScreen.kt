@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.echocall.lab.model.PendingProcessingMarker
 
 data class LabModeUiState(
     val nativeStatus: String,
@@ -34,6 +35,8 @@ data class LabModeUiState(
     val incomingCallEvents: List<String>,
     val callAction: String,
     val validSampleResult: String,
+    val pendingProcessingMarker: PendingProcessingMarker?,
+    val pendingProcessingStatus: String,
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -86,6 +89,30 @@ fun LabModeScreen(
             if (state.udpRetryAvailable) {
                 Button(onClick = onRetryUdpReceiver) {
                     Text("Retry UDP receiver")
+                }
+            }
+            Text(
+                text = "Último procesamiento pendiente/interrumpido",
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Text(state.pendingProcessingStatus)
+            state.pendingProcessingMarker?.let { marker ->
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        Text("scenarioId: ${marker.scenarioId}")
+                        Text("variant: ${marker.variant}")
+                        Text("packetLength: ${marker.packetLength}")
+                        Text("timestamp: ${marker.timestamp}")
+                        Text("source: ${marker.source}")
+                        Text(
+                            "El marker indica que un procesamiento comenzó y no " +
+                                "alcanzó la limpieza posterior al retorno normal. " +
+                                "No identifica por sí solo la causa.",
+                        )
+                    }
                 }
             }
             if (state.showIncomingCall) {
