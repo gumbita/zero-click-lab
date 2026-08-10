@@ -100,6 +100,34 @@ internal fun EchoCallApp(
                             "Accepted datagram retained in Lab: call already in progress",
                         )
                     }
+                } else if (
+                    result.startsWith(
+                        "status=rejected code=payload_too_large",
+                    )
+                ) {
+                    incomingCallEvents += "PACKET_REJECTED_INVALID_LENGTH"
+                    Log.i(UDP_LOG_TAG, "PACKET_REJECTED_INVALID_LENGTH")
+                    if (
+                        productStateHolder
+                            .recordBlockedIncomingCallFromRejectedUdp()
+                    ) {
+                        callAction =
+                            "La variante Patched rechazó la entrada por longitud " +
+                                "antes de establecer la llamada simulada."
+                        Log.i(
+                            UDP_LOG_TAG,
+                            "Blocked call state created for simulator contact " +
+                                "Marta Soler after rejected payload_too_large",
+                        )
+                    } else {
+                        callAction =
+                            "Entrada rechazada conservada en Lab: ya existe " +
+                                "una llamada o aviso bloqueado."
+                        Log.i(
+                            UDP_LOG_TAG,
+                            "Rejected datagram retained in Lab: call UI busy",
+                        )
+                    }
                 } else {
                     incomingCallEvents += "PACKET_REJECTED"
                     callAction = "Rejected packet retained in Lab"
@@ -139,6 +167,7 @@ internal fun EchoCallApp(
             onAcceptIncomingCall = productStateHolder::acceptIncomingCall,
             onRejectIncomingCall = productStateHolder::rejectIncomingCall,
             onEndActiveCall = productStateHolder::endActiveCall,
+            onCloseBlockedCall = productStateHolder::clearBlockedCallAttempt,
             onRetryUdpReceiver = onRetryUdpReceiver,
             onProcessValidSample = {
                 validSampleResult = context.assets

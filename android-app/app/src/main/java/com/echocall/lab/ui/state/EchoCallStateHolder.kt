@@ -12,6 +12,7 @@ import com.echocall.lab.model.CallDirection
 import com.echocall.lab.model.CallOutcome
 import com.echocall.lab.model.CallPhase
 import com.echocall.lab.model.CallRecord
+import com.echocall.lab.model.BlockedCallAttempt
 import com.echocall.lab.model.Contact
 import com.echocall.lab.model.CurrentCall
 import com.echocall.lab.model.Message
@@ -23,6 +24,7 @@ data class EchoCallUiState(
     val messages: List<Message>,
     val callHistory: List<CallRecord>,
     val currentCall: CurrentCall?,
+    val blockedCallAttempt: BlockedCallAttempt?,
 ) {
     fun contact(contactId: String): Contact? =
         contacts.firstOrNull { contact -> contact.id == contactId }
@@ -76,7 +78,7 @@ class EchoCallStateHolder {
     }
 
     fun resetSimulatedData() {
-        if (uiState.currentCall != null) {
+        if (uiState.currentCall != null || uiState.blockedCallAttempt != null) {
             return
         }
 
@@ -114,7 +116,7 @@ class EchoCallStateHolder {
     }
 
     fun startIncomingCallFromAcceptedUdp(): Boolean {
-        if (uiState.currentCall != null) {
+        if (uiState.currentCall != null || uiState.blockedCallAttempt != null) {
             return false
         }
 
@@ -133,6 +135,43 @@ class EchoCallStateHolder {
             ),
         )
         return true
+    }
+
+    fun recordBlockedIncomingCallFromRejectedUdp(): Boolean {
+        if (uiState.currentCall != null || uiState.blockedCallAttempt != null) {
+            return false
+        }
+
+        // ECLB carries no contact name; Marta is a deterministic simulator mapping.
+        val contactId = FakeEchoCallData.UDP_SCENARIO_CONTACT_ID
+        if (uiState.contact(contactId) == null) {
+            return false
+        }
+
+        val attempt = BlockedCallAttempt(
+            id = nextCallId(),
+            contactId = contactId,
+        )
+        val record = CallRecord(
+            id = "${attempt.id}_${CallOutcome.BLOCKED}",
+            contactId = contactId,
+            direction = CallDirection.INCOMING,
+            outcome = CallOutcome.BLOCKED,
+            timestamp = "Hoy, ${currentTime()}",
+        )
+        uiState = uiState.copy(
+            callHistory = listOf(record) + uiState.callHistory,
+            blockedCallAttempt = attempt,
+        )
+        return true
+    }
+
+    fun clearBlockedCallAttempt() {
+        if (uiState.blockedCallAttempt == null) {
+            return
+        }
+
+        uiState = uiState.copy(blockedCallAttempt = null)
     }
 
     fun acceptIncomingCall() {
@@ -221,6 +260,7 @@ private fun createInitialUiState(): EchoCallUiState = EchoCallUiState(
     messages = FakeEchoCallData.messages.map { message -> message.copy() },
     callHistory = FakeEchoCallData.callRecords.map { record -> record.copy() },
     currentCall = null,
+    blockedCallAttempt = null,
 )
 
 private val MESSAGE_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm")

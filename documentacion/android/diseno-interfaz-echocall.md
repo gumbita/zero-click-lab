@@ -1,6 +1,6 @@
 # Diseño final de interfaz y arquitectura de EchoCall Lab
 
-> Estado del documento: **FASES 0, 1, 2 Y 3 — VALIDADAS; FASE 4 — PENDIENTE**
+> Estado del documento: **FASES 0, 1, 2, 3 Y 4 — VALIDADAS; FASE 5 — PENDIENTE**
 >
 > Rama de trabajo: `feature/echocall-ui`
 >
@@ -9,6 +9,8 @@
 > Cierre versionado de Fase 1: `26b0638442a5f31b134ba259a8afcbfc0d40d35d`
 >
 > Cierre versionado de Fase 2: `ece2e13584838d1e56da117a634ff53b51faa17b`
+>
+> Cierre versionado de Fase 3: `aa69cba406fa78fd088019ec75dcd33a0ff05856`
 >
 > Fecha de auditoría inicial del repositorio: 2026-08-04
 >
@@ -235,16 +237,17 @@ determinista del simulador; ECLB no contiene un nombre de contacto.
 
 ## 5. Arquitectura Vulnerable/Patched
 
-**CONFIRMADO EN FASES 1, 2 Y 3.** Se mantiene un único módulo de aplicación Android
+**CONFIRMADO EN FASES 1, 2, 3 Y 4.** Se mantiene un único módulo de aplicación Android
 `:app` que genera cuatro variantes, con dos identidades de producto
 Vulnerable/Patched y una Activity compartida. La estructura implementada hasta
-Fase 3 es:
+Fase 4 es:
 
 ```text
 MainActivity (ciclo de vida UDP y setContent)
 └── EchoCallApp
     ├── EchoCallStateHolder (estado simulado de producto en memoria)
-    │   └── CurrentCall (OUTGOING, INCOMING o ACTIVE)
+    │   ├── CurrentCall (OUTGOING, INCOMING o ACTIVE)
+    │   └── BlockedCallAttempt (rechazo previo a establecer llamada)
     ├── estado técnico del laboratorio, separado
     └── EchoCallNavHost
         ├── ConversationsScreen (destino inicial)
@@ -254,7 +257,8 @@ MainActivity (ciclo de vida UDP y setContent)
         ├── AboutScreen
         ├── OutgoingCallScreen
         ├── IncomingCallScreen
-        └── ActiveCallScreen
+        ├── ActiveCallScreen
+        └── BlockedCallScreen
 
 NativeBridge.parsePacket() -> libechocall_native.so
 └── parser único fijado por flavor/CMake
@@ -322,14 +326,15 @@ variante `vulnerableAsan` y `patchedAsan`.
 
 ## 8. Base de código compartida
 
-**CONFIRMADO EN FASES 1, 2 Y 3.** El código Kotlin, JNI/C y la UI permanecen
-compartidos en `src/main`. Fases 2 y 3 añadieron allí:
+**CONFIRMADO EN FASES 1, 2, 3 Y 4.** El código Kotlin, JNI/C y la UI permanecen
+compartidos en `src/main`. Fases 2, 3 y 4 añadieron allí:
 
 - `EchoCallApp` como raíz Compose y `EchoCallNavHost` como grafo;
 - modelos y datos ficticios bajo `model/` y `data/`;
 - `EchoCallStateHolder` como única fuente mutable del estado simulado;
 - pantallas compartidas de conversaciones, chat, historial, Lab mode y acerca de;
 - modelo, estado y pantallas compartidas para llamadas simuladas;
+- estado y pantalla separados para intentos bloqueados antes de establecer llamada;
 - avatares locales por iniciales.
 
 El receptor UDP, el contrato JNI y el estado técnico del laboratorio se
@@ -422,6 +427,7 @@ JNI antes de implementarlo.
 | `CallRecord` | `id`, `contactId`, `direction`, `outcome`, `timestamp` |
 | `EchoCallUiState` | contactos, mensajes e historial simulado |
 | `CurrentCall` | `contactId`, `direction`, `phase`, `startedAtMillis` |
+| `BlockedCallAttempt` | `id`, `contactId` |
 
 Enums implementados:
 
@@ -441,7 +447,9 @@ resultado como conceptos separados:
 - `INCOMING → ACTIVE → COMPLETED` después de aceptar y finalizar;
 - `INCOMING → REJECTED` al rechazar.
 
-Los resultados `MISSED`, `BLOCKED` e `INTERRUPTED` permanecen preparados en el
+**CONFIRMADO EN FASE 4.** `BLOCKED` se registra sin crear `CurrentCall` cuando
+Patched devuelve `payload_too_large`; `BlockedCallAttempt` representa solo el
+aviso visual asociado. `MISSED` e `INTERRUPTED` permanecen preparados en el
 modelo, pero sus transiciones funcionales corresponden a fases posteriores.
 
 **CONFIRMADO.** El header ECLB solo contiene `MAGIC`, `VERSION`, `FLAGS`,
@@ -512,12 +520,12 @@ no representa el vector de CVE-2019-3568.
 
 ## 14. Historial
 
-**CONFIRMADO EN FASES 2 Y 3.** `CallHistoryScreen` es accesible desde la barra
+**CONFIRMADO EN FASES 2, 3 Y 4.** `CallHistoryScreen` es accesible desde la barra
 superior y muestra avatar, contacto, dirección y resultado separados, con
 fecha/hora ficticia. Sus registros iniciales forman parte del estado compartido
 en memoria y se restauran junto con conversaciones y mensajes. Fase 3 incorpora
-primero los registros locales `COMPLETED`, `REJECTED` y `CANCELLED` generados por
-los flujos simulados.
+los registros locales `COMPLETED`, `REJECTED` y `CANCELLED`; Fase 4 incorpora
+`BLOCKED` para el rechazo automático previo a establecer la llamada simulada.
 
 La dirección será `INCOMING` u `OUTGOING`. El resultado será `COMPLETED`,
 `REJECTED`, `MISSED`, `BLOCKED`, `INTERRUPTED` o `CANCELLED`. Los registros se
@@ -577,21 +585,26 @@ llamada del sistema operativo.
 
 ## 18. Llamada bloqueada
 
-**DECISIÓN DE DISEÑO.** En Patched, un retorno
-`status=rejected code=payload_too_large` procedente de UDP abrirá
-`BlockedCallScreen` y añadirá `BLOCKED` al historial.
+**CONFIRMADO EN FASE 4.** En Patched, un retorno
+`status=rejected code=payload_too_large` procedente de UDP crea un
+`BlockedCallAttempt`, abre `BlockedCallScreen` y añade al historial un registro
+con dirección `INCOMING` y resultado `BLOCKED`. No crea `CurrentCall INCOMING`.
+Marta Soler es el mapping local del simulador; su nombre no procede de ECLB.
 
 Texto normal:
 
 > **Llamada bloqueada**
 >
-> EchoCall ha rechazado automáticamente una señal de llamada no válida antes de
-> cualquier acción del usuario.
+> EchoCall rechazó esta llamada antes de establecerla.
 
-Acciones: **Volver** y **Ver detalles**. Ver detalles abrirá Lab mode.
+La única acción es **Cerrar**. Al cerrarla se elimina el estado visual
+`BlockedCallAttempt`, pero el registro `BLOCKED` permanece en el historial de la
+sesión.
 
 La pantalla normal no mostrará longitudes, `heap-buffer-overflow` o `memcpy`.
-No afirmará que la aplicación sea completamente segura.
+No muestra Aceptar o Rechazar y no afirmará que la aplicación sea completamente
+segura. `REJECTED` queda reservado al rechazo manual de una llamada válida;
+`BLOCKED` representa el rechazo de Patched antes de establecerla.
 
 **LIMITACIÓN.** En Vulnerable ASan, la muestra oversized puede terminar el
 proceso antes de que Kotlin reciba un resultado. No puede mostrarse una
@@ -688,11 +701,10 @@ módulo 256 calculada por el parser, nunca como campo del header ECLB.
 - `PACKET_REJECTED`;
 - `NATIVE_PARSE_ERROR`.
 
-Además existe `PACKET_REJECTED_INVALID_LENGTH` en la simulación local anterior,
-pero no en la ruta UDP consolidada. Antes de conservar, retirar o especializar
-ese ID se auditarán sus consumidores. Lab mode mostrará una etiqueta española,
-el ID técnico exacto y el orden temporal; los códigos no se renombrarán sin una
-decisión explícita.
+**CONFIRMADO EN FASE 4.** `PACKET_REJECTED_INVALID_LENGTH` se conserva en la
+ruta UDP para el resultado exacto `rejected/payload_too_large`. Lab mode muestra
+el resultado JNI completo, el ID técnico y el orden observado; los códigos no se
+renombran.
 
 ### G. Estado de aplicación
 
@@ -744,11 +756,18 @@ orden causal.
 
 ### 21.2 Oversized en Patched
 
+**CONFIRMADO EN FASE 4.** El orden implementado y validado es:
+
 ```text
-UDP → marcador pending=true → JNI → safe_parse_packet
-→ payload_too_large → marcador pending=false
-→ BlockedCallScreen → historial BLOCKED
+UDP → CONTROL_PACKET_RECEIVED → NATIVE_PARSE_STARTED
+→ NativeBridge.parsePacket() → status=rejected code=payload_too_large
+→ PACKET_REJECTED_INVALID_LENGTH → BlockedCallAttempt
+→ BlockedCallScreen + historial INCOMING/BLOCKED
 ```
+
+No se crea `CurrentCall INCOMING` ni se muestra `IncomingCallScreen`. El marcador
+persistente permanece pendiente de Fase 5 y, por tanto, no forma parte de esta
+secuencia validada.
 
 ### 21.3 Oversized en Vulnerable
 
@@ -922,7 +941,7 @@ autorización expresa.
 - completar detalles de Lab mode;
 - conservar la recuperación UDP;
 - probar oversized únicamente en Patched.
-- **estado: pendiente**.
+- **estado: validada; cierre Git pendiente**.
 
 ### Fase 5 — Operación nativa incompleta
 
@@ -1074,12 +1093,37 @@ válida concreta.
 
 ### Fase 4 — Integración Patched
 
-Automáticas previstas: mapeo exacto de `payload_too_large`, navegación a
-Blocked, historial `BLOCKED`, Ver detalles y regresión del receptor UDP.
+**VALIDADA.** Se implementaron `BlockedCallAttempt` y `BlockedCallScreen`, con
+navegación centralizada, historial `INCOMING/BLOCKED` y resultado técnico
+completo solo en Lab mode. El estado bloqueado es independiente de `CurrentCall`:
+cerrar la pantalla limpia el aviso visual y conserva el historial. `REJECTED`
+continúa significando rechazo manual de una llamada válida.
 
-Manuales previstas: muestra válida Patched; oversized solo Patched; proceso
-vivo, pantalla sin detalles técnicos, Lab mode con resultado completo y retry
-tras `EADDRINUSE`.
+La ejecución autoritativa utilizó únicamente Patched Debug
+(`com.echocall.lab.patched`) y
+`samples/malformed/oversized_complete_payload.bin` (77 bytes, SHA-256
+`516F7C6A9B6237274F33F8AB01057DFDBD1137DF0C898F70B5AFB6B7DA742ABA`). El
+resultado fue `status=rejected code=payload_too_large declared_length=64
+actual_length=64 maximum=32`; el PID permaneció 4569.
+
+El orden observado fue: datagrama a las 10:49:46.313,
+`CONTROL_PACKET_RECEIVED` y `NATIVE_PARSE_STARTED` a las 10:49:46.391, retorno
+`rejected/payload_too_large` a las 10:49:46.447,
+`PACKET_REJECTED_INVALID_LENGTH` a las 10:49:46.449, creación del estado
+bloqueado a las 10:49:46.510 y presentación de `BlockedCallScreen` a las
+10:49:47.085. Son observaciones de esta ejecución concreta, no una garantía
+universal del scheduler.
+
+El balance fue un oversized enviado, un datagrama recibido, un
+`NATIVE_PARSE_STARTED`, un `payload_too_large`, un
+`PACKET_REJECTED_INVALID_LENGTH`, una pantalla bloqueada y un registro
+`BLOCKED`; hubo cero `NATIVE_PARSE_OK`, crashes/fatal, informes ASan y ejecuciones
+Vulnerable. No se presentó `IncomingCallScreen`.
+
+**LIMITACIÓN.** Esta observación demuestra que Patched rechazó esta muestra y el
+proceso permaneció vivo. No demuestra seguridad general, mitigación completa,
+bloqueo de un exploit real, RCE, explotación o equivalencia exacta con WhatsApp
+o CVE-2019-3568. ECLB y la muestra pertenecen al laboratorio.
 
 ### Fase 5 — Operación nativa incompleta
 
@@ -1160,8 +1204,8 @@ stdout/stderr, exit codes, timestamps, PID, log íntegro y hashes.
 
 - [x] ambas apps conservan `43568/UDP` y se prueban secuencialmente;
 - [ ] se preservan ciclo de vida, cola, escucha única, `EADDRINUSE` y Retry;
-- [ ] Patched acepta entrada válida y rechaza oversized antes de la copia;
-- [ ] Patched muestra llamada bloqueada y registra `BLOCKED`;
+- [x] Patched acepta entrada válida y rechaza oversized antes de la copia;
+- [x] Patched muestra llamada bloqueada y registra `BLOCKED`;
 - [x] Vulnerable acepta entrada válida;
 - [ ] el marcador se escribe antes de JNI, se limpia tras retorno y se detecta
       después de un no retorno;

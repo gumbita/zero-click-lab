@@ -1,15 +1,16 @@
 # Plan de implementación de EchoCall Lab Vulnerable/Patched
 
-- **Estado general:** FASES 0, 1, 2 Y 3 VALIDADAS; FASE 4 PENDIENTE.
+- **Estado general:** FASES 0, 1, 2, 3 Y 4 VALIDADAS; FASE 5 PENDIENTE.
 - **Rama prevista:** `feature/echocall-ui`.
 - **Línea base protegida:** `8b20ffed4ef3ef5fb4b4f22c67e8853ebef1065c`.
 - **Cierre versionado de Fase 1:** `26b0638442a5f31b134ba259a8afcbfc0d40d35d`.
 - **Cierre versionado de Fase 2:** `ece2e13584838d1e56da117a634ff53b51faa17b`.
+- **Cierre versionado de Fase 3:** `aa69cba406fa78fd088019ec75dcd33a0ff05856`.
 - **Documento asociado:** `documentacion/android/diseno-interfaz-echocall.md`.
 - **Auditoría inicial del repositorio:** 2026-08-04.
 - **Revisión y consolidación documental:** 2026-08-10.
-- **Alcance de este cierre:** Fase 3, sus dos documentos vinculantes y las 12
-  rutas funcionales aprobadas; Fase 4 permanece fuera de alcance.
+- **Alcance de este cierre:** Fase 4, sus dos documentos vinculantes y las siete
+  rutas funcionales aprobadas; Fase 5 permanece fuera de alcance.
 
 > Ninguna fase posterior debe iniciarse sin autorización expresa después de revisar la fase anterior.
 
@@ -85,8 +86,9 @@ que:
 La matriz de variantes, las identidades y la separación CMake/JNI dejaron de ser
 objetivos futuros al completarse la Fase 1. La navegación y el estado simulado en
 memoria se implementaron en Fase 2. Fase 3 añadió las pantallas y el estado de
-llamada simulada. El marcador persistente, los flujos oversized y los APK
-finales congelados siguen pendientes de fases posteriores.
+llamada simulada. Fase 4 integró el rechazo oversized exclusivamente en Patched.
+El marcador persistente, el escenario oversized Vulnerable y los APK finales
+congelados siguen pendientes de fases posteriores.
 
 ### 2.7. Resultado consolidado de Fase 1
 
@@ -123,6 +125,15 @@ nombre no está contenido en el datagrama. Aceptar y Rechazar operan sobre el
 estado compartido y no vuelven a ejecutar JNI. Los resultados `COMPLETED`,
 `REJECTED` y la cancelación local `CANCELLED` se integran en el historial.
 
+### 2.10. Resultado consolidado de Fase 4
+
+**HECHO VALIDADO.** `BlockedCallAttempt` permanece separado de `CurrentCall`.
+Cuando Patched devuelve `status=rejected code=payload_too_large`, la aplicación
+registra `PACKET_REJECTED_INVALID_LENGTH`, crea el aviso bloqueado para el mapping
+local de Marta Soler y añade `INCOMING/BLOCKED` al historial sin mostrar
+`IncomingCallScreen`. Cerrar `BlockedCallScreen` elimina el aviso visual, no el
+registro de sesión. El resultado JNI completo permanece disponible en Lab mode.
+
 ## 3. Reglas generales
 
 1. Una fase por cambio lógico.
@@ -158,7 +169,7 @@ APK existentes
 XLSX pendiente
 ```
 
-En el cierre de Fase 2 se autorizan las 16 rutas funcionales auditadas y estos
+En el cierre de Fase 4 se autorizan las siete rutas funcionales auditadas y estos
 dos documentos:
 
 ```text
@@ -318,8 +329,8 @@ Un commit por fase validada. No crear commit antes de la revisión de la usuaria
 | 0 — Diseño y planificación | VALIDADA | — | Completada | No aplica | Markdown | Completada |
 | 1 — Arquitectura de variantes | VALIDADA | `26b0638` | Completada | Completada | Entrada válida; sin oversized | Cerrada y publicada |
 | 2 — Modelos y navegación | VALIDADA | `ece2e13` | Completada | Completada | Capturas temporales | Cerrada y publicada; sin UDP ni muestras |
-| 3 — Mensajería y llamadas normales | VALIDADA | Cierre actual | Completada | Completada | Entrada válida | Flujos local y UDP válido; cero oversized |
-| 4 — Integración Patched | PENDIENTE | — | Pendiente | Pendiente | Patched oversized | — |
+| 3 — Mensajería y llamadas normales | VALIDADA | `aa69cba` | Completada | Completada | Entrada válida | Cerrada y publicada; cero oversized |
+| 4 — Integración Patched | VALIDADA | Cierre actual | Completada | Completada | Patched oversized | Rechazo y pantalla bloqueada; cierre Git pendiente |
 | 5 — Operación nativa incompleta | PENDIENTE | — | Pendiente | Pendiente | Sin entrada oversized vulnerable | — |
 | 6 — Visual y accesibilidad | PENDIENTE | — | Pendiente | Pendiente | Capturas | — |
 | 7 — Congelación y regresión no destructiva | PENDIENTE | — | Pendiente | Pendiente | Patched oversized y controles válidos | — |
@@ -757,7 +768,8 @@ válida concreta.
 
 ### Punto de parada
 
-Fase 3 está validada. Detenerse tras el cierre Git y no iniciar Fase 4.
+Fase 3 quedó validada y versionada en `aa69cba`; Fase 4 se inició únicamente
+después de su aprobación.
 
 ### Checklist
 
@@ -765,8 +777,8 @@ Fase 3 está validada. Detenerse tras el cierre Git y no iniciar Fase 4.
 - [x] Automática
 - [x] Manual
 - [x] Revisada
-- [ ] Commit
-- [ ] Push
+- [x] Commit
+- [x] Push
 
 ## 14. Fase 4 — Integración Patched
 
@@ -782,11 +794,15 @@ Conectar `payload_too_large` con Llamada bloqueada, historial y Lab mode.
 
 ### Alcance autorizado
 
-- `BlockedCallScreen`;
-- historial `BLOCKED`;
-- Ver detalles;
-- Lab mode completo;
-- recuperación UDP preservada.
+**IMPLEMENTADO Y VALIDADO.** Fase 4 incluyó:
+
+- `BlockedCallAttempt` separado de `CurrentCall`;
+- `BlockedCallScreen` con una única acción **Cerrar**;
+- navegación centralizada tras `rejected/payload_too_large`;
+- historial con dirección `INCOMING` y resultado `BLOCKED`;
+- mapping local a Marta Soler, sin atribuir el nombre a ECLB;
+- resultado JNI completo y evento técnico conservados en Lab mode;
+- eliminación del aviso visual al cerrar, conservando el registro en memoria.
 
 ### Fuera de alcance
 
@@ -796,9 +812,11 @@ Conectar `payload_too_large` con Llamada bloqueada, historial y Lab mode.
 
 ### Archivos previstos
 
-- pantallas, historial, estado y Lab mode compartidos creados en fases anteriores;
-- gateway JNI compartido y mapeo del resultado nativo;
-- `native-core/src/safe_parser.c`, solo para inspección y regresión salvo autorización técnica expresa.
+Las siete rutas funcionales validadas son `BlockedCallAttempt.kt`,
+`BlockedCallScreen.kt`, `EchoCallDestination.kt`, `EchoCallNavHost.kt`,
+`EchoCallApp.kt`, `LabModeScreen.kt` y `EchoCallStateHolder.kt`.
+`NativeBridge.kt`, `UdpPacketReceiver.kt`, JNI, CMake, parsers, Gradle, Manifest,
+`native-core` y `samples` permanecieron sin cambios.
 
 ### Riesgos
 
@@ -809,40 +827,58 @@ Conectar `payload_too_large` con Llamada bloqueada, historial y Lab mode.
 
 ### Validación automática
 
-- tests de mapeo;
-- tests de historial;
-- cuatro builds;
-- parser tests.
+- `assemblePatchedDebug`: correcto;
+- búsquedas estáticas del mapeo, navegación, historial y preservación técnica;
+- `git diff --check`;
+- cero builds Vulnerable o ASan.
 
 ### Prueba manual
 
-- válida Patched;
-- oversized Patched;
-- proceso vivo;
-- Llamada bloqueada;
-- historial;
-- Ver detalles;
-- búsqueda negativa en log capturado.
+La ejecución autoritativa usó Patched Debug (`com.echocall.lab.patched`) y un
+único envío de `samples/malformed/oversized_complete_payload.bin` (77 bytes,
+SHA-256 `516F7C6A9B6237274F33F8AB01057DFDBD1137DF0C898F70B5AFB6B7DA742ABA`).
+
+El parser devolvió `status=rejected code=payload_too_large declared_length=64
+actual_length=64 maximum=32`. El PID se mantuvo de 4569 a 4569. El orden
+observado fue: datagrama 10:49:46.313; `CONTROL_PACKET_RECEIVED` y
+`NATIVE_PARSE_STARTED` 10:49:46.391; retorno rechazado 10:49:46.447;
+`PACKET_REJECTED_INVALID_LENGTH` 10:49:46.449; estado bloqueado 10:49:46.510; y
+`BlockedCallScreen` 10:49:47.085. Estos tiempos describen esta ejecución, no una
+garantía universal del scheduler.
+
+Conteos: un oversized enviado, un datagrama recibido, un
+`NATIVE_PARSE_STARTED`, un `payload_too_large`, un
+`PACKET_REJECTED_INVALID_LENGTH`, una pantalla bloqueada y un registro
+`BLOCKED`; cero `NATIVE_PARSE_OK`, crashes/fatal, informes ASan y ejecuciones
+Vulnerable. No se mostró `IncomingCallScreen`.
+
+**LIMITACIÓN.** La ejecución demuestra el rechazo de esta muestra concreta y la
+supervivencia del proceso observado. No acredita seguridad general de Patched,
+mitigación completa, bloqueo de un exploit real, RCE, explotación ni
+equivalencia exacta con WhatsApp o CVE-2019-3568. ECLB y la muestra pertenecen
+al laboratorio.
 
 ### Criterios de aceptación
 
-- [ ] Rechazo.
-- [ ] Sin llamada normal.
-- [ ] Proceso vivo.
-- [ ] Texto comprensible.
-- [ ] Detalle técnico en Lab.
-- [ ] Sin ejecución Vulnerable ASan + oversized.
+- [x] Rechazo `payload_too_large`.
+- [x] Sin llamada normal ni `CurrentCall INCOMING`.
+- [x] Proceso vivo.
+- [x] Texto comprensible sin detalles técnicos en la pantalla normal.
+- [x] Detalle técnico completo en Lab.
+- [x] `BLOCKED` distinto del rechazo manual `REJECTED`.
+- [x] Sin ejecución Vulnerable ASan + oversized.
 
 ### Punto de parada
 
-No ejecutar Vulnerable ASan con una entrada oversized.
+Fase 4 validada. Detenerse tras el cierre Git y no iniciar Fase 5. No ejecutar
+Vulnerable ASan con una entrada oversized.
 
 ### Checklist
 
-- [ ] Implementada
-- [ ] Automática
-- [ ] Manual
-- [ ] Revisada
+- [x] Implementada
+- [x] Automática
+- [x] Manual
+- [x] Revisada
 - [ ] Commit
 - [ ] Push
 
@@ -1269,10 +1305,10 @@ Fase 8
 - [x] Conversaciones.
 - [x] Chat y mensajería local en memoria.
 - [x] Historial ficticio en memoria.
-- [ ] Llamada saliente.
-- [ ] Llamada entrante válida.
-- [ ] Llamada activa.
-- [ ] Llamada bloqueada.
+- [x] Llamada saliente.
+- [x] Llamada entrante válida.
+- [x] Llamada activa.
+- [x] Llamada bloqueada.
 - [ ] Marcador prudente.
 - [x] Lab mode inicial separado de la pantalla principal.
 - [ ] Regresión UDP/JNI.
@@ -1362,3 +1398,4 @@ Fase 8
 | 2026-08-07 | Consolidación del resultado validado de Fase 1 y preparación selectiva del cierre Git | VALIDADA — commit pendiente |
 | 2026-08-07 | Consolidación de UI de mensajería, navegación, estado local y reset de Fase 2 | VALIDADA — cierre Git autorizado |
 | 2026-08-10 | Consolidación de llamadas simuladas y flujo UDP válido de Fase 3 | VALIDADA — cierre Git autorizado |
+| 2026-08-10 | Consolidación del rechazo Patched y pantalla de llamada bloqueada de Fase 4 | VALIDADA — cierre Git autorizado |

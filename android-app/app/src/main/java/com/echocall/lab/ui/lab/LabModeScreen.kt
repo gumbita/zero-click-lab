@@ -105,7 +105,7 @@ fun LabModeScreen(
                     }
                 }
                 Text("SOURCE: ${state.incomingCallSource}")
-                Text("AUTOMATIC RESULT")
+                Text("RESULTADO JNI COMPLETO")
                 Text(state.incomingCallResult)
                 Text("EVENTS")
                 state.incomingCallEvents.forEach { event -> Text(event) }

@@ -9,6 +9,7 @@ object EchoCallDestination {
     const val OUTGOING_CALL = "outgoingCall"
     const val INCOMING_CALL = "incomingCall"
     const val ACTIVE_CALL = "activeCall"
+    const val BLOCKED_CALL = "blockedCall"
 
     fun chat(contactId: String): String = "chat/$contactId"
 }

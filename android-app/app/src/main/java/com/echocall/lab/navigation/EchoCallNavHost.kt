@@ -9,6 +9,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.echocall.lab.ui.about.AboutScreen
 import com.echocall.lab.ui.calls.ActiveCallScreen
+import com.echocall.lab.ui.calls.BlockedCallScreen
 import com.echocall.lab.ui.calls.CallHistoryScreen
 import com.echocall.lab.ui.calls.IncomingCallScreen
 import com.echocall.lab.ui.calls.OutgoingCallScreen
@@ -31,11 +32,21 @@ fun EchoCallNavHost(
     onAcceptIncomingCall: () -> Unit,
     onRejectIncomingCall: () -> Unit,
     onEndActiveCall: () -> Unit,
+    onCloseBlockedCall: () -> Unit,
     onRetryUdpReceiver: () -> Unit,
     onProcessValidSample: () -> Unit,
 ) {
     val navController = rememberNavController()
     val currentCall = productUiState.currentCall
+    val blockedCallAttempt = productUiState.blockedCallAttempt
+
+    LaunchedEffect(blockedCallAttempt?.id) {
+        if (blockedCallAttempt != null) {
+            navController.navigate(EchoCallDestination.BLOCKED_CALL) {
+                launchSingleTop = true
+            }
+        }
+    }
 
     LaunchedEffect(currentCall?.id, currentCall?.phase) {
         when (currentCall?.phase) {
@@ -81,7 +92,7 @@ fun EchoCallNavHost(
                     navController.navigate(EchoCallDestination.ABOUT)
                 },
                 onResetData = onResetData,
-                resetEnabled = currentCall == null,
+                resetEnabled = currentCall == null && blockedCallAttempt == null,
             )
         }
         composable(
@@ -171,6 +182,22 @@ fun EchoCallNavHost(
                     contact = contact,
                     onEnd = {
                         onEndActiveCall()
+                        navController.returnToConversations()
+                    },
+                )
+            }
+        }
+        composable(EchoCallDestination.BLOCKED_CALL) {
+            val attempt = blockedCallAttempt
+            val contact = attempt?.let {
+                productUiState.contact(it.contactId)
+            }
+            if (attempt != null && contact != null) {
+                BlockedCallScreen(
+                    attemptId = attempt.id,
+                    contact = contact,
+                    onClose = {
+                        onCloseBlockedCall()
                         navController.returnToConversations()
                     },
                 )
