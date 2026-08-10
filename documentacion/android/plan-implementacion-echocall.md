@@ -1,6 +1,6 @@
 # Plan de implementación de EchoCall Lab Vulnerable/Patched
 
-- **Estado general:** FASES 0 A 7 VALIDADAS; FASE 8 PENDIENTE.
+- **Estado general:** FASES 0 A 8 VALIDADAS.
 - **Rama prevista:** `feature/echocall-ui`.
 - **Línea base protegida:** `8b20ffed4ef3ef5fb4b4f22c67e8853ebef1065c`.
 - **Cierre versionado de Fase 1:** `26b0638442a5f31b134ba259a8afcbfc0d40d35d`.
@@ -13,11 +13,16 @@
 - **Cierre versionado de Fase 6 y commit fuente de los candidatos de Fase 7:**
   `7bbb5ba984c55edfe2d0c6254253fb0ed9f2065d`
   (`7bbb5ba Refine EchoCall UI and accessibility`).
+- **Cierre documental de candidatos previo a Fase 8:**
+  `12ad66a486f4a24870ed7728570256fd0f65cf3e`
+  (`12ad66a Document frozen EchoCall candidates`); no es el commit fuente de
+  los APK de Fase 8.
 - **Documento asociado:** `documentacion/android/diseno-interfaz-echocall.md`.
 - **Auditoría inicial del repositorio:** 2026-08-04.
 - **Revisión y consolidación documental:** 2026-08-10.
-- **Alcance de este cierre:** preservación y consolidación documental de Fase
-  7; Fase 8 permanece pendiente y fuera de alcance.
+- **Alcance de este cierre:** consolidación documental de las evidencias finales
+  8A/8B y cierre de la demostración instrumental principal; no inicia trabajo
+  posterior.
 
 > Ninguna fase posterior debe iniciarse sin autorización expresa después de revisar la fase anterior.
 
@@ -58,7 +63,11 @@ Debe crearse o verificarse desde el commit protegido. Si ya existe, se auditará
 - E-022: variante histórica ASan, modo VULNERABLE, entrada oversized.
 - E-025: variante histórica ASan, modo SAFE, entrada oversized.
 
-E-025 acredita el comportamiento del parser SAFE histórico, que sirve como antecedente técnico de la futura variante Patched, pero no pertenece a un APK final Patched. E-022 y E-025 describen la línea base histórica anterior al rediseño y no constituyen evidencia de los futuros APK finales, que necesitarán capturas nuevas e identificación propia.
+E-025 acredita el comportamiento del parser SAFE histórico, que sirvió como
+antecedente técnico de la variante Patched, pero no pertenece al APK final
+Patched. E-022 y E-025 describen la línea base histórica anterior al rediseño y
+no constituyen evidencia de los APK finales congelados; Fase 8 generó capturas
+nuevas con identificación propia.
 
 ### 2.5. Convenciones de estado de las afirmaciones
 
@@ -95,8 +104,8 @@ objetivos futuros al completarse la Fase 1. La navegación y el estado simulado 
 memoria se implementaron en Fase 2. Fase 3 añadió las pantallas y el estado de
 llamada simulada. Fase 4 integró el rechazo oversized exclusivamente en Patched
 Debug. Fase 5 incorporó el marker persistente sin ejecutar UDP, muestras,
-oversized, ASan ni Vulnerable. El escenario oversized Vulnerable y los APK
-finales congelados siguen pendientes de fases posteriores.
+oversized, ASan ni Vulnerable. Fases 7 y 8 congelaron después los APK y cerraron
+el escenario comparativo oversized autorizado.
 
 ### 2.7. Resultado consolidado de Fase 1
 
@@ -192,8 +201,8 @@ SHA-256 y se preservaron fuera de Temp, sin reconstrucción, en
 `C:\Users\Angels\Documents\EchoCall-TFM-Evidence\phase7-frozen-candidates\echocall-phase7-20260810T162009Z`.
 `candidate-manifest.txt` tiene SHA-256
 `59E04A43D1170DF9DD2D50E4346A464CF1900CE0822B9CF339508D82A5B97B7E`.
-Fase 8 deberá operar sobre esos mismos bytes, previa comprobación de hashes,
-sin recompilar, modificar, resignar, reempaquetar ni regenerar los APK.
+Fase 8 operó sobre esos mismos bytes, previa comprobación de hashes, sin
+recompilar, modificar, resignar, reempaquetar ni regenerar los APK.
 
 La regresión confirmó identidades, ABI y separación de parser; una entrada
 válida por candidato produjo `accepted/ok` y mantuvo los cuatro PID. Patched
@@ -213,7 +222,7 @@ ejecutó.
 6. Ejecutar primero pruebas automáticas no destructivas.
 7. Señalar las pruebas manuales con `🧪 PRUEBA MANUAL NECESARIA`.
 8. No ejecutar Vulnerable ASan con una entrada oversized durante el desarrollo visual.
-9. Reservar Vulnerable ASan + oversized para la Fase 8.
+9. No repetir la ejecución Vulnerable ASan + oversized cerrada en Fase 8B.
 10. No usar `git add .`.
 11. No usar `git stash`.
 12. No usar `git clean`.
@@ -398,7 +407,7 @@ Un commit por fase validada. No crear commit antes de la revisión de la usuaria
 | 5 | `Track incomplete native operations` |
 | 6 | `Refine EchoCall UI and accessibility` |
 | 7 | `Stabilize EchoCall variants and regressions` |
-| 8 | `Document final EchoCall ASan comparison` |
+| 8 | `Document final ASan comparison` |
 
 ## 8. Estrategia de rollback
 
@@ -420,8 +429,8 @@ Un commit por fase validada. No crear commit antes de la revisión de la usuaria
 | 4 — Integración Patched | VALIDADA | `8d7add2` | Completada | Completada | Patched Debug oversized | Cerrada y publicada |
 | 5 — Operación nativa incompleta | VALIDADA | `e1da09e` | Completada | Completada | Simulación segura, sin UDP ni muestras | Cerrada y publicada; marker prudente sin `CallRecord` automático |
 | 6 — Visual y accesibilidad | VALIDADA | `7bbb5ba` | Completada | Completada | Capturas temporales | Cerrada y publicada; claro/oscuro y font scale; sin TalkBack completo |
-| 7 — Congelación y regresión no destructiva | VALIDADA | Candidatos desde `7bbb5ba` | Completada | Completada | Patched oversized y controles válidos | Candidatos congelados; cierre documental actual |
-| 8 — Evidencia final y única ejecución vulnerable | PENDIENTE | — | Pendiente | Pendiente | Comparación final nueva | Una única ejecución Vulnerable ASan |
+| 7 — Congelación y regresión no destructiva | VALIDADA | Candidatos desde `7bbb5ba`; cierre `12ad66a` | Completada | Completada | Patched oversized y controles válidos | Candidatos congelados y documentados |
+| 8 — Evidencia final y única ejecución vulnerable | VALIDADA | Este cierre | Completada | Completada | Comparación final 8A/8B | Una única ejecución Vulnerable ASan; no repetir |
 
 Estados permitidos:
 
@@ -1287,8 +1296,8 @@ válida solo describe esas ejecuciones benignas concretas.
 
 ### Punto de parada
 
-Fase 7 validada y candidatos congelados. Preservar los mismos bytes y solicitar
-autorización expresa antes de iniciar Fase 8.
+Fase 7 validada y candidatos congelados. Los mismos bytes fueron los utilizados
+posteriormente en Fase 8, sin reconstrucción.
 
 ### Checklist
 
@@ -1296,8 +1305,8 @@ autorización expresa antes de iniciar Fase 8.
 - [x] Automática
 - [x] Manual
 - [x] Revisada
-- [ ] Commit documental
-- [ ] Push documental
+- [x] Commit documental (`12ad66a`)
+- [x] Push documental
 
 ## 18. Fase 8 — Evidencia final y única ejecución vulnerable
 
@@ -1308,145 +1317,244 @@ Generar evidencia primaria nueva sobre los APK finales congelados mediante:
 - una captura final de Patched ASan con una entrada oversized;
 - una única ejecución autorizada de Vulnerable ASan con la misma muestra.
 
-Patched ASan + oversized y la única ejecución Vulnerable ASan + oversized quedan
-reservadas para Fase 8. La restricción de ejecución única se aplica
-exclusivamente a Vulnerable ASan + oversized sobre el APK final congelado y
-requiere autorización expresa.
+**OBJETIVO COMPLETADO.** Fase 8A y Fase 8B quedaron validadas. La restricción
+de ejecución única de Vulnerable ASan + oversized se respetó y la evidencia
+experimental quedó cerrada.
 
 ### Precondiciones
 
-- APK congelados y hasheados.
-- Muestra hasheada.
-- Procedimiento revisado.
-- Autorización expresa.
-- Emulador o dispositivo dedicado.
-- Red controlada.
-- Redirección verificada.
-- Captura preparada.
+- [x] APK congelados y hasheados.
+- [x] Muestra hasheada.
+- [x] Procedimiento revisado.
+- [x] Autorización expresa.
+- [x] Emulador dedicado, red controlada y redirección verificada.
+- [x] Captura preparada.
 
 ### Alcance autorizado
 
-Orden futuro obligatorio, no ejecutado durante este cierre:
+El procedimiento se completó en el orden autorizado: verificación de hashes,
+Patched ASan, revisión de su captura, autorización separada, única ejecución
+Vulnerable ASan, captura de terminación, relanzamiento, correlación del marker,
+simbolización y comparación. Los APK utilizados fueron exactamente los bytes
+preservados en Fase 7, procedentes de
+`7bbb5ba984c55edfe2d0c6254253fb0ed9f2065d`; no se reconstruyeron, modificaron,
+resignaron, reempaquetaron ni regeneraron. El HEAD documental previo era
+`12ad66a486f4a24870ed7728570256fd0f65cf3e` y no se atribuye como fuente de
+los APK.
 
-1. Verificar hashes de APK y muestra.
-2. Instalar y usar Patched ASan congelado.
-3. Ejecutar exactamente una muestra oversized.
-4. Capturar rechazo, PID, marker, logs y ausencia/presencia de firmas ASan.
-5. Revisar que la captura Patched esté completa.
-6. Detenerse.
-7. Solicitar autorización explícita.
-8. Instalar y usar Vulnerable ASan congelado.
-9. Ejecutar oversized una única vez.
-10. Capturar ASan íntegro y terminación.
-11. Relanzar y correlacionar marker.
-12. Simbolizar.
-13. No repetir.
-14. Comparar Patched/Vulnerable.
-
-Los APK serán exactamente los bytes preservados en Fase 7. No se podrán
-recompilar, modificar, resignar, reempaquetar ni regenerar; cualquier hash
-distinto invalida el artefacto como candidato congelado.
+La muestra común fue `oversized_complete_payload.bin`, 77 bytes, SHA-256
+`516F7C6A9B6237274F33F8AB01057DFDBD1137DF0C898F70B5AFB6B7DA742ABA`.
 
 ### Fuera de alcance
 
 - RCE;
 - control del flujo;
-- shellcode;
+- hijacking, ejecución arbitraria, shell o shellcode;
+- persistencia, exfiltración o compromiso del dispositivo;
+- exploit completo y análisis de explotabilidad;
 - terceros;
 - Internet;
 - repetir la ejecución Vulnerable ASan + oversized.
 
-### Archivos previstos
+### Evidencia primaria
 
-- APK finales y muestra oversized congelados, solo como entradas de la validación;
-- rutas de evidencia final que se autoricen expresamente antes de ejecutar la fase;
-- símbolos y fuentes nativas previamente identificados para la simbolización.
+Fase 8A se conserva, sin modificación, en
+`C:\Users\Angels\Documents\EchoCall-TFM-Evidence\phase8a-patched-asan-20260810T172319Z`:
 
-La Fase 8 no autoriza cambios funcionales en Gradle, CMake, Kotlin, JNI o C.
+- manifest SHA-256
+  `910642CAA5E428A4DF1FA201E2EF3E3F699AC60391E4A27E9124B09AE5E161A8`;
+- `artifact-hashes.txt` SHA-256
+  `3A1364EBF7BE5E5D7D32792E501CF242E8C0139DE9155B39C258698193FFE255`;
+- addendum SHA-256
+  `6FA461F18E59910BF0F989638038C58E73D0B8FB3759B96584B21D02BEDEC4E5`;
+- `incidents.txt` SHA-256
+  `F93C2A41BCC122E417E100A079A9CF7A8A0BCE472D767FCA915E40D4B8B77313`.
 
-### Riesgos
+Fase 8B se conserva, sin modificación, en
+`C:\Users\Angels\Documents\EchoCall-TFM-Evidence\phase8b-vulnerable-asan-20260810T174243Z`:
 
-- APK equivocado.
-- Log perdido.
-- Repetición accidental.
-- Binarios no equivalentes.
-- Interpretación excesiva.
+- manifest SHA-256
+  `A33E17F4574509FD81AE53EA86C88763B5F6FA82CDBA5CA6D069261E17666F7B`;
+- `artifact-hashes.txt` SHA-256
+  `E7CE06F333551A6C084E1855BC6DAB6FDC2EC1A03E934242CF547522A0F77803`;
+- log RAW SHA-256
+  `55094B74451A1CF86D8E61FD7BBA47BB67ED3C72324019084284ED0230BA56EA`;
+- informe ASan RAW SHA-256
+  `CD17F66CF4219A14EF26DA6219B9692923E07C732916D75CCF6A1AA43FBEA7E7`;
+- `tombstone_09` SHA-256
+  `688416EA8E9149C4C3B63620E7D8051F93690BE6A656492495C9417382EC0071`;
+- exit information SHA-256
+  `9113DAE00858180C0305C59C346C5F342AF6B9E032334E36A5D1A31C08A1B4E0`.
 
-### Validación automática
+### Fase 8A — Patched ASan
 
-- hashes;
-- package/variant;
-- PID;
-- receptor/puerto;
-- firmas;
-- simbolización;
-- manifest.
-
-### Prueba manual
+El candidato `com.echocall.lab.patched.asan`, parser `PATCHED`, APK SHA-256
+`0F5DC5B9DE28FB26DEF2F8A97CA8EA2F89F305EFCECCC42952D4FF13D5B01F4C`,
+recibió un único datagrama de 77 bytes. El resultado JNI literal fue:
 
 ```text
-🧪 PRUEBA MANUAL NECESARIA
+status=rejected code=payload_too_large declared_length=64 actual_length=64 maximum=32
 ```
 
-Procedimiento exacto y lineal. Completar primero la captura final Patched. Confirmar de nuevo la autorización y detenerse inmediatamente después de la única ejecución Vulnerable ASan, aunque el resultado sea incompleto; cualquier repetición requeriría una decisión nueva fuera de este plan.
+Secuencia confirmada: `Datagram received → CONTROL_PACKET_RECEIVED →
+PENDING_MARKER_PERSISTED → NATIVE_PARSE_STARTED → retorno
+rejected/payload_too_large → PENDING_MARKER_CLEARED →
+PACKET_REJECTED_INVALID_LENGTH → BlockedCallScreen`. Se mostró **Marta Soler ·
+Llamada bloqueada** y se añadió **Marta Soler · Entrante · Bloqueada** al
+historial. El PID permaneció `15257 → 15257`; ASan y
+`libechocall_native.so` continuaron cargadas.
 
-### Criterios de aceptación — Patched
+No aparecieron `NATIVE_PARSE_OK`, `IncomingCallScreen`, Aceptar, Rechazar,
+crash, `Fatal signal` o informe `heap-buffer-overflow`. Las búsquedas de
+`ERROR: AddressSanitizer`, `AddressSanitizer:`, `heap-buffer-overflow`,
+`ABORTING`, `Fatal signal` y `FATAL EXCEPTION` dieron cero.
 
-- [ ] mismo input;
-- [ ] `payload_too_large`;
-- [ ] proceso vivo;
-- [ ] sin firmas buscadas en el log capturado;
-- [ ] Llamada bloqueada;
-- [ ] hashes.
+Conteos 8A: sender oversized 1; datagramas 1; `CONTROL_PACKET_RECEIVED` 1;
+`PENDING_MARKER_PERSISTED` 1; `NATIVE_PARSE_STARTED` 1;
+`payload_too_large` 1; `PENDING_MARKER_CLEARED` 1;
+`PACKET_REJECTED_INVALID_LENGTH` 1; `NATIVE_PARSE_OK` 0;
+`BlockedCallScreen` 1; historial `INCOMING/BLOCKED` 1; crashes 0; informes
+`heap-buffer-overflow` 0.
 
-### Criterios de aceptación — Vulnerable
+### Fase 8B — Vulnerable ASan
 
-- [ ] mismo input;
-- [ ] parser inequívoco;
-- [ ] informe ASan;
-- [ ] escritura y tamaños;
-- [ ] terminación;
-- [ ] simbolización;
-- [ ] una sola ejecución.
+El candidato `com.echocall.lab.vulnerable.asan`, parser `VULNERABLE`, APK
+SHA-256
+`DD8018E5D4B31AB778E479087C51E5D23DBC41F927D6D2F9F615255959B74BE5`,
+recibió una única vez la misma muestra. El PID previo era 16006, quedó vacío
+inmediatamente después y el relanzamiento obtuvo el PID 16249.
 
-### Interpretación
+Secuencia confirmada: `Datagram received length=77 → CALL_INCOMING →
+CONTROL_PACKET_RECEIVED → PENDING_MARKER_PERSISTED → NATIVE_PARSE_STARTED →
+ERROR: AddressSanitizer → Fatal signal 6 (SIGABRT) → proceso terminado`. Antes
+de la terminación no aparecieron `PENDING_MARKER_CLEARED`, `NATIVE_PARSE_OK`,
+`PACKET_REJECTED_INVALID_LENGTH`, `BlockedCallScreen` ni
+`IncomingCallScreen`.
 
-- [ ] sin RCE;
-- [ ] sin control del flujo;
-- [ ] sin equivalencia exacta;
-- [ ] hechos separados de interpretación.
+ASan diagnosticó `heap-buffer-overflow`, `WRITE` de 64 bytes, thread T22
+(`DefaultDispatch`), dirección `0x5030000bf640`, 0 bytes después de una región
+heap de 32 bytes `[0x5030000bf620,0x5030000bf640)`. El informe contiene
+`__asan_memcpy`, `vulnerable_parse_packet` y `ABORTING`; la terminación fue
+`SIGABRT`, señal 6, `SI_QUEUE`, con exit information `APP CRASH(NATIVE)`.
 
-### Evidencias esperadas
+Conteos 8B: sender oversized 1; datagramas 1; `CALL_INCOMING` 1;
+`CONTROL_PACKET_RECEIVED` 1; `PENDING_MARKER_PERSISTED` 1;
+`NATIVE_PARSE_STARTED` 1; `PENDING_MARKER_CLEARED` durante el test 0;
+`NATIVE_PARSE_OK` 0; `PACKET_REJECTED_INVALID_LENGTH` 0; incidentes ASan 1;
+`ABORTING` 1; `Fatal signal` 1; terminaciones 1;
+`InterruptedProcessingScreen` 1; marker pendiente tras relanzamiento 1;
+registros automáticos `INTERRUPTED` 0; ejecuciones Vulnerable oversized 1. Las
+repeticiones de `heap-buffer-overflow` en debuggerd/tombstone son el mismo
+incidente, no ejecuciones distintas.
 
-- metadatos;
-- hashes;
-- salida del emisor;
-- log;
-- UI;
-- PID;
-- simbolización;
-- comparación;
-- manifest SHA-256.
+### Marker e historial post-crash
+
+Tras el relanzamiento, **Procesamiento interrumpido** mostró
+`scenarioId=voip_control_packet`,
+`variant=com.echocall.lab.vulnerable.asan`, `packetLength=77`,
+`timestamp=2026-08-10T17:46:09.743162Z` y `source=udp`. El marker acredita que
+el procesamiento marcado no alcanzó su punto normal de limpieza; por sí solo no
+demuestra ASan, crash, `heap-buffer-overflow` o `SIGABRT`. La atribución causal
+primaria procede del informe ASan, el log RAW, `SIGABRT`, la terminación,
+tombstone y exit information.
+
+No se creó ningún `CallRecord` automático `INTERRUPTED`. **Cerrar y continuar**
+produjo `INTERRUPTED_MARKER_CLEARED_BY_USER`, cero reejecuciones JNI y devolvió
+a Conversaciones con **Sin procesamiento pendiente**.
+
+### Simbolización y procedencia
+
+La simbolización autoritativa del candidato congelado resolvió:
+
+- `0x55b6` → `vulnerable_parse_packet` → `vulnerable_parser.c:83:15`,
+  asignación del buffer de destino de 32 bytes;
+- `0x571a` → `vulnerable_parse_packet` → `vulnerable_parser.c:93:11`, copia
+  asociada al `WRITE` de 64 bytes;
+- `0x42ea` → `parse_packet_to_string` → `native_bridge.c:69:14`;
+- `0x3f40` → JNI `parsePacket` → `native_bridge.c:125:12`.
+
+Se emplearon NDK `27.0.12077973`, LLVM `18.0.1`, `ndk-stack.cmd`,
+`llvm-addr2line.exe` y `llvm-symbolizer.exe`. Las herramientas usaron
+`android-app/app/build/intermediates/merged_native_libs/vulnerableAsan/mergeVulnerableAsanNativeLibs/out/lib/x86_64/libechocall_native.so`,
+98568 bytes, SHA-256
+`5E254E39CF252D4E6C70FC4966FD6933CCE1C76C70724651410B68F0EE41655B`,
+Build ID `6dbcbaecdc5dfd981b60e91f334a6bc451bc36a5`, correlacionada con
+`5kc70511`, `x86_64`, ASan y parser Vulnerable. La procedencia quedó
+`PROVENANCE_RESOLVED`; la disponibilidad de símbolos se comprobó sin inferir
+«unstripped» solo por el nombre del directorio.
+
+E-022 conserva históricamente `vulnerable_parser.c:83`,
+`vulnerable_parser.c:93`, `native_bridge.c:53` y `native_bridge.c:120`. La
+evidencia final Fase 8B usa 83/93/69/125. E-022 y E-025 siguen siendo evidencia
+histórica anterior, no prueba de los APK congelados finales.
+
+### Comparación final
+
+| Propiedad | Patched ASan | Vulnerable ASan |
+|---|---|---|
+| APK congelado | Sí | Sí |
+| Commit fuente | `7bbb5ba` | `7bbb5ba` |
+| Misma muestra | Sí, 77 B | Sí, 77 B |
+| SHA muestra | `516F7C...42ABA` | `516F7C...42ABA` |
+| Parser | PATCHED | VULNERABLE |
+| `NATIVE_PARSE_STARTED` | 1 | 1 |
+| Marker persistido | 1 | 1 |
+| Retorno normal JNI | Sí | No |
+| Marker limpiado | Sí | No |
+| Resultado | `payload_too_large` | `heap-buffer-overflow` |
+| `WRITE` | No observado | 64 bytes |
+| Región destino afectada | — | heap 32 bytes |
+| Informe ASan | 0 | 1 incidente |
+| PID | `15257→15257` | `16006→vacío` |
+| `SIGABRT` | No | Sí |
+| `BlockedCallScreen` | Sí | No |
+| `InterruptedProcessing` post-relaunch | No aplica | Sí |
+| RCE demostrado | No | No |
+
+La misma muestra canónica oversized de 77 bytes produjo comportamientos
+diferenciados. Patched rechazó mediante `payload_too_large` antes de la
+condición insegura, limpió el marker y mantuvo el proceso vivo. En Vulnerable,
+ASan detectó un `heap-buffer-overflow` durante una escritura de 64 bytes
+asociada a `vulnerable_parse_packet` sobre una región heap de 32 bytes; el
+proceso terminó mediante `SIGABRT` antes de la limpieza normal. Esto reproduce
+instrumentalmente una escritura fuera de límites en heap en EchoCall Lab.
+
+### Interpretación y limitaciones
+
+Fase 8 no demuestra control del flujo, hijacking, ejecución arbitraria, shell,
+RCE, persistencia, exfiltración, compromiso del dispositivo, exploit completo,
+seguridad general de Patched ni equivalencia exacta con WhatsApp o
+CVE-2019-3568. ASan se utilizó como instrumento de detección de memoria; una
+muestra concreta no permite una afirmación universal.
+
+EchoCall Lab usa ECLB, UDP y parsers propios. No reproduce WhatsApp, RTCP real
+ni el código privado de WhatsApp. `vulnerable_parser.c`, su `memcpy`, el buffer
+de 32 bytes, la longitud de 64 bytes y las líneas citadas son propiedades del
+laboratorio, no hechos atribuibles a WhatsApp o al CVE.
 
 ### Punto de parada
 
-Cerrar el laboratorio y clasificar la ejecución Vulnerable ASan como no repetir.
+Fase 8A y Fase 8B validadas. La demostración instrumental principal está
+completada y la única ejecución Vulnerable ASan + oversized queda clasificada
+como no repetir. No se inicia fase posterior.
 
 ### Checklist
 
-- [ ] Preparación
-- [ ] Patched final
-- [ ] Autorización vulnerable
-- [ ] Vulnerable única
-- [ ] Simbolización
-- [ ] Documentación
-- [ ] Revisión
-- [ ] Commit
-- [ ] Push
+- [x] Preparación
+- [x] Patched final
+- [x] Autorización vulnerable
+- [x] Vulnerable única
+- [x] Simbolización
+- [x] Documentación
+- [x] Revisión
+- [x] Commit incluido en este cierre
+- [x] Push incluido en este cierre
 
 ## 19. Dependencias
 
-Ninguna fase posterior puede comenzar sin la revisión y aprobación de la anterior. La transición de Fase 7 a Fase 8 exige además autorización expresa para la única ejecución Vulnerable ASan + oversized.
+Las Fases 0 a 8 están validadas. La demostración instrumental principal queda
+completada y no se inicia una fase posterior en este cierre. Cualquier trabajo
+posterior requiere alcance y autorización propios.
 
 ```text
 Fase 0
@@ -1464,9 +1572,19 @@ Fase 5
 Fase 6
   ↓
 Fase 7
-  ↓ autorización expresa
-Fase 8
+  ↓ autorización expresa completada
+Fase 8 — VALIDADA
 ```
+
+Estado consolidado: Fase 0 VALIDADA; Fase 1 VALIDADA; Fase 2 VALIDADA; Fase 3
+VALIDADA; Fase 4 VALIDADA; Fase 5 VALIDADA; Fase 6 VALIDADA; Fase 7 VALIDADA;
+Fase 8 VALIDADA, incluidas 8A y 8B.
+
+Trabajo posterior únicamente planificado: una posible PoC ofensiva de
+presentación, análisis de explotabilidad, consolidación global del repositorio,
+paper, presentación, artículo/blog y vídeo. Ninguna de estas actividades se
+inicia en este cierre; no se crea `echocall_exploit_poc.py` ni se añaden
+payloads.
 
 ## 20. Criterios globales de finalización
 
@@ -1491,8 +1609,8 @@ Fase 8
 - [x] Tema Material 3 claro/oscuro y presentación visual compartida.
 - [x] Iconografía, touch targets y semántica de estados auditados en Fase 6.
 - [x] Regresión UDP/JNI.
-- [ ] Evidencias finales nuevas.
-- [ ] Limitaciones académicas.
+- [x] Evidencias finales nuevas.
+- [x] Limitaciones académicas explícitas.
 
 ## 21. Riesgos transversales
 
@@ -1508,7 +1626,7 @@ Fase 8
 | Alcance excesivo | Alta | Medio | Sin backend/audio/plugins |
 | Confusión con CVE real | Media | Alto | Fuentes y ECLB explícito |
 | Pérdida de trazabilidad | Baja | Alto | Commits, hashes y manifest |
-| Repetición de Vulnerable ASan + oversized | Baja | Alto | Una única ejecución, solo en Fase 8 y con autorización expresa |
+| Repetición de Vulnerable ASan + oversized | Baja | Alto | Ejecución única completada en Fase 8B; evidencia cerrada y clasificada como no repetir |
 
 ## 22. Fuentes
 
@@ -1582,3 +1700,4 @@ Fase 8
 | 2026-08-10 | Persistencia pre-JNI, marker técnico e InterruptedProcessingScreen de Fase 5 | VALIDADA, CERRADA Y PUBLICADA — `e1da09e` |
 | 2026-08-10 | Tema Material 3, claro/oscuro, iconografía y accesibilidad de Fase 6 | VALIDADA, CERRADA Y PUBLICADA — `7bbb5ba` |
 | 2026-08-10 | Regresión no destructiva, congelación y preservación externa de cuatro candidatos de Fase 7 | VALIDADA — CANDIDATOS CONGELADOS desde `7bbb5ba` |
+| 2026-08-10 | Comparación final Patched/Vulnerable ASan, simbolización y cierre de la demostración instrumental de Fase 8 | VALIDADA — 8A Y 8B CERRADAS |
