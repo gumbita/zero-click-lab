@@ -1,5 +1,13 @@
 # Registro de validación experimental
 
+> **REGISTRO HISTÓRICO**
+>
+> Las expresiones como «funcionalidad actual» dentro de entradas antiguas
+> describen el estado existente en la fecha de esa evidencia, no necesariamente
+> el `HEAD` actual. La arquitectura final de EchoCall está documentada en el
+> [diseño Android](../../documentacion/android/diseno-interfaz-echocall.md) y el
+> [plan de implementación](../../documentacion/android/plan-implementacion-echocall.md).
+
 Este documento es la matriz maestra de evidencias del laboratorio del TFM.
 Distingue evidencia primaria, reconstrucción documental, resultado reportado y
 trabajo pendiente. El código, un commit o un artefacto actual pueden confirmar
@@ -111,8 +119,10 @@ conserve las salidas experimentales originales.
   `oversized_complete_payload.bin`, genera los eventos y despacha al JNI según
   el modo seleccionado.
 - **Fuentes:** [`MainActivity.kt`](../../android-app/app/src/main/java/com/echocall/lab/MainActivity.kt),
-  [asset oversized](../../android-app/app/src/main/assets/oversized_complete_payload.bin)
+  [asset Android oversized histórico en `33ff251`](https://github.com/gumbita/zero-click-lab/blob/33ff2512918ec65f9cfe1ac63a6afe6918eae4f0/android-app/app/src/main/assets/oversized_complete_payload.bin)
   y commit [`33ff251`](https://github.com/gumbita/zero-click-lab/commit/33ff2512918ec65f9cfe1ac63a6afe6918eae4f0).
+  El asset fue retirado de la aplicación en `26b0638`; la muestra canónica
+  externa permanece bajo `samples/malformed/`.
 - **Evidencia primaria faltante:** captura y log originales de la simulación,
   incluyendo orden temporal y resultado.
 - **Estado:** `RECONSTRUIDA DOCUMENTALMENTE`.
@@ -127,8 +137,10 @@ conserve las salidas experimentales originales.
   opción `ENABLE_ANDROID_ASAN` en
   [`CMakeLists.txt`](../../android-app/app/src/main/cpp/CMakeLists.txt), recursos
   [`main/strings.xml`](../../android-app/app/src/main/res/values/strings.xml) y
-  [`asan/strings.xml`](../../android-app/app/src/asan/res/values/strings.xml),
+  [`asan/strings.xml` histórico en `3bcceb3`](https://github.com/gumbita/zero-click-lab/blob/3bcceb36748aaf385dfa6c4b8e43b0a213767de4/android-app/app/src/asan/res/values/strings.xml),
   commit [`ad5045f`](https://github.com/gumbita/zero-click-lab/commit/ad5045feee02684ea4e368aab0ebcc6d5c1836dd).
+  El nombre ASan genérico fue sustituido por recursos de variante y retirado en
+  `26b0638`.
 - **Comprobación actual no histórica:** el APK ASan presente contiene
   `lib/x86_64/libechocall_native.so`,
   `lib/x86_64/libclang_rt.asan-x86_64-android.so` y

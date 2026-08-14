@@ -1,5 +1,14 @@
 # Evidencias experimentales
 
+> **REGISTRO HISTÓRICO VERSIONADO**
+>
+> Esta ruta conserva evidencia y reconstrucciones de etapas anteriores. La
+> evidencia primaria final de las Fases 8A y 8B se mantiene bajo custodia
+> externa selectiva; sus hashes, protocolo y conclusiones están documentados en
+> el [diseño Android](../../documentacion/android/diseno-interfaz-echocall.md)
+> y el
+> [plan de implementación](../../documentacion/android/plan-implementacion-echocall.md).
+
 Esta ruta contiene el registro versionado de la validación y la reconstrucción
 documental del laboratorio zero-click. Cada resultado debe
 distinguir si procede de un artefacto primario, del código o historial Git, de
@@ -39,6 +48,12 @@ La recomendación de repetición es independiente del estado. E-022 se conserva
 como evidencia primaria de una única ejecución concluyente y se clasifica como
 `NO REPETIR`. E-025 conserva la ejecución comparativa SAFE por UDP con cadena
 de custodia completa y también se clasifica como `PRIMARIA` y `NO REPETIR`.
+
+E-021, E-022 y E-025 son evidencia histórica versionada previa a la matriz
+final de variantes EchoCall. Los binarios, logs y capturas primarios de 8A/8B
+no se incorporaron a esta carpeta: su ausencia del repositorio responde a la
+política de custodia externa selectiva y no implica que los artefactos no
+existan.
 
 No deben registrarse como hechos resultados esperados, hipótesis ni resultados
 históricos que no se hayan vuelto a comprobar.

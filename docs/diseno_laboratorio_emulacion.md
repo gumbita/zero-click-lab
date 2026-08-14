@@ -1,5 +1,15 @@
 # Diseño del laboratorio de emulación CVE-2019-3568
 
+> **DOCUMENTO HISTÓRICO / DISEÑO INICIAL**
+>
+> Este documento conserva decisiones y alternativas consideradas durante el
+> diseño del laboratorio. Algunas fueron sustituidas durante la implementación
+> y el contenido no debe interpretarse como una descripción exacta del estado
+> actual. Las referencias vigentes son el
+> [diseño de interfaz de EchoCall](../documentacion/android/diseno-interfaz-echocall.md)
+> y el
+> [plan de implementación](../documentacion/android/plan-implementacion-echocall.md).
+
 ## 1. Decisión general
 
 El laboratorio será una **app Android de mensajería/VoIP simulada** que emula el patrón técnico de CVE-2019-3568 mediante procesamiento automático de paquetes de control de llamada.
