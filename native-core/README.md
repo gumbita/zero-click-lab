@@ -1,46 +1,96 @@
-# Native Core — Fase 1A
+# Native Core de EchoCall Lab
 
-Parser seguro en C para el formato binario documentado en
-`docs/02_packet_format.md`. Esta fase solo lee archivos locales y no contiene
-código vulnerable, red ni dependencias externas.
+`native-core` contiene la implementación C compartida por las herramientas CLI
+y la aplicación Android. Su objetivo es comparar dos parsers del formato
+sintético ECLB dentro de un laboratorio controlado:
 
-## Contrato
+- `safe_parser.c`: implementación defensiva usada por las variantes Patched;
+- `vulnerable_parser.c`: implementación deliberadamente vulnerable usada por
+  las variantes Vulnerable;
+- `receiver_safe` y `receiver_vuln`: frontends CLI para sus respectivos parsers;
+- tests unitarios y de integración segura mediante CTest.
 
-La cabecera ocupa 13 bytes y todos los enteros multibyte se leen explícitamente
-en big-endian. El parser valida argumentos, cabecera, magic `ECLB`, versión 1,
-tipo 1, payload máximo de 32 bytes y coincidencia entre longitud declarada y
-real. No convierte el buffer a una estructura C.
+## Contrato ECLB
 
-`receiver_safe` aplica además un límite defensivo de lectura de 1 MiB. Este es
-un límite propio de la CLI para evitar reservas arbitrarias: no pertenece al
-formato binario y no modifica el máximo semántico de 32 bytes del payload seguro.
-
-## Build en WSL
-
-Desde la raíz del repositorio:
-
-```powershell
-wsl -- bash -lc "cd /mnt/c/Users/Angels/Documents/GitHub/zero-click-lab && cmake -S native-core -B native-core/build -G 'Unix Makefiles' -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_COMPILER=cc"
-wsl -- bash -lc "cd /mnt/c/Users/Angels/Documents/GitHub/zero-click-lab && cmake --build native-core/build --parallel"
-wsl -- bash -lc "cd /mnt/c/Users/Angels/Documents/GitHub/zero-click-lab && ctest --test-dir native-core/build --output-on-failure"
-```
-
-## Uso
+La cabecera ocupa 13 bytes. Los enteros multibyte se interpretan explícitamente
+en big-endian y el payload comienza en el offset 13.
 
 ```text
-receiver_safe <sample.bin>
+MAGIC(4) | VERSION(1) | FLAGS(1) | TYPE(1) | LENGTH(2) | SSRC(4) | PAYLOAD(N)
 ```
 
-Ejemplo:
+El contrato actual está definido por
+[`include/packet_format.h`](include/packet_format.h) y documentado en
+[`../docs/02_packet_format.md`](../docs/02_packet_format.md). La versión vigente
+usa `MAGIC=ECLB`, `VERSION=1`, `TYPE=1` y un máximo defensivo de 32 bytes para el
+payload Patched.
 
-```powershell
-wsl -- bash -lc "cd /mnt/c/Users/Angels/Documents/GitHub/zero-click-lab && ./native-core/build/receiver_safe samples/benign/valid_call_control.bin"
+## Parsers
+
+### Patched / safe
+
+`safe_parse_packet()` valida argumentos, cabecera, magic, versión, tipo, máximo
+de payload y coincidencia entre longitud declarada y real antes de procesar el
+payload. Una longitud superior a 32 devuelve `payload_too_large`.
+
+### Vulnerable
+
+`vulnerable_parse_packet()` conserva deliberadamente la condición experimental:
+reserva un destino de 32 bytes y copia la longitud declarada después de comprobar
+su coincidencia con la longitud real, pero sin validar el máximo de destino.
+
+Este código existe únicamente con fines académicos. No debe ejecutarse con
+muestras malformadas fuera del procedimiento controlado y autorizado del
+laboratorio.
+
+## CLI
+
+Ambos receptores leen un archivo local y presentan el resultado normalizado del
+parser. Aplican además un límite de lectura de 1 MiB, propio de la CLI y ajeno al
+formato ECLB.
+
+| Programa | Parser |
+|---|---|
+| `receiver_safe` | Patched / safe |
+| `receiver_vuln` | Vulnerable |
+
+La recepción UDP pertenece a la aplicación Android y no a estas CLI. La
+integración Android compila una sola fuente de parser por variante y accede a
+ella a través de JNI.
+
+## Build y tests seguros
+
+Ejecuta desde `<REPO_ROOT>` y sustituye `<TEMP_BUILD_DIR>` por un directorio
+temporal fuera del repositorio:
+
+```text
+cmake -S native-core -B <TEMP_BUILD_DIR> -DENABLE_ASAN=OFF
+cmake --build <TEMP_BUILD_DIR>
+ctest --test-dir <TEMP_BUILD_DIR> --output-on-failure
 ```
 
-Códigos de salida:
+CTest ejecuta únicamente `test_safe_parser` y `receiver_safe`; no invoca
+`receiver_vuln`. Para una comprobación manual benigna puede usarse:
 
-- `0`: paquete aceptado;
-- `2`: paquete rechazado por el parser;
-- `3`: error de archivo o límite de lectura;
-- `4`: error de asignación de memoria;
-- `64`: uso incorrecto.
+```text
+<TEMP_BUILD_DIR>/receiver_safe samples/benign/valid_call_control.bin
+```
+
+Resultado esperado:
+
+```text
+status=accepted code=ok
+```
+
+No se incluye una receta rápida para ejecutar `receiver_vuln` con muestras
+malformadas. Las muestras y evidencias experimentales se describen en la
+[documentación Android](../documentacion/android/) y el
+[registro histórico](../docs/evidencias/README.md).
+
+## Límites
+
+- ECLB no es RTCP real.
+- Native Core no contiene código de WhatsApp.
+- El fallo del parser Vulnerable pertenece a EchoCall Lab.
+- La evidencia acredita una escritura fuera de límites detectada por ASan, no
+  RCE, control del flujo ni explotabilidad completa.

@@ -1,0 +1,5 @@
+docs/evidencias/artefactos/**/*.log -text whitespace=-trailing-space
+docs/evidencias/artefactos/**/*.txt -text whitespace=-trailing-space
+docs/evidencias/artefactos/**/*.xml -text whitespace=-trailing-space
+docs/evidencias/artefactos/**/*.png binary
+docs/evidencias/artefactos/E-025/*-metadata.txt whitespace=-trailing-space

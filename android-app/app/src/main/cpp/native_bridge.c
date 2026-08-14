@@ -5,14 +5,21 @@
 #include <stdio.h>
 
 #include "packet_format.h"
-#include "safe_parser.h"
-#include "vulnerable_parser.h"
 
-typedef parser_status (*packet_parser_fn)(
-    const uint8_t *data,
-    size_t data_size,
-    parser_result *result
-);
+#if defined(ECHOCALL_PARSER_VULNERABLE) && \
+    defined(ECHOCALL_PARSER_PATCHED)
+#error "Multiple EchoCall parser implementations configured"
+#elif defined(ECHOCALL_PARSER_VULNERABLE)
+#include "vulnerable_parser.h"
+#define ECHOCALL_PARSE_PACKET vulnerable_parse_packet
+#define ECHOCALL_PARSER_NAME "VULNERABLE"
+#elif defined(ECHOCALL_PARSER_PATCHED)
+#include "safe_parser.h"
+#define ECHOCALL_PARSE_PACKET safe_parse_packet
+#define ECHOCALL_PARSER_NAME "PATCHED"
+#else
+#error "No EchoCall parser implementation configured"
+#endif
 
 JNIEXPORT jstring JNICALL
 Java_com_echocall_lab_NativeBridge_nativeStatus(
@@ -24,10 +31,19 @@ Java_com_echocall_lab_NativeBridge_nativeStatus(
     return (*env)->NewStringUTF(env, "Native JNI connected");
 }
 
+JNIEXPORT jstring JNICALL
+Java_com_echocall_lab_NativeBridge_getCompiledParserImplementation(
+    JNIEnv *env,
+    jobject receiver
+)
+{
+    (void)receiver;
+    return (*env)->NewStringUTF(env, ECHOCALL_PARSER_NAME);
+}
+
 static jstring parse_packet_to_string(
     JNIEnv *env,
-    jbyteArray packet,
-    packet_parser_fn parser
+    jbyteArray packet
 )
 {
     char output[256] = {0};
@@ -50,7 +66,7 @@ static jstring parse_packet_to_string(
         return NULL;
     }
 
-    status = parser(
+    status = ECHOCALL_PARSE_PACKET(
         (const uint8_t *)packet_data,
         (size_t)packet_size,
         &result
@@ -106,16 +122,5 @@ Java_com_echocall_lab_NativeBridge_parsePacket(
 )
 {
     (void)receiver;
-    return parse_packet_to_string(env, packet, safe_parse_packet);
-}
-
-JNIEXPORT jstring JNICALL
-Java_com_echocall_lab_NativeBridge_parsePacketVulnerable(
-    JNIEnv *env,
-    jobject receiver,
-    jbyteArray packet
-)
-{
-    (void)receiver;
-    return parse_packet_to_string(env, packet, vulnerable_parse_packet);
+    return parse_packet_to_string(env, packet);
 }

@@ -1,103 +1,137 @@
-# Zero-click Lab
+# Zero-click Lab / EchoCall Lab
 
-MVP educativo y local que muestra este patrón de forma segura:
+Laboratorio controlado de investigación sobre patrones de vulnerabilidades
+*zero-click*, inspirado principalmente en el patrón descrito públicamente para
+CVE-2019-3568.
+
+EchoCall es una aplicación propia. No contiene código de WhatsApp, no implementa
+RTCP real y no constituye un exploit contra WhatsApp ni contra terceros. Utiliza
+el formato sintético ECLB, un receptor UDP local y parsers creados para este
+laboratorio. La experimentación se limita a entornos propios y controlados; no
+se ha demostrado ejecución remota de código (RCE).
+
+## Estado actual
+
+El laboratorio actual incluye:
+
+- una aplicación Android de mensajería y llamadas simuladas;
+- recepción UDP en el puerto `43568`;
+- procesamiento automático previo a la interacción de la persona usuaria;
+- integración Kotlin → JNI → C mediante `NativeBridge.parsePacket()`;
+- variantes Vulnerable y Patched con el parser fijado al compilar;
+- builds Debug y ASan;
+- evidencia experimental final de las Fases 8A y 8B cerrada y documentada.
+
+La interfaz normal es compartida por ambas variantes. Los detalles técnicos se
+mantienen en Modo Lab y en la documentación de investigación.
+
+## Arquitectura
 
 ```text
-entrada recibida → procesamiento automático → parser vulnerable
-→ fallo por falta de validación → parser seguro → rechazo controlado
+PC / sender
+    ↓ UDP :43568
+EchoCall Android
+    ↓
+UdpPacketReceiver
+    ↓
+Kotlin
+    ↓ JNI
+NativeBridge.parsePacket()
+    ↓
+parser C
+    ├── Vulnerable
+    └── Patched
 ```
 
-No contiene malware, no explota software real, no usa red ni se conecta a
-WhatsApp o a servicios externos. Los paquetes son un formato sintético propio y
-Python convierte el fallo vulnerable en una excepción controlada, sin corrupción
-de memoria.
+Cada APK contiene una sola implementación de parser. La elección no se realiza
+en runtime: el flavor selecciona la fuente nativa durante el build.
 
-Esta fase emula una validación insuficiente de longitud mediante excepciones
-seguras de Python. No reproduce corrupción de memoria, un *heap overflow* nativo
-ni ejecución remota de código (RCE).
+| Variante | Nombre instalado | `applicationId` | Parser |
+|---|---|---|---|
+| `vulnerableDebug` | EchoCall Lab — Vulnerable | `com.echocall.lab.vulnerable` | Vulnerable |
+| `patchedDebug` | EchoCall Lab — Patched | `com.echocall.lab.patched` | Patched |
+| `vulnerableAsan` | EchoCall Lab — Vulnerable ASan | `com.echocall.lab.vulnerable.asan` | Vulnerable |
+| `patchedAsan` | EchoCall Lab — Patched ASan | `com.echocall.lab.patched.asan` | Patched |
 
-## Formato de la muestra
+## Resultado experimental principal
 
-Cada archivo contiene `MAGIC(4) | VERSION(1) | FLAGS(1) | TYPE(1) |
-LENGTH(2) | SSRC(4) | PAYLOAD(N)`. El parser vulnerable confía deliberadamente
-en `LENGTH`; el seguro valida cabecera, tipo, tamaño máximo y consistencia entre
-la longitud declarada y la real.
+La comparación final utilizó la misma muestra canónica ECLB de 77 bytes sobre
+los dos candidatos ASan congelados:
 
-`oversized_payload.bin` combina dos anomalías: declara 64 bytes aunque contiene
-solo 4, y esa longitud declarada supera el máximo seguro de 32 bytes. El parser
-seguro informa primero del exceso de tamaño por el orden de sus validaciones.
+- **Patched ASan:** devolvió `payload_too_large`, limpió el marcador pendiente y
+  mantuvo el proceso vivo; no se observó un informe ASan en esa ejecución.
+- **Vulnerable ASan:** ASan detectó un `heap-buffer-overflow` durante un `WRITE`
+  de 64 bytes sobre una región heap de 32 bytes; el proceso terminó mediante
+  `SIGABRT`.
 
-La especificación completa, incluidos offsets, muestras y hashes reproducibles,
-está en [docs/02_packet_format.md](docs/02_packet_format.md).
+Este resultado demuestra instrumentalmente una escritura fuera de límites en
+heap dentro de EchoCall Lab. No demuestra RCE, secuestro del flujo de control ni
+equivalencia exacta con CVE-2019-3568. Tampoco permite afirmar seguridad general
+de la variante Patched.
 
-## Ejecución en Windows PowerShell
+El alcance, los conteos, las huellas y las limitaciones se encuentran en el
+[diseño Android](documentacion/android/diseno-interfaz-echocall.md) y el
+[plan de implementación](documentacion/android/plan-implementacion-echocall.md).
 
-Ejecuta los comandos desde la raíz del repositorio. No es necesario instalar
-dependencias externas.
+## Estructura del repositorio
 
-1. Genera las muestras:
+| Ruta | Función |
+|---|---|
+| [`android-app/`](android-app/) | Aplicación EchoCall Android, Compose, UDP, JNI y variantes. |
+| [`native-core/`](native-core/) | Parsers C, receptores CLI y tests nativos. |
+| [`samples/`](samples/) | Muestras ECLB benignas y malformadas del laboratorio. |
+| [`tools/`](tools/) | Utilidades controladas, incluido el emisor UDP. |
+| [`documentacion/android/`](documentacion/android/) | Documentación autoritativa del estado Android actual. |
+| [`docs/evidencias/`](docs/evidencias/) | Registro y evidencia histórica versionada. |
+| [`docs/`](docs/) | Especificación ECLB y documentación histórica. |
+| [`app/`](app/) | MVP Python inicial, conservado como componente histórico. |
+| [`tests/`](tests/) | Tests seguros del MVP Python y sus muestras. |
 
-   ```powershell
-   python -m app.create_samples
-   ```
+## Por dónde empezar
 
-   Se crean una muestra válida en `samples/benign/` y tres entradas de prueba en
-   `samples/malformed/`.
+1. Este `README.md`.
+2. [`documentacion/android/diseno-interfaz-echocall.md`](documentacion/android/diseno-interfaz-echocall.md).
+3. [`documentacion/android/plan-implementacion-echocall.md`](documentacion/android/plan-implementacion-echocall.md).
+4. [`native-core/src/vulnerable_parser.c`](native-core/src/vulnerable_parser.c).
+5. [`native-core/src/safe_parser.c`](native-core/src/safe_parser.c).
+6. [`android-app/app/src/main/cpp/native_bridge.c`](android-app/app/src/main/cpp/native_bridge.c).
+7. [`UdpPacketReceiver.kt`](android-app/app/src/main/java/com/echocall/lab/UdpPacketReceiver.kt).
+8. [`tools/send_udp_packet.py`](tools/send_udp_packet.py).
+9. [`docs/evidencias/`](docs/evidencias/).
 
-2. Prueba válida con el parser vulnerable:
+El [mapa documental](docs/README.md) distingue la referencia actual de los
+documentos históricos.
 
-   ```powershell
-   Copy-Item .\samples\benign\valid_call_control.bin .\inbox\
-   python -m app.processor --mode vulnerable
-   Get-Content .\logs\processing.log -Tail 10
-   ```
+## Reproducibilidad
 
-   El log incluye `CONTROL_FILE_RECEIVED`, `PACKET_READ`, `PACKET_ACCEPTED` y
-   `FILE_MOVED_TO_PROCESSED`.
+La trazabilidad final separa dos hitos:
 
-3. Prueba malformada con el parser vulnerable:
+- **commit fuente de los APK candidatos:**
+  `7bbb5ba984c55edfe2d0c6254253fb0ed9f2065d`;
+- **cierre documental de Fase 8:**
+  `b0d26dec60a6abbafd5ff98928be377014cd5b99`.
 
-   ```powershell
-   Copy-Item .\samples\malformed\oversized_payload.bin .\inbox\
-   python -m app.processor --mode vulnerable
-   Get-Content .\logs\processing.log -Tail 10
-   ```
+Los APK experimentales no se atribuyen al commit documental. Sus hashes,
+procedencia y resultados detallados están registrados en la documentación
+Android. Los artefactos primarios finales se mantienen bajo custodia externa
+selectiva y no se copian a este repositorio.
 
-   El acceso basado en la longitud no validada genera un `IndexError`, capturado
-   como `PACKET_PROCESSING_FAILED outcome=controlled_failure`. El proceso sigue
-   funcionando y mueve la muestra a `processed/`.
+Las comprobaciones seguras del MVP Python y de Native Core se describen en sus
+respectivos README. La ejecución de muestras malformadas requiere un
+procedimiento experimental autorizado; no forma parte del inicio rápido.
 
-4. Prueba la misma entrada con el parser seguro:
+## Uso responsable
 
-   ```powershell
-   Copy-Item .\samples\malformed\oversized_payload.bin .\inbox\
-   python -m app.processor --mode secure
-   Get-Content .\logs\processing.log -Tail 10
-   ```
+Consulta [SECURITY.md](SECURITY.md) antes de ejecutar componentes del
+laboratorio. No utilices el receptor, las muestras ni las herramientas contra
+sistemas o personas de terceros.
 
-   El parser la rechaza antes de acceder al payload. El log muestra
-   `PACKET_PROCESSING_FAILED outcome=rejected reason=payload_too_large`, sin
-   excepción inesperada.
+## Referencias técnicas
 
-El procesador realiza una pasada sobre todos los `.bin` presentes en `inbox/` al
-arrancar. Cada ejecución registra `ZERO_CLICK_LAB_STARTED`. Los archivos se
-mueven a `processed/`; si un nombre ya existe, se añade un sufijo numérico.
-Después de esa única pasada el proceso termina: no es un *watcher* y no detecta
-archivos que lleguen posteriormente.
+- [NVD — CVE-2019-3568](https://nvd.nist.gov/vuln/detail/CVE-2019-3568)
+- [CVE Services — CVE-2019-3568](https://cveawg.mitre.org/api/cve/CVE-2019-3568)
+- [Meta Security Advisory — CVE-2019-3568](https://www.facebook.com/security/advisories/cve-2019-3568)
+- [Android NDK — Address Sanitizer](https://developer.android.com/ndk/guides/asan)
 
-## Pruebas automatizadas
-
-La suite usa únicamente `unittest` y directorios temporales; no altera los
-directorios runtime reales ni regenera las muestras versionadas:
-
-```powershell
-python -m unittest discover -s tests -p "test_*.py" -v
-```
-
-## Archivos generados durante la ejecución
-
-- Log comparable: `logs/processing.log`.
-- Entradas ya tratadas: `processed/`.
-- Entradas pendientes: `inbox/*.bin`.
-
-Estas rutas están excluidas de Git mediante `.gitignore`.
+Estas fuentes delimitan el contexto público. ECLB, sus parsers, tamaños,
+eventos y líneas de código son decisiones exclusivas de EchoCall Lab.
