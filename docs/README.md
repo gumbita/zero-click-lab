@@ -1,47 +1,66 @@
-# Mapa documental
+# Mapa de aprendizaje
 
-La documentación del repositorio combina el estado vigente de EchoCall con
-material histórico que explica la evolución del laboratorio. Este mapa indica
-qué fuente usar para cada propósito.
+`docs/` es el centro documental técnico de EchoCall Lab. El recorrido está
+organizado por preguntas, no por las fases internas que condujeron al resultado.
 
-## Documentación actual
+## Quiero entender el problema y la arquitectura
 
-- [Arquitectura vigente](architecture.md): flujo UDP → Kotlin → JNI → parser C
-  y selección fija por build.
-- [Guía de reproducción segura](reproduction.md): Native Core, Android Patched
-  e instrumentación ASan separada de la ruta rutinaria.
-- [Resultados experimentales](results.md): comparación final sobre la muestra
-  canónica de 77 bytes.
-- [Reversing estático](reversing.md): síntesis comparada de E-028/E-029.
-- [Limitaciones](limitations.md): alcance, interpretación y custodia.
-- [Diseño de interfaz de EchoCall](../documentacion/android/diseno-interfaz-echocall.md):
-  arquitectura de producto y decisiones vigentes de la aplicación Android.
-- [Plan de implementación de EchoCall](../documentacion/android/plan-implementacion-echocall.md):
-  fases, validaciones y estado consolidado del desarrollo Android.
+- [Arquitectura](architecture.md): sigue una entrada desde UDP hasta el parser C
+  y explica la selección Vulnerable/Patched, JNI y el marcador pre-JNI.
+- [EchoCall Android](../android-app/README.md): compila la aplicación y localiza
+  los puntos de observación en Android.
 
-Estos dos documentos son la referencia autoritativa para el estado actual de
-EchoCall.
+## Quiero entender la entrada
 
-## Especificación
+- [Formato binario ECLB](02_packet_format.md): especificación canónica de la
+  cabecera, semántica de `declared_length`, máximo defensivo y muestras.
+- [Muestras](../samples/README.md): compara los bytes relevantes, su finalidad y
+  el riesgo de ejecución.
 
-- [Formato binario ECLB](02_packet_format.md): contrato sintético compartido
-  por Native Core y la integración Android.
+## Quiero localizar la diferencia Vulnerable/Patched
 
-## Diseño histórico
+- [Native Core](../native-core/README.md): relaciona `vulnerable_parser.c` y
+  `safe_parser.c` con los tests y frontends CLI.
+- [`vulnerable_parser.c`](../native-core/src/vulnerable_parser.c): reserva fija y
+  copia gobernada por la entrada.
+- [`safe_parser.c`](../native-core/src/safe_parser.c): validación temprana usada
+  por Patched.
 
-- [Diseño inicial del laboratorio de emulación](diseno_laboratorio_emulacion.md):
-  decisiones y alternativas consideradas al inicio. No debe interpretarse como
-  descripción exacta de la implementación actual.
+## Quiero ver qué ocurrió
 
-## Evidencia histórica versionada
+- [Resultados](results.md): misma entrada, dos variantes y resultados
+  observables con instrumentación ASan.
+- [Reversing](reversing.md): contraste estático de la reserva/copia Vulnerable y
+  la validación Patched.
 
-- [Guía de evidencias](evidencias/README.md): alcance, clasificación y custodia.
-- [Registro de validación experimental](evidencias/registro_validacion_experimental.md):
-  matriz histórica de resultados y carencias documentales.
-- [E-028 — reversing estático Vulnerable](evidencias/artefactos/E-028/README.md).
-- [E-029 — reversing estático Patched](evidencias/artefactos/E-029/README.md).
+## Quiero reproducir comprobaciones seguras
 
-Los resultados finales están resumidos en [`results.md`](results.md). Parte de
-la evidencia primaria de las Fases 8A/8B se mantiene bajo custodia externa
-selectiva; E-028/E-029 preservan capturas estáticas, con la limitación de
-custodia de sus ELF documentada explícitamente.
+- [Reproducción](reproduction.md): Native Core seguro, Android Patched y builds
+  instrumentadas sin automatizar la ejecución peligrosa.
+- [Herramientas](../tools/README.md): generación determinista y envío UDP
+  controlado.
+
+## Quiero contrastar la evidencia
+
+- [Guía de evidencias](evidencias/README.md): qué prueba respalda cada clase de
+  afirmación.
+- [Registro experimental](evidencias/registro_validacion_experimental.md): matriz
+  histórica con estados y carencias.
+- [Procedencia Android](evidencias/procedencia-experimento-android.md): commits,
+  candidatos, tamaños, hashes y custodia externa.
+- [E-028 Vulnerable](evidencias/artefactos/E-028/README.md) y
+  [E-029 Patched](evidencias/artefactos/E-029/README.md): reversing estático.
+
+## Quiero entender hasta dónde llegan las conclusiones
+
+- [Limitaciones](limitations.md): validez interna/externa, límites de ASan,
+  custodia y afirmaciones no demostradas.
+- [Uso seguro](../SECURITY.md): reglas operativas y comunicación privada.
+
+## Material histórico
+
+[Diseño inicial del laboratorio](diseno_laboratorio_emulacion.md) conserva las
+alternativas consideradas al inicio. No es una descripción de la implementación
+vigente. La cronología Android detallada retirada del árbol principal permanece
+accesible mediante los enlaces inmutables incluidos en
+[procedencia Android](evidencias/procedencia-experimento-android.md).

@@ -12,9 +12,10 @@ reconstrucción documental en evidencia experimental primaria.
 | Archivo | Tamaño | SHA-256 | Función |
 |---|---:|---|---|
 | `../../../.gitattributes` | 339 bytes | `0BF96FC7CC180580057A29EDB2D8D60297C911A3BFF76D89375F8BB3F03C9AAF` | Conservación byte a byte de artefactos de evidencia |
-| `../../../README.md` | 6 767 bytes | `BF19EB58DDC1ADF714F5C05E1366185E25DF766E9BEE9339F77BA7CD4B57F8E2` | Enlace raíz al registro de evidencias |
-| `../README.md` | 3 780 bytes | `D01586BEBA2A7BA0E22982F9C6390D8C6BD59F4485EB753F54035AD2BF40D974` | Índice y taxonomía |
-| `../registro_validacion_experimental.md` | 39 555 bytes | `3851A7B98433E2E2A3C33898EBB00DD6B18B7F9037DECAFDF9583952AE7F0D15` | Matriz y análisis consolidado |
+| `../../../README.md` | 8 718 bytes | `1726500B7E458963836A18CC0B2822B108C991046B99D71DDD058BA4CB306786` | Enlace raíz al registro de evidencias |
+| `../README.md` | 3 998 bytes | `2AFC9A62D7847C35E16A922B8BD5532BB557F30E78680F261103511F1107CB99` | Índice y taxonomía |
+| `../registro_validacion_experimental.md` | 39 526 bytes | `8BF4878AECAC5722EE165D109A91B81BF46A34D6AFEE1B73A1B3A2A6B2A910D4` | Matriz y análisis consolidado |
+| `../procedencia-experimento-android.md` | 6 626 bytes | `275F55336D605D9FA886926EE8A114282D32054B2E76F1E778FCEDBE896A82AE` | Identidad, cronología y custodia externa del experimento Android |
 | `README.md` | 3 076 bytes | `CA7175DCACD724E1E3B9C497AC44343B9AFF26935F324E5377F027A7331FEC8D` | Política de artefactos y saneamiento |
 | `contexto/echocall-vulnerable-20260731-134143.png` | 204 949 bytes | `EE7DDFD7804D18DB51F1C415934B0E57EF98DE485E4EB79EDE94D45CF634A8E0` | Captura contextual; no concluyente para E-021/E-022 |
 | `E-022/asan-udp-vulnerable-20260731-140415.log` | 64 698 bytes | `F59B0BCCC33F2B9E6BCCA28DA80145F59C04A2E93B9F101A999A042185EDED7D` | Log primario E-022 |

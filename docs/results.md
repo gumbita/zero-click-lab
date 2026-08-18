@@ -1,63 +1,76 @@
 # Resultados experimentales
 
-La comparación final utilizó la misma muestra ECLB canónica y dos candidatos
-Android ASan congelados cuyo commit fuente fue
-`7bbb5ba984c55edfe2d0c6254253fb0ed9f2065d`.
+La comparación final aplicó la misma entrada a las variantes Patched y
+Vulnerable construidas con instrumentación AddressSanitizer. `Patched ASan` y
+`Vulnerable ASan` significan variante de parser + build instrumentado; ASan no
+es otra implementación lógica.
 
-`Patched ASan` y `Vulnerable ASan` designan, respectivamente, la variante
-Patched o Vulnerable construida con instrumentación AddressSanitizer. ASan no
-es una variante lógica del parser ni altera la diferencia de validación que se
-compara.
-
-## Entrada
+## Entrada común
 
 | Propiedad | Valor |
 |---|---|
 | Archivo | `samples/malformed/oversized_complete_payload.bin` |
 | Tamaño total | 77 bytes |
+| Cabecera | 13 bytes |
 | `declared_length` | 64 |
 | `actual_length` | 64 |
 | Máximo Patched | 32 |
 | SHA-256 | `516F7C6A9B6237274F33F8AB01057DFDBD1137DF0C898F70B5AFB6B7DA742ABA` |
 
-## Resultado comparado
+La longitud declarada coincide con la real. Así se supera la comprobación de
+coherencia de Vulnerable y se alcanza la diferencia relevante: validar o no el
+máximo de 32 antes de procesar el payload.
 
-| Propiedad | Patched ASan | Vulnerable ASan |
+## Observación comparada
+
+| Propiedad | Patched + ASan | Vulnerable + ASan |
 |---|---|---|
 | Parser | `safe_parse_packet` | `vulnerable_parse_packet` |
-| Resultado principal | `payload_too_large` | `heap-buffer-overflow` |
-| Operación | Rechazo antes del sink | `WRITE of size 64` mediante `__asan_memcpy` |
-| Región afectada | No aplica | Heap de 32 bytes |
-| Proceso | Permaneció vivo | Terminó |
-| ASan/señal | Sin informe ASan observado en la ventana documentada | `ABORTING`, `SIGABRT` |
+| Decisión | Rechazo antes del procesamiento | Copia gobernada por `declared_length` |
+| Resultado | `payload_too_large` | `heap-buffer-overflow` |
+| Operación | No alcanza el sink | `WRITE` de 64 bytes mediante `__asan_memcpy` |
+| Región | No aplica | Heap de 32 bytes |
+| Proceso | Permaneció vivo | Terminó mediante `SIGABRT` |
+| ASan | Sin informe observado en la ventana documentada | Informe y `ABORTING` |
 
-Patched devolvió exactamente:
+Patched devolvió literalmente:
 
 ```text
 status=rejected code=payload_too_large declared_length=64 actual_length=64 maximum=32
 ```
 
-En Vulnerable, ASan atribuyó la escritura a `vulnerable_parse_packet`. La
-ejecución oversized Vulnerable fue única, está cerrada y no debe repetirse como
-parte del onboarding o la CI.
+Vulnerable alcanzó la copia y ASan atribuyó la escritura a
+`vulnerable_parse_packet`. La ejecución oversized Vulnerable fue única y no se
+incluye en CI, quickstarts ni demostraciones rutinarias.
 
-## Qué demuestra
+## Qué sabemos y cómo lo sabemos
 
-- La entrada coherente de 64 bytes alcanza una escritura fuera de los límites
-  de una reserva heap de 32 bytes en el parser Vulnerable de EchoCall.
-- El parser Patched rechaza esa misma condición mediante el límite semántico de
-  32 bytes en la ejecución documentada.
-- La evidencia estática E-028/E-029 y la evidencia dinámica convergen sobre la
-  misma diferencia lógica del laboratorio.
+| Afirmación | Evidencia |
+|---|---|
+| Patched valida antes del payload | Código `safe_parser.c`, CTest y reversing E-029 |
+| Vulnerable reserva 32 y copia la longitud declarada | Código `vulnerable_parser.c` y reversing E-028 |
+| Patched rechazó la entrada final | Log/resultados Android y proceso vivo |
+| Vulnerable escribió 64 sobre una región de 32 | Informe ASan, log RAW, tombstone y simbolización |
+| La operación no retornó normalmente | Ausencia de limpieza del marcador, terminación y `SIGABRT` |
+| Ambos resultados usaron candidatos fijados | Tamaños, SHA-256 y manifiestos de procedencia |
 
-## Qué no demuestra
+La [procedencia completa](evidencias/procedencia-experimento-android.md)
+relaciona commit fuente, APK, hashes y custodia. El
+[registro experimental](evidencias/registro_validacion_experimental.md)
+separa evidencia primaria, reportada e histórica.
 
-- RCE, ejecución arbitraria o control del flujo.
-- Explotabilidad completa, persistencia o compromiso del dispositivo.
-- Seguridad general de Patched o ausencia de otras vulnerabilidades.
-- Identidad binaria entre los ELF Debug analizados en E-028/E-029 y los APK
-  ASan de la comparación dinámica.
-- Equivalencia exacta con WhatsApp, RTCP o CVE-2019-3568.
+## Interpretación
 
-La matriz histórica y la cadena de custodia disponible se conservan en el
-[registro experimental](evidencias/registro_validacion_experimental.md).
+**Hecho confirmado:** la entrada coherente de 64 bytes alcanzó una escritura
+fuera de los límites de una reserva heap de 32 bytes en el parser Vulnerable de
+EchoCall.
+
+**Hecho confirmado:** Patched rechazó esa misma condición mediante el máximo
+semántico de 32 y el proceso permaneció vivo en la ejecución documentada.
+
+**Interpretación:** el contraste muestra por qué la validación debe preceder a
+una operación cuyo tamaño depende de datos externos.
+
+**Limitación:** no se demostró RCE, control del flujo, compromiso completo,
+seguridad general de Patched ni equivalencia exacta con CVE-2019-3568. Consulta
+[`limitations.md`](limitations.md).

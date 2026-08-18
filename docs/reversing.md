@@ -5,6 +5,12 @@ EchoCall. La comparación muestra una convergencia de evidencia estática y
 dinámica sobre la lógica del laboratorio, no una correlación
 instrucción-a-instrucción con los APK ASan finales.
 
+El reversing responde a una pregunta distinta de la ejecución instrumentada:
+¿qué decisiones de control de flujo y qué operaciones de memoria pueden
+reconstruirse desde el binario? Las capturas permiten seguir JNI hasta cada
+parser y contrastar la presencia de la reserva/copia Vulnerable con la
+validación Patched.
+
 ## Vulnerable — E-028
 
 El flujo recuperado fue:

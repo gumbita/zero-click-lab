@@ -1,11 +1,19 @@
 # Formato binario ECLB
 
-## Alcance y evolución
+> **Especificación canónica:** el contrato ejecutable se define en
+> [`packet_format.h`](../native-core/include/packet_format.h); este documento
+> explica sus campos, invariantes y muestras.
 
-ECLB es un formato sintético propio del laboratorio. Se originó en el MVP
-Python y continúa como contrato compartido por Native Core y EchoCall Android.
-No es RTCP real, no contiene datos de WhatsApp y no pretende reproducir el
-protocolo privado asociado a CVE-2019-3568.
+## Qué representa ECLB
+
+ECLB es un formato sintético creado para controlar exactamente qué bytes y qué
+longitudes alcanzan los parsers de Native Core y EchoCall Android. Su campo
+`LENGTH` permite separar dos preguntas: si la longitud declarada coincide con
+los bytes recibidos y si esa longitud cabe en el destino previsto.
+
+El formato se originó en el prototipo Python y se mantuvo como contrato común
+al migrar el experimento a C y Android. No es RTCP ni un protocolo extraído de
+un producto real.
 
 La especificación vigente se corresponde con
 [`native-core/include/packet_format.h`](../native-core/include/packet_format.h)
@@ -15,7 +23,7 @@ y con las validaciones de
 
 ## Cabecera
 
-El formato histórico de Python se expresa como `>4sBBBHI`. El prefijo `>`
+La notación original del formato es `>4sBBBHI`. El prefijo `>`
 establece orden de bytes *big-endian*, tamaños estándar y ausencia de
 alineación nativa. La implementación C decodifica explícitamente los enteros
 multibyte con el mismo orden. La cabecera mide 13 bytes.
@@ -43,7 +51,7 @@ de comprobar la igualdad entre longitud declarada y real. La ruta Vulnerable
 comprueba la coherencia declarada/real, pero reserva un buffer fijo de 32 bytes
 y copia `LENGTH` bytes sin imponer ese máximo.
 
-## Muestras
+## Cómo leer las muestras
 
 ### Muestra válida compartida
 
@@ -73,7 +81,7 @@ En las ejecuciones finales documentadas, Patched devolvió
 64 bytes sobre una región heap de 32 bytes. Estos resultados no demuestran RCE
 ni equivalencia exacta con CVE-2019-3568.
 
-### Muestras históricas del prototipo Python
+### Muestras auxiliares con trazabilidad histórica
 
 `samples/malformed/oversized_payload.bin`:
 

@@ -1,35 +1,63 @@
-# Limitaciones
+# Alcance y limitaciones
 
-## Alcance técnico
+Estas limitaciones acotan la interpretación del experimento; no sustituyen la
+explicación técnica de [arquitectura](architecture.md) y
+[resultados](results.md).
 
-- EchoCall, ECLB, el receptor UDP y ambos parsers son construcciones propias.
-- No se utiliza código de WhatsApp ni se implementa RTCP/SRTCP real.
-- CVE-2019-3568 aporta contexto público, no identidad de protocolo, código o
-  exploit.
-- El procesamiento preinteracción estudiado pertenece a esta aplicación de
-  laboratorio y no prueba un ataque contra terceros.
+## Validez interna
 
-## Interpretación de resultados
+- La comparación usa la misma muestra ECLB, con payload declarado y real de 64
+  bytes, sobre candidatos Android congelados.
+- La ruta Vulnerable contiene deliberadamente una reserva de 32 bytes seguida
+  de una copia gobernada por la longitud declarada.
+- Patched aplica el máximo semántico de 32 antes del procesamiento.
+- El diagnóstico dinámico procede de ASan, logs, señal, tombstone e información
+  de terminación; el marcador pre-JNI es evidencia auxiliar.
+- La ausencia de un informe ASan en la ventana Patched documentada no demuestra
+  ausencia de otros errores o rutas vulnerables.
 
-- ASan detectó una escritura fuera de límites concreta; no se demostró RCE,
-  control del flujo ni ejecución arbitraria.
-- Un crash no equivale a explotabilidad completa.
-- El rechazo de una muestra por Patched no demuestra seguridad general.
-- La ausencia de firmas ASan en una ventana concreta no prueba ausencia de
-  errores en todas las rutas o entradas.
+## Validez externa
 
-## Custodia y reproducibilidad
+- EchoCall, su flujo de llamada, el receptor y ECLB son construcciones propias.
+- ECLB no es un protocolo real de VoIP y el tamaño 32/64 es una decisión del
+  diseño experimental.
+- CVE-2019-3568 motiva la pregunta sobre procesamiento automático y memoria,
+  pero EchoCall no comparte su código, protocolo ni identidad binaria.
+- Los resultados no deben extrapolarse a la seguridad de productos reales ni a
+  todas las vulnerabilidades zero-click.
 
-- Las capturas de E-028/E-029 están preservadas, pero los ELF exactos con los
+## Qué no se ha demostrado
+
+- Ejecución remota de código (RCE) o ejecución arbitraria.
+- Secuestro del flujo de control, shellcode o persistencia.
+- Exfiltración, compromiso completo del dispositivo o explotabilidad práctica.
+- Seguridad general de Patched o ausencia de otras vulnerabilidades.
+- Equivalencia exacta con CVE-2019-3568.
+
+## Límites de AddressSanitizer
+
+ASan observa determinadas clases de errores de memoria durante las rutas que se
+ejecutan; no prueba que las rutas no ejercitadas estén libres de fallos. La
+[documentación Android NDK](https://developer.android.com/ndk/guides/asan)
+indica además que ASan está obsoleto/no soportado desde 2023 y recomienda HWASan
+en entornos ARM64 compatibles. EchoCall conserva ASan para reproducir la cadena
+experimental `x86_64` ya documentada, no como recomendación general para nuevos
+proyectos.
+
+## Custodia y binarios
+
+- Los candidatos finales y parte de la evidencia primaria permanecen bajo
+  custodia externa selectiva; sus hashes están en
+  [procedencia Android](evidencias/procedencia-experimento-android.md).
+- Las capturas E-028/E-029 están versionadas, pero sus ELF Debug exactos con los
   hashes registrados no están disponibles actualmente.
-- No se afirma identidad entre esos ELF Debug y los binarios ASan usados en la
-  comparación dinámica.
-- Algunos artefactos primarios finales permanecen bajo custodia externa y no
-  se publican como builds en Git.
-- Versiones futuras del SDK, NDK o Gradle pueden afectar la reproducción de los
-  builds Android históricos.
+- No se afirma identidad entre esos ELF y los APK ASan de la comparación
+  dinámica.
+- Versiones futuras del SDK, NDK, Gradle o sistema anfitrión pueden afectar la
+  reconstrucción de builds históricos.
 
-## Uso
+## Uso autorizado
 
-El repositorio contiene código deliberadamente vulnerable. Debe emplearse solo
-en infraestructura propia y aislada, conforme a [`SECURITY.md`](../SECURITY.md).
+El repositorio contiene código deliberadamente vulnerable. Las comprobaciones
+rutinarias deben limitarse a Native Core Patched y Android Patched. Consulta
+[`SECURITY.md`](../SECURITY.md) antes de ejecutar herramientas o muestras.
