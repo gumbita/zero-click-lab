@@ -46,6 +46,13 @@ add_executable(receiver_vuln cli/receiver_vuln.c)
 target_link_libraries(receiver_vuln PRIVATE vulnerable_parser)
 enable_strict_warnings(receiver_vuln)
 
+# MinGW's legacy printf mode does not expose the C99/C17 `%zu` conversion to
+# GCC's format checker. Enable its ANSI stdio implementation for the CLI only.
+if(MINGW)
+    target_compile_definitions(receiver_safe PRIVATE __USE_MINGW_ANSI_STDIO=1)
+    target_compile_definitions(receiver_vuln PRIVATE __USE_MINGW_ANSI_STDIO=1)
+endif()
+
 if(ENABLE_ASAN AND CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(vulnerable_parser PRIVATE
         -fsanitize=address

@@ -198,7 +198,7 @@ Fase 6 quedó validada, cerrada y publicada en
 funcionales. Los cuatro APK proceden del commit fuente
 `7bbb5ba984c55edfe2d0c6254253fb0ed9f2065d`, quedaron fijados por tamaño y
 SHA-256 y se preservaron fuera de Temp, sin reconstrucción, en
-`C:\Users\Angels\Documents\EchoCall-TFM-Evidence\phase7-frozen-candidates\echocall-phase7-20260810T162009Z`.
+`%USERPROFILE%\Documents\EchoCall-TFM-Evidence\phase7-frozen-candidates\echocall-phase7-20260810T162009Z`.
 `candidate-manifest.txt` tiene SHA-256
 `59E04A43D1170DF9DD2D50E4346A464CF1900CE0822B9CF339508D82A5B97B7E`.
 Fase 8 operó sobre esos mismos bytes, previa comprobación de hashes, sin
@@ -259,11 +259,14 @@ Las demás fuentes internas se inspeccionan sin modificación.
 
 ## 5. Estrategia técnica
 
-### 5.1. Variantes objetivo
+### 5.1. Variantes y builds objetivo
 
 **IMPLEMENTADO Y VALIDADO EN FASE 1.** La matriz es:
 
-| Flavor | Build type | Variante |
+Vulnerable y Patched son las variantes de parser. Debug y ASan son build types;
+ASan añade instrumentación, no otra implementación lógica.
+
+| Flavor / variante | Build type | Combinación Gradle |
 |---|---|---|
 | vulnerable | debug | `vulnerableDebug` |
 | vulnerable | asan | `vulnerableAsan` |
@@ -274,7 +277,7 @@ Las demás fuentes internas se inspeccionan sin modificación.
 
 **IMPLEMENTADO Y VALIDADO EN FASE 1.** Las identidades de instalación son:
 
-| Variante | `applicationId` | Nombre instalado |
+| Combinación Gradle | `applicationId` | Nombre instalado |
 |---|---|---|
 | `vulnerableDebug` | `com.echocall.lab.vulnerable` | EchoCall Lab — Vulnerable |
 | `patchedDebug` | `com.echocall.lab.patched` | EchoCall Lab — Patched |
@@ -615,7 +618,7 @@ modificaron.
 - Las 10/10 bibliotecas se correlacionaron desde APK hasta CMake, fuentes y
   objetos; el símbolo del parser esperado está presente y el contrario ausente.
 - Los cuatro APK provisionales cargaron JNI, mostraron el parser correcto,
-  conservaron PID y no registraron crash. Las dos variantes ASan no registraron
+  conservaron PID y no registraron crash. Los dos builds ASan no registraron
   error AddressSanitizer.
 - La muestra usada fue `samples/benign/valid_call_control.bin`, 17 bytes,
   SHA-256
@@ -630,7 +633,7 @@ no explotabilidad. E-022 y E-025 siguen siendo evidencia histórica anterior.
 
 ### Criterios de aceptación
 
-- [x] Cuatro variantes compilan.
+- [x] Cuatro combinaciones Gradle compilan: dos variantes por dos build types.
 - [x] Cuatro IDs distintos.
 - [x] Sin selector runtime.
 - [x] Parser correcto.
@@ -663,7 +666,8 @@ Introducir estado, datos ficticios y navegación sin completar todavía todos lo
 ### Precondiciones
 
 - Fase 1 validada y revisada.
-- Cuatro variantes identificables sin selector runtime.
+- Dos variantes identificables, cada una con builds Debug y ASan, sin selector
+  runtime.
 - Contrato de navegación del documento de diseño aprobado.
 
 ### Alcance autorizado
@@ -1359,7 +1363,7 @@ La muestra común fue `oversized_complete_payload.bin`, 77 bytes, SHA-256
 ### Evidencia primaria
 
 Fase 8A se conserva, sin modificación, en
-`C:\Users\Angels\Documents\EchoCall-TFM-Evidence\phase8a-patched-asan-20260810T172319Z`:
+`%USERPROFILE%\Documents\EchoCall-TFM-Evidence\phase8a-patched-asan-20260810T172319Z`:
 
 - manifest SHA-256
   `910642CAA5E428A4DF1FA201E2EF3E3F699AC60391E4A27E9124B09AE5E161A8`;
@@ -1371,7 +1375,7 @@ Fase 8A se conserva, sin modificación, en
   `F93C2A41BCC122E417E100A079A9CF7A8A0BCE472D767FCA915E40D4B8B77313`.
 
 Fase 8B se conserva, sin modificación, en
-`C:\Users\Angels\Documents\EchoCall-TFM-Evidence\phase8b-vulnerable-asan-20260810T174243Z`:
+`%USERPROFILE%\Documents\EchoCall-TFM-Evidence\phase8b-vulnerable-asan-20260810T174243Z`:
 
 - manifest SHA-256
   `A33E17F4574509FD81AE53EA86C88763B5F6FA82CDBA5CA6D069261E17666F7B`;
@@ -1592,7 +1596,7 @@ payloads.
 - [x] Plan actualizado.
 - [x] Línea base preservada.
 - [x] Rama publicada.
-- [x] Cuatro variantes.
+- [x] Dos variantes de parser con cuatro combinaciones Gradle.
 - [x] Parser fijado.
 - [x] La separación nativa de Patched ha sido verificada en Gradle, CMake, fuentes compiladas, símbolos de la `.so` y contenido del APK; la implementación vulnerable no se empaqueta.
 - [x] La separación quedó razonablemente garantizada y Fase 1 no quedó bloqueada.

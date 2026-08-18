@@ -33,8 +33,10 @@ entornos expresamente preparados para ello.
 
 Si detectas una vulnerabilidad accidental distinta del comportamiento
 deliberadamente incluido, evita publicar detalles explotables antes de que
-pueda revisarse. Comunícala de forma privada a la persona responsable del
-repositorio mediante los canales privados asociados al proyecto.
+pueda revisarse. No abras un issue público con los detalles. Comunícala a la
+persona responsable mediante el canal privado por el que recibiste acceso al
+repositorio; si no dispones de uno, solicita primero un canal privado sin
+incluir información explotable.
 
 Este archivo no concede una licencia de uso. La licencia del repositorio se
 decidirá por separado antes de una eventual publicación pública.

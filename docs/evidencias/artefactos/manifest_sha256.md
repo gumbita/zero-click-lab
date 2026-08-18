@@ -11,11 +11,11 @@ reconstrucción documental en evidencia experimental primaria.
 
 | Archivo | Tamaño | SHA-256 | Función |
 |---|---:|---|---|
-| `../../../.gitattributes` | 325 bytes | `1720FCB479CB2F420A79DE2B7D6CC4A03164D756EA6038772EDBB9F40929F462` | Conservación byte a byte de artefactos de evidencia |
-| `../../../README.md` | 3 980 bytes | `957301ACA37A5532FA9B1128E4BDC9E387B6E47119C1293060497011373A9DE1` | Enlace raíz al registro de evidencias |
-| `../README.md` | 2 558 bytes | `8BC2AC5DD09014209A1F72FD6BA06EA8522B14151DC9BFB52B213E636AD51883` | Índice y taxonomía |
-| `../registro_validacion_experimental.md` | 37 263 bytes | `8E53AC558A8DE26AA7A46B5E429925B57FBD84898786A4D7DA41C215C3524B56` | Matriz y análisis consolidado |
-| `README.md` | 2 516 bytes | `BEBCB3C5EA7A7A673B85D5DFD8C9095D7046B52480A3C498FEF007A01E1FE4AE` | Política de artefactos y saneamiento |
+| `../../../.gitattributes` | 339 bytes | `0BF96FC7CC180580057A29EDB2D8D60297C911A3BFF76D89375F8BB3F03C9AAF` | Conservación byte a byte de artefactos de evidencia |
+| `../../../README.md` | 6 767 bytes | `BF19EB58DDC1ADF714F5C05E1366185E25DF766E9BEE9339F77BA7CD4B57F8E2` | Enlace raíz al registro de evidencias |
+| `../README.md` | 3 780 bytes | `D01586BEBA2A7BA0E22982F9C6390D8C6BD59F4485EB753F54035AD2BF40D974` | Índice y taxonomía |
+| `../registro_validacion_experimental.md` | 39 555 bytes | `3851A7B98433E2E2A3C33898EBB00DD6B18B7F9037DECAFDF9583952AE7F0D15` | Matriz y análisis consolidado |
+| `README.md` | 3 076 bytes | `CA7175DCACD724E1E3B9C497AC44343B9AFF26935F324E5377F027A7331FEC8D` | Política de artefactos y saneamiento |
 | `contexto/echocall-vulnerable-20260731-134143.png` | 204 949 bytes | `EE7DDFD7804D18DB51F1C415934B0E57EF98DE485E4EB79EDE94D45CF634A8E0` | Captura contextual; no concluyente para E-021/E-022 |
 | `E-022/asan-udp-vulnerable-20260731-140415.log` | 64 698 bytes | `F59B0BCCC33F2B9E6BCCA28DA80145F59C04A2E93B9F101A999A042185EDED7D` | Log primario E-022 |
 | `E-021_E-024_sesion_powershell_sanitizada.txt` | 369 039 bytes | `92C0CF67B87D2D126504FA9FDD59455753EA56363B40AFD1865EB25866595496` | Derivado saneado de la transcripción primaria |
@@ -24,6 +24,19 @@ reconstrucción documental en evidencia experimental primaria.
 | `E-025/e025-safe-udp-oversized-20260804-121742-metadata.txt` | 1 361 bytes | `163250586C651FAEAAA4226A06197FD0D395CD84B8933B08AD436DB3FD873E45` | Metadatos y cadena de custodia E-025 |
 | `E-025/e025-safe-udp-oversized-20260804-121742-sender.txt` | 79 bytes | `C0EAA651A54FA70296A7AEE873358FEA1584094D46053EC0D713F54538BDA4F5` | Salida del emisor E-025 |
 | `E-025/e025-safe-udp-oversized-20260804-121742.log` | 2 774 bytes | `D06D6FABF8E7333011CB51C66019BBAA7F14564EE96FD8AFED3B5AE44A664EDB` | Log primario E-025 |
+| `E-028/README.md` | 10 003 bytes | `8A1BF72A5C823839624E4E86B6BDDCC1633B8D430DFBB22E23C49A05C74622B6` | Alcance, hallazgos y limitación de custodia E-028 |
+| `E-028/e028-01-ghidra-vulnerable-import-summary.png` | 96 491 bytes | `A840572F38E8F216F2BB964027008A7A09531546B674A25F3F6C0A3CC906BCE6` | Importación Ghidra del ELF Vulnerable |
+| `E-028/e028-02-ghidra-jni-to-vulnerable-parser.png` | 128 912 bytes | `AB6F160F842683534E5558AA4459A1931C53A0C22708EBA4E44A3C15423F882D` | Flujo JNI hacia el parser Vulnerable |
+| `E-028/e028-03-ghidra-vulnerable-parse-packet-context.png` | 124 954 bytes | `7312EE1B2239FE94FF35ADED39F77AEC7F87DB5A75781F74E22463DC868346F1` | Contexto de longitudes Vulnerable |
+| `E-028/e028-04-ghidra-vulnerable-root-cause.png` | 154 480 bytes | `4BD72EB4DFC6F22714AA3D61AE12629E01A469E76D5CEFEC4F343B2B356BC0D3` | Reserva de 32 bytes y copia gobernada por entrada |
+| `E-028/e028-aux-04-ghidra-vulnerable-symbol-tree.png` | 21 139 bytes | `7B7A65E05CB4E465847432404CD965FD9EF6A5F26797D6C72CAF75413191C776` | Árbol auxiliar de símbolos Vulnerable |
+| `E-028/e028-aux-05-ghidra-jni-export.png` | 12 053 bytes | `E8A580BAAFF8B6FFEC30CCEE756EF50DCE476A081A3089E4B5BD949894E0CF3D` | Export JNI auxiliar Vulnerable |
+| `E-029/README.md` | 8 445 bytes | `762836C0AC87E1C74CB80B8F0B0E11D00BA07E15D9BEBE5448F3C5C42498AD95` | Alcance, hallazgos y limitación de custodia E-029 |
+| `E-029/e029-01-ghidra-patched-safe-parser-overview.png` | 164 003 bytes | `E233863BCE0F527A3F3EBFB9CA661EECEC0EBCA72766EFFFE5A4E472C917719A` | Vista general del parser Patched |
+| `E-029/e029-02-ghidra-patched-symbol-tree.png` | 16 637 bytes | `F71E50E48ACEB4D9AB1E5DD2B8D8896FDA2D5F04023E2F606611E4A52CC34707` | Árbol de símbolos Patched |
+| `E-029/e029-03-ghidra-patched-length-check.png` | 162 399 bytes | `B9C650257D1948F5563CF6D04C255272FBBA89390B0CA3D96612F6C2A26AF637` | Límite `< 0x21` y estado 6 |
+| `E-029/e029-04-ghidra-patched-status6-payload-too-large.png` | 145 711 bytes | `28AE8870C078C273F40CA234955096E1664CCB1426C2DF7DACC49AE6993103E1` | Mapeo de estado 6 a `payload_too_large` |
+| `E-029/e029-aux-02-ghidra-patched-safe-parser-entry.png` | 150 286 bytes | `A88D7AE1CCFECDDCD887A35A24C9CD9EEEED8864117B05D7CF1F26B70249D470` | Entrada auxiliar de `safe_parse_packet` |
 
 `manifest_sha256.md` también se versiona, pero no incluye su propio hash porque
 ese valor cambiaría al escribirlo y produciría una referencia circular.

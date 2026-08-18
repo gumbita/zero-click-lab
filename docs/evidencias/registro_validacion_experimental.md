@@ -59,6 +59,8 @@ puede no estar reproducida y, aun así, no ser recomendable repetirla.
 | E-023 | P5 Robustez UDP | Ciclo de vida y ráfagas | Muestra válida actual; 17 bytes | UDP y ambos parsers | Stop, restart, bind único, diez retornos SAFE y uno VULNERABLE; PID 5624 vivo | Transcripción E-021–E-024 | `PRIMARIA` | Transcripción y código |
 | E-024 | P5 Robustez UDP | `EADDRINUSE` y recuperación | Puerto 43568 ocupado; después muestra válida | UDP y SAFE | Error visible, un retry, bind único y parse SAFE aceptado; PID 5971 vivo | Transcripción E-021–E-024 | `PRIMARIA` | Transcripción y código |
 | E-025 | P5 Android UDP | SAFE oversized por UDP con cadena de custodia | `samples/malformed/oversized_complete_payload.bin`; 77 bytes; SHA-256 previo `516F7C6A9B6237274F33F8AB01057DFDBD1137DF0C898F70B5AFB6B7DA742ABA` | UDP, JNI, SAFE y ASan | Recepción y despacho SAFE; `payload_too_large`; PID 5397 permanece vivo; sin firmas de error buscadas en el log | Metadatos, sender, log y UI anterior/posterior | `PRIMARIA` | Cinco artefactos E-025 y hashes verificados |
+| E-028 | Reversing estático | Ghidra sobre ELF Vulnerable x86_64 | ELF con identidad registrada `A14467B2...26723`, 8360 bytes | JNI y `vulnerable_parse_packet` | `declared == actual` permite alcanzar `malloc(32)` y una copia dependiente de `declared_length`; no se identifica `declared <= 32` antes del sink | [README y capturas](artefactos/E-028/README.md) | `PRIMARIA` | Capturas conservadas; custodia parcial porque el ELF exacto no se localizó en el árbol auditado |
+| E-029 | Reversing estático | Ghidra sobre ELF Patched x86_64 | ELF con identidad registrada `229C26DB...7D60`, 7984 bytes | JNI y `safe_parse_packet` | `declared <= 32` precede a la coherencia; superar el máximo produce `status = 6` y `payload_too_large` | [README y capturas](artefactos/E-029/README.md) | `PRIMARIA` | Capturas conservadas; custodia parcial porque el ELF exacto no se localizó en el árbol auditado |
 
 ## Revisión de E-007–E-014
 
@@ -217,6 +219,8 @@ ejecutar durante esta consolidación.
 | E-023 | Ciclo de vida y ráfagas UDP | `PRIMARIA` | Sí, transcripción | Sí | Sí, no destructiva | `NO NECESARIA` | Varios eventos se conservan en una transcripción conjunta. |
 | E-024 | `EADDRINUSE` y retry | `PRIMARIA` | Sí, transcripción | Sí | Sí, no destructiva | `NO NECESARIA` | Exit codes auxiliares ND. |
 | E-025 | SAFE oversized por UDP con custodia integral | `PRIMARIA` | Sí, cinco artefactos | Sí | Sí, pero la evidencia ya está cerrada | `NO REPETIR` | Commit, APK, muestra, PID, sender, log y UI identificados antes/después. |
+| E-028 | Reversing estático Vulnerable | `PRIMARIA` | Sí, cuatro capturas principales y dos auxiliares | Sí, documental | El análisis ya está cerrado; no requiere ejecución | `NO NECESARIA` | Custodia parcial: identidad registrada; falta el ELF exacto. |
+| E-029 | Reversing estático Patched | `PRIMARIA` | Sí, cuatro capturas principales y una auxiliar | Sí, documental | El análisis ya está cerrado; no requiere ejecución | `NO NECESARIA` | Custodia parcial: identidad registrada; falta el ELF exacto. |
 
 ## E-025 — SAFE oversized por UDP
 

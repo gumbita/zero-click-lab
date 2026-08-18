@@ -1,0 +1,24 @@
+name: Safe CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  native-safe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Configure Native Core
+        run: cmake -S native-core -B "${{ runner.temp }}/echocall-native" -DENABLE_ASAN=OFF
+
+      - name: Build safe native targets
+        run: cmake --build "${{ runner.temp }}/echocall-native" --target test_safe_parser receiver_safe
+
+      - name: Run safe native tests
+        run: ctest --test-dir "${{ runner.temp }}/echocall-native" --output-on-failure

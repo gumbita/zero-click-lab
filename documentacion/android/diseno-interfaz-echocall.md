@@ -252,9 +252,9 @@ determinista del simulador; ECLB no contiene un nombre de contacto.
 ## 5. Arquitectura Vulnerable/Patched
 
 **CONFIRMADO EN FASES 1 A 6.** Se mantiene un único módulo de aplicación Android
-`:app` que genera cuatro variantes, con dos identidades de producto
-Vulnerable/Patched y una Activity compartida. La estructura implementada hasta
-Fase 6 es:
+`:app` con dos variantes de parser, Vulnerable y Patched. Cada una admite los
+builds Debug y ASan y comparte la misma Activity. La estructura implementada
+hasta Fase 6 es:
 
 ```text
 MainActivity (ciclo de vida UDP, PendingProcessingStore y setContent)
@@ -290,7 +290,7 @@ de producto. La UI no elige el parser ni invoca dos rutas alternativas.
 Las diferencias por flavor se limitarán a identidad, recursos informativos y
 selección nativa.
 
-## 6. Variantes de compilación
+## 6. Variantes y builds
 
 ### 6.1 Matriz implementada
 
@@ -299,7 +299,7 @@ selección nativa.
 - flavors: `vulnerable`, `patched`;
 - build types de entrega del laboratorio: `debug`, `asan`.
 
-| Variante Gradle | Parser | Instrumentación | ABI validada |
+| Combinación Gradle | Variante de parser | Instrumentación | ABI validada |
 |---|---|---|---|
 | `vulnerableDebug` | VULNERABLE | no ASan | `arm64-v8a`, `armeabi-v7a`, `x86`, `x86_64` |
 | `vulnerableAsan` | VULNERABLE | ASan | `x86_64` |
@@ -310,9 +310,10 @@ selección nativa.
 `-DECHOCALL_PARSER_IMPLEMENTATION=VULNERABLE` o `PATCHED`. El build type `asan`
 mantiene `-DENABLE_ANDROID_ASAN=ON`.
 
-**CONFIRMADO EN FASE 1.** Las variantes `release` quedaron deshabilitadas con
+**CONFIRMADO EN FASE 1.** Las combinaciones `release` quedaron deshabilitadas con
 `androidComponents.beforeVariants` en Android Gradle Plugin 8.12.2. La matriz de
-aplicación queda limitada a las cuatro variantes anteriores.
+aplicación queda limitada a las cuatro combinaciones anteriores: dos variantes
+de parser por dos build types.
 
 **LIMITACIÓN.** ASan se mantiene aquí por continuidad experimental con la línea
 base x86_64. La documentación oficial del NDK indica que ASan está obsoleto y
@@ -324,7 +325,7 @@ instrumentación no forma parte de esta evolución.
 
 **DECISIÓN DE DISEÑO.** Identidades finales:
 
-| Variante | Nombre instalado | `applicationId` |
+| Combinación Gradle | Nombre instalado | `applicationId` |
 |---|---|---|
 | `vulnerableDebug` | EchoCall Lab — Vulnerable | `com.echocall.lab.vulnerable` |
 | `patchedDebug` | EchoCall Lab — Patched | `com.echocall.lab.patched` |
@@ -338,7 +339,7 @@ comunes; `applicationId` seguirá siendo la identidad de instalación.
 **CONFIRMADO EN FASE 1.** Cada flavor define su `applicationId` base y el build
 type conserva `.asan` como sufijo. Los nombres Debug se resuelven mediante
 recursos de flavor y los nombres ASan completos mediante los source sets de
-variante `vulnerableAsan` y `patchedAsan`.
+combinación `vulnerableAsan` y `patchedAsan`.
 
 ## 8. Base de código compartida
 
@@ -1038,7 +1039,8 @@ terminología, coherencia cruzada y `git diff --check`. Manuales: no aplica.
 
 ### Fase 1 — Arquitectura de variantes
 
-**VALIDADA.** Se construyeron las cuatro variantes:
+**VALIDADA.** Se construyeron las cuatro combinaciones Gradle de las dos
+variantes con Debug y ASan:
 
 - `assembleVulnerableDebug`;
 - `assembleVulnerableAsan`;
@@ -1064,8 +1066,8 @@ mostró el parser compilado correcto, cargó JNI, recibió exactamente un datagr
 de la muestra canónica `samples/benign/valid_call_control.bin` (17 bytes,
 SHA-256
 `912B5F7F858A790D4C49AE2860CD421F0B70C8DD8E582ABE99AB6D6640965B8E`) y
-devolvió `status=accepted code=ok` conservando su PID. No hubo crashes; las dos
-variantes ASan no registraron errores AddressSanitizer.
+devolvió `status=accepted code=ok` conservando su PID. No hubo crashes; los dos
+builds ASan no registraron errores AddressSanitizer.
 
 El asset Android histórico `oversized_complete_payload.bin` se retiró en 1B.4.
 La muestra canónica externa permanece en
@@ -1251,7 +1253,7 @@ El cierre quedó versionado en
 Los cuatro candidatos proceden del commit fuente
 `7bbb5ba984c55edfe2d0c6254253fb0ed9f2065d` y se preservaron, sin
 reconstrucción, fuera de Temp en
-`C:\Users\Angels\Documents\EchoCall-TFM-Evidence\phase7-frozen-candidates\echocall-phase7-20260810T162009Z`.
+`%USERPROFILE%\Documents\EchoCall-TFM-Evidence\phase7-frozen-candidates\echocall-phase7-20260810T162009Z`.
 El manifiesto candidato tiene SHA-256
 `59E04A43D1170DF9DD2D50E4346A464CF1900CE0822B9CF339508D82A5B97B7E`.
 Fase 8 usó exactamente esos bytes: no se recompilaron, modificaron, resignaron,
@@ -1332,7 +1334,7 @@ describe únicamente esa ejecución concreta: no demuestra seguridad general de
 Patched.
 
 Evidencia primaria externa, conservada sin modificación en
-`C:\Users\Angels\Documents\EchoCall-TFM-Evidence\phase8a-patched-asan-20260810T172319Z`:
+`%USERPROFILE%\Documents\EchoCall-TFM-Evidence\phase8a-patched-asan-20260810T172319Z`:
 
 - `phase8a-evidence-manifest.txt`: SHA-256
   `910642CAA5E428A4DF1FA201E2EF3E3F699AC60391E4A27E9124B09AE5E161A8`;
@@ -1391,7 +1393,7 @@ presuponer que el directorio `merged_native_libs` significase por sí mismo
 «unstripped».
 
 Evidencia primaria externa, conservada sin modificación en
-`C:\Users\Angels\Documents\EchoCall-TFM-Evidence\phase8b-vulnerable-asan-20260810T174243Z`:
+`%USERPROFILE%\Documents\EchoCall-TFM-Evidence\phase8b-vulnerable-asan-20260810T174243Z`:
 
 - `phase8b-evidence-manifest.txt`: SHA-256
   `A33E17F4574509FD81AE53EA86C88763B5F6FA82CDBA5CA6D069261E17666F7B`;
@@ -1489,8 +1491,8 @@ repositorio y la redacción de paper, presentación, artículo/blog o vídeo.
 
 ### Identidad y compilación
 
-- [x] dos apps conceptuales instalables simultáneamente;
-- [x] cuatro variantes compilables con los IDs acordados;
+- [x] una app con dos variantes conceptuales instalables simultáneamente;
+- [x] cuatro combinaciones Gradle compilables con los IDs acordados;
 - [x] Debug y ASan diferenciados, ASan x86_64;
 - [x] trabajo realizado solo en `feature/echocall-ui`;
 - [x] base `feature/native-core` y commits protegidos preservados.
@@ -1553,7 +1555,7 @@ repositorio y la redacción de paper, presentación, artículo/blog o vídeo.
 | ambos parsers permanecen en la `.so` | separación solo cosmética | mitigado y verificado en Fase 1 mediante Gradle, CMake, fuentes, objetos, símbolos y APK |
 | etiqueta UI y parser nativo divergen | evidencia engañosa | mitigado en Fase 1 con identidad compilada consultada desde JNI y contrastada con flavor |
 | cambio de namespace rompe símbolos JNI | error de carga | conservar namespace compartido y smoke test de cada variante |
-| source sets de flavor/build type pisan recursos | nombre o distintivo incorrecto | mitigado en Fase 1 con recursos de variante ASan explícitos e inspección del resultado |
+| source sets de flavor/build type pisan recursos | nombre o distintivo incorrecto | mitigado en Fase 1 con recursos de combinación ASan explícitos e inspección del resultado |
 | ASan está obsoleto/no soportado desde 2023 y podría contener errores | fragilidad en toolchains futuras | congelar NDK/ABI actual, documentar el límite y mantener HWASan como recomendación para entornos compatibles |
 | las dos apps compiten por UDP 43568 | `EADDRINUSE` esperado | ejecución secuencial y retry conservado; no cambiar el puerto |
 | navegación a Incoming antes de `accepted` | rompe la propiedad central | mitigado en Fase 3: orden causal observado `NATIVE_PARSE_OK → currentCall → IncomingCallScreen` |

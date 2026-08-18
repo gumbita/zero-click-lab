@@ -1,4 +1,4 @@
-"""Genera entradas binarias inocuas y reproducibles para la demo local."""
+"""Genera las muestras ECLB versionadas de EchoCall Lab."""
 
 from __future__ import annotations
 
