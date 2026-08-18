@@ -3,11 +3,10 @@
 > **REGISTRO HISTÓRICO VERSIONADO**
 >
 > Esta ruta conserva evidencia y reconstrucciones de etapas anteriores. La
-> evidencia primaria final de las Fases 8A y 8B se mantiene bajo custodia
-> externa selectiva; sus hashes, protocolo y conclusiones están documentados en
-> el [diseño Android](../../documentacion/android/diseno-interfaz-echocall.md)
-> y el
-> [plan de implementación](../../documentacion/android/plan-implementacion-echocall.md).
+> evidencia primaria final del experimento Android se mantiene bajo custodia
+> externa selectiva. Su identidad, procedencia, protocolo y límites están
+> consolidados en la
+> [ficha de procedencia del experimento Android](procedencia-experimento-android.md).
 
 Esta ruta contiene el registro versionado de la validación y la reconstrucción
 documental del laboratorio zero-click. Cada resultado debe
@@ -24,6 +23,8 @@ artefactos versionados, externos/excluidos y pendientes de revisión.
 
 - [Registro de validación experimental](registro_validacion_experimental.md):
   matriz maestra, carencias y criterio de capturas y logs.
+- [Procedencia del experimento Android](procedencia-experimento-android.md):
+  hashes, tamaños, versiones, cronología y localización de artefactos externos.
 - `registro_evidencias_zero_click.xlsx`: archivo XLSX local excluido
   temporalmente de Git. Solo se han confirmado existencia, tamaño y hash; su
   contenido interno no se certifica.
@@ -56,10 +57,11 @@ como evidencia primaria de una única ejecución concluyente y se clasifica como
 de custodia completa y también se clasifica como `PRIMARIA` y `NO REPETIR`.
 
 E-021, E-022 y E-025 son evidencia histórica versionada previa a la matriz
-final de variantes EchoCall. Los binarios, logs y capturas primarios de 8A/8B
-no se incorporaron a esta carpeta: su ausencia del repositorio responde a la
-política de custodia externa selectiva y no implica que los artefactos no
-existan.
+final de variantes EchoCall. Los binarios, logs y capturas primarios del
+experimento Android final no se incorporaron a esta carpeta: su ausencia del
+repositorio responde a la política de custodia externa selectiva y no implica
+que los artefactos no existan. La ficha de procedencia conserva los
+identificadores necesarios para comprobar su identidad si se recuperan.
 
 No deben registrarse como hechos resultados esperados, hipótesis ni resultados
 históricos que no se hayan vuelto a comprobar.

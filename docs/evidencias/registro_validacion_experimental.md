@@ -4,9 +4,9 @@
 >
 > Las expresiones como «funcionalidad actual» dentro de entradas antiguas
 > describen el estado existente en la fecha de esa evidencia, no necesariamente
-> el `HEAD` actual. La arquitectura final de EchoCall está documentada en el
-> [diseño Android](../../documentacion/android/diseno-interfaz-echocall.md) y el
-> [plan de implementación](../../documentacion/android/plan-implementacion-echocall.md).
+> el `HEAD` actual. La arquitectura final de EchoCall está documentada en
+> [`docs/architecture.md`](../architecture.md) y la identidad del experimento
+> en la [ficha de procedencia](procedencia-experimento-android.md).
 
 Este documento es la matriz maestra de evidencias del laboratorio del TFM.
 Distingue evidencia primaria, reconstrucción documental, resultado reportado y

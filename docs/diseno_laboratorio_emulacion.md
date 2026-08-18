@@ -5,10 +5,10 @@
 > Este documento conserva decisiones y alternativas consideradas durante el
 > diseño del laboratorio. Algunas fueron sustituidas durante la implementación
 > y el contenido no debe interpretarse como una descripción exacta del estado
-> actual. Las referencias vigentes son el
-> [diseño de interfaz de EchoCall](../documentacion/android/diseno-interfaz-echocall.md)
-> y el
-> [plan de implementación](../documentacion/android/plan-implementacion-echocall.md).
+> actual. La referencia vigente es la
+> [arquitectura de EchoCall](architecture.md); la identidad y cronología del
+> experimento se conservan en su
+> [ficha de procedencia](evidencias/procedencia-experimento-android.md).
 
 ## 1. Decisión general
 

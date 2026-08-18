@@ -33,6 +33,8 @@ payload Patched.
 de payload y coincidencia entre longitud declarada y real antes de procesar el
 payload. Una longitud superior a 32 devuelve `payload_too_large`.
 
+Código: [`src/safe_parser.c`](src/safe_parser.c).
+
 ### Vulnerable
 
 `vulnerable_parse_packet()` conserva deliberadamente la condición experimental:
@@ -42,6 +44,12 @@ su coincidencia con la longitud real, pero sin validar el máximo de destino.
 Este código existe únicamente con fines académicos. No debe ejecutarse con
 muestras malformadas fuera del procedimiento controlado y autorizado del
 laboratorio.
+
+Código: [`src/vulnerable_parser.c`](src/vulnerable_parser.c).
+
+La diferencia pedagógica está en el orden: Patched comprueba el máximo antes de
+recorrer el payload; Vulnerable reserva 32 bytes y copia la longitud declarada
+después de validar solo que coincide con la longitud real.
 
 ## CLI
 
@@ -65,7 +73,7 @@ temporal fuera del repositorio:
 
 ```text
 cmake -S native-core -B <TEMP_BUILD_DIR> -DENABLE_ASAN=OFF
-cmake --build <TEMP_BUILD_DIR>
+cmake --build <TEMP_BUILD_DIR> --target test_safe_parser receiver_safe
 ctest --test-dir <TEMP_BUILD_DIR> --output-on-failure
 ```
 
