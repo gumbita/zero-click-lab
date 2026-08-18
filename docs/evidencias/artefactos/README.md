@@ -32,6 +32,19 @@ evidencia experimental primaria. Para futuras pruebas se calculará el hash de
 la entrada y, cuando proceda, del APK antes de ejecutar; se conservarán el
 comando, la salida íntegra y el estado final del proceso.
 
+## Reversing estático
+
+- [E-028 — Vulnerable](E-028/README.md): JNI, `vulnerable_parse_packet`,
+  reserva de 32 bytes y copia gobernada por `declared_length`.
+- [E-029 — Patched](E-029/README.md): límite `declared_length <= 32`, estado 6
+  y `payload_too_large`.
+- [Comparativa](../../reversing.md): lectura diferencial y límites de
+  interpretación.
+
+Los README preservan las identidades registradas durante las sesiones Ghidra.
+Los ELF exactos no están disponibles en este árbol y no se sustituyen por
+otros `.so` de tamaño o función similares.
+
 ## Derivados saneados
 
 La transcripción E-021–E-024 versionada es un derivado documental del original

@@ -29,6 +29,12 @@ artefactos versionados, externos/excluidos y pendientes de revisión.
   contenido interno no se certifica.
 - [`artefactos/`](artefactos/README.md): convención para incorporar logs,
   capturas, manifiestos y salidas de herramientas sin perder trazabilidad.
+- [E-028](artefactos/E-028/README.md): análisis estático Ghidra de Vulnerable;
+  capturas preservadas y custodia física del ELF exacto no disponible.
+- [E-029](artefactos/E-029/README.md): análisis estático Ghidra de Patched;
+  capturas preservadas y custodia física del ELF exacto no disponible.
+- [Comparativa técnica](../reversing.md): convergencia de evidencia estática y
+  dinámica sin afirmar identidad binaria con los candidatos ASan finales.
 - [Manifest SHA-256](artefactos/manifest_sha256.md): identidad de los
   artefactos actualmente custodiados.
 
