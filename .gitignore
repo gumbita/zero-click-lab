@@ -9,12 +9,27 @@ venv/
 logs/*.log
 processed/
 inbox/*.bin
+tmp/
 
 # OS / editors
 .DS_Store
+desktop.ini
 Thumbs.db
+_drive_sync_test.txt
 .vscode/
 .idea/
+
+# Android / Gradle local state and generated outputs
+**/.gradle/
+**/.kotlin/
+**/.cxx/
+**/local.properties
+android-app/**/build/
+
+# Native generated trees
+native-core/build*/
+**/CMakeFiles/
+**/CMakeCache.txt
 
 # Evidence / large outputs
 evidence/
