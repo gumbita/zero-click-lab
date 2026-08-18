@@ -1,5 +1,22 @@
 # Herramientas
 
+Estas utilidades auxiliares usan únicamente la biblioteca estándar de Python;
+no constituyen otra implementación de EchoCall ni requieren dependencias
+externas.
+
+## `generate_samples.py`
+
+Genera de forma determinista las cinco muestras ECLB versionadas bajo
+`samples/`. Conserva la utilidad vigente del prototipo histórico sin mantener
+sus parsers ni su procesador paralelo.
+
+```text
+python tools/generate_samples.py
+```
+
+Antes de sustituir muestras con valor probatorio, compara tamaños y SHA-256 con
+[`samples/README.md`](../samples/README.md) y los manifiestos de evidencia.
+
 ## `send_udp_packet.py`
 
 Envía un archivo binario como un único datagrama UDP. La utilidad no interpreta

@@ -17,6 +17,8 @@ de terceros.
 Los hashes anteriores se calculan sobre los archivos versionados. La
 especificación de campos y endianness está en
 [`docs/02_packet_format.md`](../docs/02_packet_format.md).
+La utilidad estándar [`tools/generate_samples.py`](../tools/generate_samples.py)
+permite regenerar exactamente este conjunto desde la raíz del repositorio.
 
 ## Ejecución segura
 
