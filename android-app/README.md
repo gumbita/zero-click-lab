@@ -1,70 +1,86 @@
 # EchoCall Android
 
-Aplicación Android propia del laboratorio. Recibe datagramas ECLB en
-`43568/UDP`, persiste un marcador antes de JNI y entrega los bytes a
-`NativeBridge.parsePacket()`. El parser queda fijado durante el build: cada APK
-contiene la implementación Vulnerable o la Patched, nunca un selector runtime.
+La aplicación Android proporciona el entorno donde una entrada UDP alcanza
+automáticamente Kotlin, JNI y un parser C. La interfaz simula mensajería y
+llamadas para hacer visible cuándo ocurre el procesamiento respecto de las
+acciones de aceptar o rechazar.
 
-## Arquitectura y estructura
+## Recorrido de una entrada
 
 ```text
-UDP :43568 → UdpPacketReceiver → Kotlin → NativeBridge.parsePacket()
-                                      ↓ JNI
-                                 parser C único
+UDP :43568
+   ↓
+UdpPacketReceiver
+   ↓
+Kotlin registra el evento y persiste pending
+   ↓
+NativeBridge.parsePacket(byte[])
+   ↓ JNI
+native_bridge.c
+   ↓
+parser Vulnerable o Patched fijado al compilar
 ```
 
-- `app/src/main/java/`: receptor UDP, estado, navegación y UI Compose;
-- `app/src/main/cpp/`: gateway JNI y selección CMake del parser;
+El receptor pertenece al ciclo de vida de la Activity, mantiene una cola FIFO
+y entrega los bytes al flujo técnico. Antes de JNI, Preferences DataStore
+guarda un marcador; un retorno normal lo limpia. Si el proceso termina dentro
+del parser, el relanzamiento puede mostrar que aquella operación no llegó al
+punto normal de limpieza.
+
+El marcador no diagnostica por sí solo un overflow. Ese diagnóstico procede de
+ASan, logs y señal de terminación. Consulta la
+[arquitectura](../docs/architecture.md).
+
+## Código compartido y selección nativa
+
+- `app/src/main/java/`: Activity, receptor UDP, estado, navegación y UI Compose;
+- `app/src/main/cpp/`: gateway JNI y selección CMake;
 - `app/src/{vulnerable,patched}/`: identidad visual de cada variante;
-- `app/src/{vulnerableAsan,patchedAsan}/`: recursos de identidad para sus
-  builds instrumentadas;
-- `../native-core/`: fuentes C reutilizadas por CMake.
+- `app/src/{vulnerableAsan,patchedAsan}/`: recursos de los builds ASan;
+- `../native-core/`: contrato y parsers C reutilizados.
 
-## Requisitos comprobables en el proyecto
+El flavor transmite `ECHOCALL_PARSER_IMPLEMENTATION=VULNERABLE|PATCHED` a
+CMake. Solo `vulnerable_parser.c` o `safe_parser.c` entra en la biblioteca
+nativa de cada APK; la UI no selecciona el parser en runtime.
 
-- Java source/bytecode target 17; usa un JDK compatible (el polish se validó
-  con el JBR 21 incluido en Android Studio);
-- Android SDK Platform 36 (`compileSdk=36`, `targetSdk=36`, `minSdk=28`);
-- Android NDK `27.0.12077973`;
-- CMake `3.22.1`;
-- Gradle Wrapper `8.13`;
-- Android Gradle Plugin `8.12.2`;
-- Kotlin `2.0.21`.
+## Variantes y builds
+
+**Variantes:**
+
+- Vulnerable: implementación deliberadamente insegura.
+- Patched: implementación que valida el máximo antes del payload.
+
+**Build types:**
+
+- Debug: ejecución funcional y depuración ordinaria.
+- ASan: instrumentación experimental `x86_64` para errores de memoria nativa.
+
+| Variante | Build | Tarea Gradle | `applicationId` |
+|---|---|---|---|
+| Vulnerable | Debug | `assembleVulnerableDebug` | `com.echocall.lab.vulnerable` |
+| Patched | Debug | `assemblePatchedDebug` | `com.echocall.lab.patched` |
+| Vulnerable | ASan | `assembleVulnerableAsan` | `com.echocall.lab.vulnerable.asan` |
+| Patched | ASan | `assemblePatchedAsan` | `com.echocall.lab.patched.asan` |
+
+ASan no es una tercera o cuarta lógica de parser. Instrumenta la biblioteca y
+empaqueta su runtime para hacer observables determinadas operaciones inválidas.
+
+## Requisitos
+
+| Componente | Versión configurada |
+|---|---|
+| Java target | 17 |
+| Android SDK | compile/target 36; min 28 |
+| NDK | `27.0.12077973` |
+| CMake | `3.22.1` |
+| Gradle Wrapper | `8.13` |
+| Android Gradle Plugin | `8.12.2` |
+| Kotlin | `2.0.21` |
 
 Configura el SDK mediante `ANDROID_HOME`, `ANDROID_SDK_ROOT` o un
-`local.properties` local que no se versionará. Usa siempre el wrapper incluido.
+`local.properties` no versionado. Usa el wrapper incluido.
 
-## Variantes
-
-### Vulnerable
-
-Implementación deliberadamente insegura del parser ECLB.
-
-### Patched
-
-Implementación que incorpora la validación del límite relevante.
-
-CMake recibe `ECHOCALL_PARSER_IMPLEMENTATION` desde el flavor e incluye solo
-`vulnerable_parser.c` o `safe_parser.c`. La interfaz Kotlin/JNI es compartida.
-
-## Builds e instrumentación
-
-El flavor selecciona Vulnerable o Patched. El build type selecciona Debug o
-AddressSanitizer. ASan instrumenta la ejecución nativa para detectar
-determinados errores de memoria; no constituye otra lógica de parser.
-
-| Variante | Build | Tarea Gradle | Propósito |
-|---|---|---|---|
-| Vulnerable | Debug | `assembleVulnerableDebug` | Ejecución funcional del parser vulnerable |
-| Patched | Debug | `assemblePatchedDebug` | Ejecución funcional del parser parcheado |
-| Vulnerable | ASan (`x86_64`) | `assembleVulnerableAsan` | Instrumentación experimental del parser vulnerable |
-| Patched | ASan (`x86_64`) | `assemblePatchedAsan` | Instrumentación experimental del parser parcheado |
-
-Los `applicationId` son, respectivamente,
-`com.echocall.lab.vulnerable`, `com.echocall.lab.patched`,
-`com.echocall.lab.vulnerable.asan` y `com.echocall.lab.patched.asan`.
-
-## Build
+## Compilar
 
 Desde `android-app/` en Windows:
 
@@ -75,54 +91,39 @@ Desde `android-app/` en Windows:
 .\gradlew.bat :app:assembleVulnerableAsan
 ```
 
-En Linux o macOS sustituye `.\gradlew.bat` por `./gradlew`. Para el inicio
-seguro basta `patchedDebug`; compilar Vulnerable no ejecuta ninguna muestra.
+En Linux/macOS usa `./gradlew`. Los APK quedan en `app/build/outputs/apk/` y no
+se versionan. Compilar Vulnerable no ejecuta muestras.
 
-Los APK se generan bajo `app/build/outputs/apk/` y permanecen ignorados.
+## Comprobación segura con Patched
 
-## Instalación y arranque de Patched
-
-Con un dispositivo o emulador propio conectado mediante ADB:
+Con un emulador o dispositivo propio:
 
 ```text
+adb devices
 adb install -r app/build/outputs/apk/patched/debug/app-patched-debug.apk
 adb shell am start -n com.echocall.lab.patched/com.echocall.lab.MainActivity
 ```
 
-Confirma el dispositivo con `adb devices` y mantén una sola variante activa:
-todas escuchan el mismo puerto. La redirección host→emulador depende del
-entorno y debe configurarse explícitamente; no asumas que el loopback del host
-es el loopback del emulador.
-
-## Comprobación benigna
-
-Cuando Patched esté visible y escuchando, vuelve a la raíz del repositorio y
-envía únicamente la muestra benigna desde un host autorizado:
+Desde la raíz del repositorio, envía la muestra benigna:
 
 ```text
-python tools/send_udp_packet.py --host <IP_DEL_DISPOSITIVO_O_REDIRECCION> --port 43568 --file samples/benign/valid_call_control.bin
+python tools/send_udp_packet.py --host <IP_O_REDIRECCION_AUTORIZADA> --port 43568 --file samples/benign/valid_call_control.bin
 ```
 
-El resultado nativo esperado es `status=accepted code=ok`. El procesamiento se
-inicia al recibir el datagrama y antes de una interacción explícita de la
-persona usuaria.
+El resultado nativo esperado es `status=accepted code=ok`. Para un emulador,
+la redirección host→guest debe configurarse explícitamente; consulta la
+[guía de reproducción](../docs/reproduction.md).
 
-## Patched y ASan
+## Dónde observar
 
-Patched valida el máximo semántico de 32 bytes antes del procesamiento. Para la
-muestra canónica de 77 bytes (`declared_length=64`, `actual_length=64`) devuelve
-`payload_too_large`. Este rechazo concreto no demuestra seguridad general.
+- log `EchoCallUDP`: recepción, despacho y resultado normalizado;
+- pantalla técnica **Modo Lab**: package, parser compilado, estado UDP, último
+  resultado y eventos;
+- interfaz de llamada: navegación posterior a un retorno válido o rechazo;
+- relanzamiento: marcador de procesamiento interrumpido cuando no hubo limpieza
+  normal;
+- ASan/logcat: diagnóstico de memoria en los builds instrumentados.
 
-Los builds ASan instrumentan la biblioteca nativa y empaquetan el runtime
-para un entorno `x86_64` controlado. Sirven para diagnóstico de memoria, no
-para producción ni como garantía de ausencia de errores.
-
-## Precauciones con Vulnerable
-
-Vulnerable contiene deliberadamente una reserva de 32 bytes seguida de una
-copia gobernada por la longitud de entrada. No envíes la muestra oversized a
-Vulnerable como parte de un quick check, CI o prueba rutinaria. La ejecución
-final ya está documentada y clasificada como no repetir.
-
-Consulta la [guía de reproducción](../docs/reproduction.md), los
-[resultados](../docs/results.md) y [`SECURITY.md`](../SECURITY.md).
+Para interpretar las observaciones usa [Resultados](../docs/results.md) y
+[Evidencias](../docs/evidencias/README.md). No envíes la muestra oversized a
+Vulnerable como comprobación rutinaria.

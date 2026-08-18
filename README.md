@@ -2,131 +2,136 @@
 
 [![Safe CI](https://github.com/gumbita/zero-click-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/gumbita/zero-click-lab/actions/workflows/ci.yml)
 
-Laboratorio controlado de Android/JNI/C para estudiar procesamiento previo a la
-interacción y validación de memoria en escenarios *zero-click* sintéticos. El
-contexto de investigación está inspirado en el patrón descrito públicamente
-para CVE-2019-3568, sin reproducir su implementación.
+EchoCall Lab es un laboratorio experimental Android/JNI/C diseñado para
+estudiar, de forma controlada y reproducible, el procesamiento automático de
+datos antes de la interacción de la persona usuaria y su relación con errores
+de seguridad de memoria.
 
-EchoCall es una aplicación propia. No contiene código de WhatsApp, no implementa
-RTCP real y no constituye un exploit contra WhatsApp ni contra terceros. Utiliza
-el formato sintético ECLB, un receptor UDP local y parsers creados para este
-laboratorio. La experimentación se limita a entornos propios y controlados; no
-se ha demostrado ejecución remota de código (RCE).
+El laboratorio implementa un flujo `UDP → Kotlin → JNI → C` en el que los
+paquetes recibidos alcanzan automáticamente un parser nativo. Esto permite
+comparar dos implementaciones del mismo componente: **Vulnerable** y
+**Patched**. Ambas procesan ECLB, un formato binario sintético creado para el
+proyecto.
 
-En este repositorio, *zero-click* describe que el paquete entrante llega al
-parser antes de que la persona pulse Aceptar o Rechazar. No significa que se
-haya demostrado compromiso remoto, explotación completa o ausencia absoluta de
-interacción en todos los niveles del sistema.
+La variante Vulnerable reproduce intencionadamente un patrón de validación
+incorrecta de longitudes antes de una copia de memoria. Patched valida el
+límite relevante antes de procesar el payload. Las pruebas nativas, los builds
+Android, AddressSanitizer (ASan) y el reversing permiten observar esa diferencia
+desde el código fuente, la ejecución y el binario.
 
-## Estado actual
+El caso real que motiva la pregunta técnica es
+[CVE-2019-3568](https://www.cve.org/CVERecord?id=CVE-2019-3568), cuyo registro
+oficial describe un desbordamiento de buffer en una pila VoIP. EchoCall no
+reproduce aquel producto: usa código, arquitectura y protocolo propios para
+aislar experimentalmente un patrón de procesamiento automático y validación de
+longitudes.
 
-El laboratorio actual incluye:
+## Qué problema estudia
 
-- una aplicación Android de mensajería y llamadas simuladas;
-- recepción UDP en el puerto `43568`;
-- procesamiento automático previo a la interacción de la persona usuaria;
-- integración Kotlin → JNI → C mediante `NativeBridge.parsePacket()`;
-- variantes Vulnerable y Patched con el parser fijado al compilar;
-- builds Debug y ASan;
-- evidencia experimental final de las Fases 8A y 8B cerrada y documentada.
+En un escenario *zero-click*, datos procedentes de una fuente externa pueden
+alcanzar una superficie de procesamiento sin que exista una acción deliberada
+de la persona destinataria. La cuestión de seguridad es qué validaciones se
+aplican antes de que esos datos lleguen a operaciones sensibles, especialmente
+cuando la ruta cruza hacia código nativo y gestión manual de memoria.
 
-La interfaz normal es compartida por ambas variantes. Los detalles técnicos se
-mantienen en Modo Lab y en la documentación de investigación.
+En EchoCall Lab, esa idea se modela haciendo que un datagrama ECLB se procese al
+recibirlo, antes de cualquier acción de aceptar o rechazar en la interfaz. Esta
+es la propiedad concreta del modelo, no una definición universal de todas las
+vulnerabilidades zero-click.
 
 ## Arquitectura
 
 ```text
-PC / sender
-    ↓ UDP :43568
+Sender controlado
+      ↓ UDP :43568
 EchoCall Android
-    ↓
+      ↓
 UdpPacketReceiver
-    ↓
+      ↓
 Kotlin
-    ↓ JNI
+      ↓ JNI
 NativeBridge.parsePacket()
-    ↓
-parser C
-    ├── Vulnerable
-    └── Patched
+      ↓
+parser C fijado al compilar
+      ├── Vulnerable
+      └── Patched
 ```
 
-Cada APK contiene una sola implementación de parser. La elección no se realiza
-en runtime: el flavor selecciona la fuente nativa durante el build.
+Cada APK incorpora un solo parser. Gradle selecciona el flavor de seguridad y
+CMake compila únicamente `vulnerable_parser.c` o `safe_parser.c`; no existe un
+selector runtime entre ambos. Debug y ASan son formas de construir las dos
+variantes, no parsers adicionales.
 
-## Variantes del laboratorio
+La [arquitectura completa](docs/architecture.md) explica el receptor, el
+marcador persistente pre-JNI, la selección nativa y los puntos de observación.
 
-### Vulnerable
+## Vulnerable vs. Patched
 
-Implementación deliberadamente insegura que copia la longitud declarada sobre
-una reserva fija sin validar antes el máximo relevante.
+El contraste conceptual —simplificado, no sustituto del código real— es:
 
-### Patched
+```c
+/* Vulnerable: el tamaño de copia procede de la entrada. */
+buffer = malloc(32);
+memcpy(buffer, payload, declared_length);
+```
 
-Implementación defensiva que valida el límite semántico antes de procesar el
-payload.
+```c
+/* Patched: el límite se comprueba antes del procesamiento. */
+if (declared_length > MAX_PAYLOAD) {
+    reject();
+}
+```
 
-## Builds e instrumentación
+En el código real, Vulnerable comprueba primero que la longitud declarada
+coincide con la recibida, pero no que quepa en la reserva de 32 bytes. Patched
+aplica el máximo semántico antes de recorrer el payload:
 
-Debug y AddressSanitizer son dos formas de construir las mismas variantes, no
-parsers adicionales. ASan instrumenta el código nativo para detectar
-determinados errores de memoria durante una ejecución.
+- [`vulnerable_parser.c`](native-core/src/vulnerable_parser.c)
+- [`safe_parser.c`](native-core/src/safe_parser.c), usado por Patched
+- [especificación canónica de ECLB](docs/02_packet_format.md)
 
-| Variante | Build | Tarea Gradle | `applicationId` |
-|---|---|---|---|
-| Vulnerable | Debug | `assembleVulnerableDebug` | `com.echocall.lab.vulnerable` |
-| Patched | Debug | `assemblePatchedDebug` | `com.echocall.lab.patched` |
-| Vulnerable | ASan | `assembleVulnerableAsan` | `com.echocall.lab.vulnerable.asan` |
-| Patched | ASan | `assemblePatchedAsan` | `com.echocall.lab.patched.asan` |
+## Qué demuestra el laboratorio
 
-## Resultado experimental principal
+```text
+Recepción automática de una entrada ECLB controlada
+                        ↓
+                 Kotlin → JNI → C
+                        ↓
+       longitud declarada = longitud real = 64
+                        ↓
+        ┌───────────────┴────────────────┐
+        ↓                                ↓
+Vulnerable                         Patched
+copia 64 bytes en                 valida máximo 32
+destino de 32                          ↓
+        ↓                         rechazo controlado
+ASan observa escritura
+fuera de límites
+```
 
-La comparación final utilizó la misma muestra canónica ECLB de 77 bytes sobre
-los dos candidatos ASan congelados:
+ASan es instrumentación de diagnóstico: ayuda a detectar accesos de memoria
+inválidos durante una ejecución y aporta ubicación, tipo de operación y límites
+de la región afectada. En EchoCall hizo observable el overflow de la ruta
+Vulnerable; no convierte Debug/ASan en variantes lógicas diferentes.
 
-- **Patched ASan:** devolvió `payload_too_large`, limpió el marcador pendiente y
-  mantuvo el proceso vivo; no se observó un informe ASan en esa ejecución.
-- **Vulnerable ASan:** ASan detectó un `heap-buffer-overflow` durante un `WRITE`
-  de 64 bytes sobre una región heap de 32 bytes; el proceso terminó mediante
-  `SIGABRT`.
+## Resultado experimental
 
-Este resultado demuestra instrumentalmente una escritura fuera de límites en
-heap dentro de EchoCall Lab. No demuestra RCE, secuestro del flujo de control ni
-equivalencia exacta con CVE-2019-3568. Tampoco permite afirmar seguridad general
-de la variante Patched.
+La misma muestra ECLB de 77 bytes —payload declarado y real de 64 bytes— se
+aplicó a los dos candidatos Android ASan congelados:
 
-El alcance, los conteos, las huellas y las limitaciones se encuentran en el
-[diseño Android](documentacion/android/diseno-interfaz-echocall.md) y el
-[plan de implementación](documentacion/android/plan-implementacion-echocall.md).
-
-## Estructura del repositorio
-
-| Ruta | Función |
+| Variante | Resultado observado |
 |---|---|
-| [`android-app/`](android-app/README.md) | Aplicación EchoCall Android, Compose, UDP y JNI. |
-| [`native-core/`](native-core/) | Parsers C, receptores CLI y tests nativos. |
-| [`samples/`](samples/README.md) | Muestras ECLB benignas y malformadas del laboratorio. |
-| [`tools/`](tools/README.md) | Utilidades auxiliares para generar muestras y realizar envíos controlados. |
-| [`documentacion/android/`](documentacion/android/) | Documentación autoritativa del estado Android actual. |
-| [`docs/evidencias/`](docs/evidencias/) | Registro y evidencia histórica versionada. |
-| [`docs/`](docs/) | Arquitectura, ECLB, reproducción, resultados, reversing y límites. |
+| Patched + ASan | `payload_too_large`; proceso vivo; sin informe ASan observado en la ventana documentada |
+| Vulnerable + ASan | `heap-buffer-overflow`; `WRITE` de 64 bytes; región heap de 32 bytes; `SIGABRT` |
 
-## Por dónde empezar
+El resultado enlaza una diferencia de código con una diferencia observable de
+ejecución. [Resultados](docs/results.md) explica qué demuestra cada dato;
+[reversing](docs/reversing.md) muestra cómo la validación y la copia aparecen en
+el análisis estático.
 
-1. Este `README.md`.
-2. [Guía de reproducción segura](docs/reproduction.md).
-3. [Arquitectura vigente](docs/architecture.md).
-4. [Android](android-app/README.md) y [Native Core](native-core/README.md).
-5. [Resultados](docs/results.md), [reversing](docs/reversing.md) y
-   [limitaciones](docs/limitations.md).
-6. [Evidencias seleccionadas](docs/evidencias/README.md).
+## Quick start seguro
 
-El [mapa documental](docs/README.md) distingue la referencia actual de los
-documentos históricos.
-
-## Reproducibilidad
-
-Inicio rápido seguro desde la raíz del repositorio:
+El recorrido inicial construye y ejecuta únicamente Native Core Patched:
 
 ```text
 cmake -S native-core -B <TEMP_BUILD_DIR> -DENABLE_ASAN=OFF
@@ -134,38 +139,68 @@ cmake --build <TEMP_BUILD_DIR> --target test_safe_parser receiver_safe
 ctest --test-dir <TEMP_BUILD_DIR> --output-on-failure
 ```
 
-Después continúa con Android Patched en la [guía operativa](docs/reproduction.md).
-El quick start no construye ni ejecuta la ruta Vulnerable y nunca envía
-automáticamente la muestra oversized.
+CTest ejecuta `test_safe_parser` y `receiver_safe`; no invoca
+`receiver_vuln`. Continúa con [Android Patched y la reproducción
+segura](docs/reproduction.md). No envíes la muestra oversized a Vulnerable como
+prueba rutinaria.
 
-La trazabilidad final separa dos hitos:
+## Ruta de aprendizaje
 
-- **commit fuente de los APK candidatos:**
-  `7bbb5ba984c55edfe2d0c6254253fb0ed9f2065d`;
-- **cierre documental de Fase 8:**
-  `b0d26dec60a6abbafd5ff98928be377014cd5b99`.
+| Pregunta | Documento |
+|---|---|
+| ¿Cómo llega una entrada hasta C? | [Arquitectura](docs/architecture.md) |
+| ¿Qué contiene un paquete ECLB? | [Formato ECLB](docs/02_packet_format.md) |
+| ¿Dónde está la diferencia de validación? | [Native Core](native-core/README.md) |
+| ¿Qué ocurrió en el experimento? | [Resultados](docs/results.md) |
+| ¿Qué revela el binario? | [Reversing](docs/reversing.md) |
+| ¿Cómo ejecuto comprobaciones seguras? | [Reproducción](docs/reproduction.md) |
+| ¿En qué pruebas se basa cada afirmación? | [Evidencias](docs/evidencias/README.md) |
+| ¿Hasta dónde llegan las conclusiones? | [Limitaciones](docs/limitations.md) |
 
-Los APK experimentales no se atribuyen al commit documental. Sus hashes,
-procedencia y resultados detallados están registrados en la documentación
-Android. Los artefactos primarios finales se mantienen bajo custodia externa
-selectiva y no se copian a este repositorio.
+El [mapa de aprendizaje](docs/README.md) ofrece el recorrido completo.
 
-Las comprobaciones seguras de Native Core se describen en su README. La
-ejecución de muestras malformadas requiere un procedimiento experimental
-autorizado; no forma parte del inicio rápido.
+## Estructura del repositorio
+
+| Ruta | Función |
+|---|---|
+| [`android-app/`](android-app/README.md) | Aplicación Android, recepción UDP, Kotlin y JNI |
+| [`native-core/`](native-core/README.md) | Contrato C, parsers, CLI y tests seguros |
+| [`samples/`](samples/README.md) | Entradas ECLB explicadas y versionadas |
+| [`tools/`](tools/README.md) | Generador de muestras y emisor UDP controlado |
+| [`docs/`](docs/README.md) | Centro de aprendizaje técnico |
+| [`docs/evidencias/`](docs/evidencias/README.md) | Registro, hashes, procedencia y capturas seleccionadas |
+
+## Evidencias
+
+Las conclusiones combinan cuatro clases de prueba:
+
+- código fuente y tests de Native Core;
+- resultados dinámicos instrumentados con ASan;
+- reversing estático E-028/E-029;
+- hashes, manifiestos y registros de procedencia.
+
+La relación entre los APK fuente, la muestra y la custodia externa se conserva
+en [procedencia del experimento Android](docs/evidencias/procedencia-experimento-android.md).
+
+## Alcance y limitaciones
+
+EchoCall usa una arquitectura sintética y el protocolo propio ECLB. La evidencia
+demuestra una escritura fuera de límites concreta en el laboratorio y el
+rechazo temprano de esa condición por Patched. No demuestra RCE, secuestro del
+flujo, compromiso completo, seguridad general de Patched ni equivalencia
+binaria con CVE-2019-3568. Consulta [Limitaciones](docs/limitations.md) para los
+límites de custodia, ASan y validez externa.
 
 ## Uso responsable
 
-Consulta [SECURITY.md](SECURITY.md) antes de ejecutar componentes del
-laboratorio. No utilices el receptor, las muestras ni las herramientas contra
-sistemas o personas de terceros.
+El repositorio contiene código deliberadamente vulnerable. Úsalo únicamente en
+infraestructura propia y aislada. Consulta [SECURITY.md](SECURITY.md) antes de
+ejecutar muestras o herramientas.
 
 ## Referencias técnicas
 
-- [NVD — CVE-2019-3568](https://nvd.nist.gov/vuln/detail/CVE-2019-3568)
-- [CVE Services — CVE-2019-3568](https://cveawg.mitre.org/api/cve/CVE-2019-3568)
+- [CVE.org — CVE-2019-3568](https://www.cve.org/CVERecord?id=CVE-2019-3568)
+- [CVE Services — registro CNA](https://cveawg.mitre.org/api/cve/CVE-2019-3568)
 - [Meta Security Advisory — CVE-2019-3568](https://www.facebook.com/security/advisories/cve-2019-3568)
 - [Android NDK — Address Sanitizer](https://developer.android.com/ndk/guides/asan)
-
-Estas fuentes delimitan el contexto público. ECLB, sus parsers, tamaños,
-eventos y líneas de código son decisiones exclusivas de EchoCall Lab.
+- [LLVM/Clang — AddressSanitizer](https://clang.llvm.org/docs/AddressSanitizer.html)

@@ -1,32 +1,45 @@
 # Muestras ECLB
 
-Esta carpeta contiene entradas binarias del formato sintético ECLB usado por
-EchoCall Lab. No son paquetes RTCP, tráfico de WhatsApp ni muestras capturadas
-de terceros.
+Las muestras convierten las reglas de ECLB en entradas concretas y
+reproducibles. Cada archivo controla tres propiedades: tamaño total, longitud
+declarada en la cabecera y longitud real del payload.
 
-## Inventario
+## Qué cambia en cada muestra
 
-| Muestra | Bytes | SHA-256 | Resultado esperado en Patched | Uso recomendado |
-|---|---:|---|---|---|
-| `benign/valid_call_control.bin` | 17 | `912B5F7F858A790D4C49AE2860CD421F0B70C8DD8E582ABE99AB6D6640965B8E` | `status=accepted code=ok` | Comprobación segura inicial |
-| `malformed/length_mismatch.bin` | 18 | `B7B3E3D267CA313B943147A83C7461FB3E0553EF17A0B595AC986611A1B83584` | `length_mismatch` | Test defensivo local |
-| `malformed/oversized_complete_payload.bin` | 77 | `516F7C6A9B6237274F33F8AB01057DFDBD1137DF0C898F70B5AFB6B7DA742ABA` | `payload_too_large`; `declared_length=64`; `actual_length=64`; `maximum=32` | Solo Patched o procedimiento experimental autorizado |
-| `malformed/oversized_payload.bin` | 17 | `3C3CD136FFB223449F226FE22061922371E8B8C11EC60F336E293F41F4047D30` | Rechazo por longitud | Test defensivo local |
-| `malformed/truncated_packet.bin` | 5 | `9F46C77E1F2857E4E8D2A1C62403EF15275A664B20CF70ACB2922F083CF1F18C` | Rechazo por paquete truncado | Test defensivo local |
+| Muestra | Bytes | `declared_length` | `actual_length` | Propósito | Resultado Patched |
+|---|---:|---:|---:|---|---|
+| `benign/valid_call_control.bin` | 17 | 4 | 4 | Flujo normal con payload `CALL` | `accepted/ok` |
+| `malformed/length_mismatch.bin` | 18 | 10 | 5 | Declaración y contenido no coinciden | `length_mismatch` |
+| `malformed/oversized_payload.bin` | 17 | 64 | 4 | Longitud declarada excesiva e incoherente | `payload_too_large` |
+| `malformed/oversized_complete_payload.bin` | 77 | 64 | 64 | Supera el máximo de 32 manteniendo coherencia | `payload_too_large` |
+| `malformed/truncated_packet.bin` | 5 | ND | ND | Cabecera incompleta | `truncated_header` |
 
-Los hashes anteriores se calculan sobre los archivos versionados. La
-especificación de campos y endianness está en
-[`docs/02_packet_format.md`](../docs/02_packet_format.md).
-La utilidad estándar [`tools/generate_samples.py`](../tools/generate_samples.py)
-permite regenerar exactamente este conjunto desde la raíz del repositorio.
+La muestra canónica del experimento es `oversized_complete_payload.bin`:
+`declared_length` coincide con `actual_length`, por lo que Vulnerable alcanza la
+copia gobernada por 64. Patched rechaza antes porque 64 supera el máximo 32.
 
-## Ejecución segura
+## Integridad
 
-Empieza siempre por `valid_call_control.bin`. Las muestras malformadas se
-incluyen para validar rechazos en el parser Patched y para conservar la
-trazabilidad del laboratorio.
+| Muestra | SHA-256 |
+|---|---|
+| `valid_call_control.bin` | `912B5F7F858A790D4C49AE2860CD421F0B70C8DD8E582ABE99AB6D6640965B8E` |
+| `length_mismatch.bin` | `B7B3E3D267CA313B943147A83C7461FB3E0553EF17A0B595AC986611A1B83584` |
+| `oversized_complete_payload.bin` | `516F7C6A9B6237274F33F8AB01057DFDBD1137DF0C898F70B5AFB6B7DA742ABA` |
+| `oversized_payload.bin` | `3C3CD136FFB223449F226FE22061922371E8B8C11EC60F336E293F41F4047D30` |
+| `truncated_packet.bin` | `9F46C77E1F2857E4E8D2A1C62403EF15275A664B20CF70ACB2922F083CF1F18C` |
 
-No envíes automáticamente `oversized_complete_payload.bin` a una variante
-Vulnerable. Esa ruta puede provocar una escritura fuera de límites y queda
-fuera del inicio rápido. Consulta [`SECURITY.md`](../SECURITY.md) y la
-[guía de reproducción](../docs/reproduction.md).
+[`tools/generate_samples.py`](../tools/generate_samples.py) regenera exactamente
+este conjunto. La [especificación ECLB](../docs/02_packet_format.md) explica los
+offsets y el orden big-endian.
+
+## Uso seguro
+
+1. Empieza por `valid_call_control.bin`.
+2. Usa las entradas malformadas únicamente contra Patched para comprobar
+   rechazos rutinarios.
+3. No envíes `oversized_complete_payload.bin` a Vulnerable como quickstart,
+   demostración o CI: puede alcanzar la escritura fuera de límites.
+4. Calcula el SHA-256 antes de atribuir un resultado a una muestra.
+
+Los archivos son construcciones propias; no contienen tráfico capturado ni
+datos de terceros.
