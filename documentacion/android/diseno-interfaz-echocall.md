@@ -1251,7 +1251,7 @@ El cierre quedó versionado en
 Los cuatro candidatos proceden del commit fuente
 `7bbb5ba984c55edfe2d0c6254253fb0ed9f2065d` y se preservaron, sin
 reconstrucción, fuera de Temp en
-`C:\Users\Angels\Documents\EchoCall-TFM-Evidence\phase7-frozen-candidates\echocall-phase7-20260810T162009Z`.
+`%USERPROFILE%\Documents\EchoCall-TFM-Evidence\phase7-frozen-candidates\echocall-phase7-20260810T162009Z`.
 El manifiesto candidato tiene SHA-256
 `59E04A43D1170DF9DD2D50E4346A464CF1900CE0822B9CF339508D82A5B97B7E`.
 Fase 8 usó exactamente esos bytes: no se recompilaron, modificaron, resignaron,
@@ -1332,7 +1332,7 @@ describe únicamente esa ejecución concreta: no demuestra seguridad general de
 Patched.
 
 Evidencia primaria externa, conservada sin modificación en
-`C:\Users\Angels\Documents\EchoCall-TFM-Evidence\phase8a-patched-asan-20260810T172319Z`:
+`%USERPROFILE%\Documents\EchoCall-TFM-Evidence\phase8a-patched-asan-20260810T172319Z`:
 
 - `phase8a-evidence-manifest.txt`: SHA-256
   `910642CAA5E428A4DF1FA201E2EF3E3F699AC60391E4A27E9124B09AE5E161A8`;
@@ -1391,7 +1391,7 @@ presuponer que el directorio `merged_native_libs` significase por sí mismo
 «unstripped».
 
 Evidencia primaria externa, conservada sin modificación en
-`C:\Users\Angels\Documents\EchoCall-TFM-Evidence\phase8b-vulnerable-asan-20260810T174243Z`:
+`%USERPROFILE%\Documents\EchoCall-TFM-Evidence\phase8b-vulnerable-asan-20260810T174243Z`:
 
 - `phase8b-evidence-manifest.txt`: SHA-256
   `A33E17F4574509FD81AE53EA86C88763B5F6FA82CDBA5CA6D069261E17666F7B`;

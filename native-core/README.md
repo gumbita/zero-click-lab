@@ -84,8 +84,9 @@ status=accepted code=ok
 
 No se incluye una receta rápida para ejecutar `receiver_vuln` con muestras
 malformadas. Las muestras y evidencias experimentales se describen en la
-[documentación Android](../documentacion/android/) y el
-[registro histórico](../docs/evidencias/README.md).
+[guía de reproducción](../docs/reproduction.md), la
+[documentación Android](../android-app/README.md) y el
+[registro de evidencias](../docs/evidencias/README.md).
 
 ## Límites
 

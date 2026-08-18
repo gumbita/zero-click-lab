@@ -51,7 +51,8 @@ status=accepted code=ok
 ### Requisitos
 
 Consulta versiones y configuración en [`android-app/README.md`](../android-app/README.md).
-Necesitas JDK 17, Android SDK 36, NDK `27.0.12077973`, CMake `3.22.1`,
+Necesitas un JDK compatible con el target Java 17, Android SDK 36, NDK
+`27.0.12077973`, CMake `3.22.1`,
 un emulador/dispositivo autorizado y ADB.
 
 ### Build, instalación y arranque

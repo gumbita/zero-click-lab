@@ -6,6 +6,14 @@ qué fuente usar para cada propósito.
 
 ## Documentación actual
 
+- [Arquitectura vigente](architecture.md): flujo UDP → Kotlin → JNI → parser C
+  y selección fija por build.
+- [Guía de reproducción segura](reproduction.md): niveles Python, Native Core,
+  Android Patched y separación de la ruta Vulnerable/ASan.
+- [Resultados experimentales](results.md): comparación final sobre la muestra
+  canónica de 77 bytes.
+- [Reversing estático](reversing.md): síntesis comparada de E-028/E-029.
+- [Limitaciones](limitations.md): alcance, interpretación y custodia.
 - [Diseño de interfaz de EchoCall](../documentacion/android/diseno-interfaz-echocall.md):
   arquitectura de producto y decisiones vigentes de la aplicación Android.
 - [Plan de implementación de EchoCall](../documentacion/android/plan-implementacion-echocall.md):
@@ -30,7 +38,10 @@ EchoCall.
 - [Guía de evidencias](evidencias/README.md): alcance, clasificación y custodia.
 - [Registro de validación experimental](evidencias/registro_validacion_experimental.md):
   matriz histórica de resultados y carencias documentales.
+- [E-028 — reversing estático Vulnerable](evidencias/artefactos/E-028/README.md).
+- [E-029 — reversing estático Patched](evidencias/artefactos/E-029/README.md).
 
-La evidencia primaria final de las Fases 8A y 8B se mantiene bajo custodia
-externa selectiva; sus hashes y conclusiones están recogidos en la
-documentación Android actual.
+Los resultados finales están resumidos en [`results.md`](results.md). Parte de
+la evidencia primaria de las Fases 8A/8B se mantiene bajo custodia externa
+selectiva; E-028/E-029 preservan capturas estáticas, con la limitación de
+custodia de sus ELF documentada explícitamente.

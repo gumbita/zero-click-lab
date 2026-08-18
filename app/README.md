@@ -1,6 +1,6 @@
-# MVP Python inicial — componente histórico
+# Modelo/prototipo Python de referencia
 
-> **COMPONENTE HISTÓRICO**
+> **MODELO HISTÓRICO DE REFERENCIA**
 >
 > Esta carpeta conserva la primera etapa del laboratorio. No describe la
 > demostración principal actual de EchoCall.
@@ -17,7 +17,8 @@ demostración principal por el [Native Core](../native-core/README.md) en C y la
 aplicación Android EchoCall, que integran recepción UDP, JNI y variantes cuyo
 parser se selecciona al compilar.
 
-El código Python se conserva sin cambios por trazabilidad y para mostrar la
-evolución metodológica del proyecto. Para conocer el estado vigente, empieza
-por el [README del repositorio](../README.md) y la
-[documentación Android autoritativa](../documentacion/android/).
+El código Python se conserva por trazabilidad, sigue respaldando los tests
+seguros de `tests/` y permite explicar la evolución del contrato ECLB. No es la
+implementación principal ni evidencia de corrupción nativa. Para conocer el
+estado vigente, empieza por el [README del repositorio](../README.md) y la
+[arquitectura actual](../docs/architecture.md).
