@@ -3,33 +3,19 @@
 Esta guía separa comprobaciones rutinarias de la ruta experimental Vulnerable.
 Trabaja únicamente en sistemas propios y consulta [`SECURITY.md`](../SECURITY.md).
 
-## Nivel 1 — Safe quick check
+## Nivel 1 — Native Core seguro
 
 ```text
 git clone https://github.com/gumbita/zero-click-lab.git
 cd zero-click-lab
-python -m venv .venv
 ```
-
-Activa el entorno virtual según tu sistema e instala las dependencias:
-
-```text
-python -m pip install -r requirements.txt
-python -m unittest discover -s tests -v
-```
-
-El conjunto actual contiene 8 tests y cubre el modelo Python de referencia,
-la generación de muestras y el procesamiento seguro. No abre sockets Android
-ni ejecuta el parser C Vulnerable.
-
-## Nivel 2 — Native Core
 
 Requiere CMake 3.20 o posterior y un compilador C17. Usa un directorio de build
 fuera del repositorio:
 
 ```text
 cmake -S native-core -B <TEMP_BUILD_DIR> -DENABLE_ASAN=OFF
-cmake --build <TEMP_BUILD_DIR>
+cmake --build <TEMP_BUILD_DIR> --target test_safe_parser receiver_safe
 ctest --test-dir <TEMP_BUILD_DIR> --output-on-failure
 ```
 
@@ -46,7 +32,7 @@ Resultado esperado:
 status=accepted code=ok
 ```
 
-## Nivel 3 — Android Patched
+## Nivel 2 — Android Patched
 
 ### Requisitos
 
@@ -114,11 +100,13 @@ status=rejected code=payload_too_large declared_length=64 actual_length=64 maxim
 La app debe permanecer viva. Esta observación concreta no demuestra seguridad
 general de Patched.
 
-## Nivel 4 — Vulnerable / ASan
+## Nivel 3 — Instrumentación ASan
 
-Nivel experimental, separado del onboarding. Las variantes
-`vulnerableAsan` y `patchedAsan` son `x86_64` y requieren el runtime ASan del
-NDK configurado. Compilar una variante no ejecuta ninguna entrada:
+Nivel experimental adicional, separado del onboarding. Vulnerable y Patched
+son las variantes; ASan es el build type que instrumenta su código nativo para
+detectar determinados errores de memoria. Los builds `vulnerableAsan` y
+`patchedAsan` son `x86_64` y requieren el runtime ASan del NDK configurado.
+Compilarlos no ejecuta ninguna entrada:
 
 ```text
 cd android-app
@@ -167,7 +155,6 @@ Comprobaciones realizadas durante el polish del 2026-08-18:
 
 | Comprobación | Estado | Resultado |
 |---|---|---|
-| Tests Python | PASS | 8/8 |
 | Configuración/build Native Core seguro | PASS | MinGW GCC 13.2.0, CMake 3.29.2 |
 | CTest | PASS | 9/9; solo `test_safe_parser` y `receiver_safe` |
 | `assemblePatchedDebug` | PASS | 43 tareas |

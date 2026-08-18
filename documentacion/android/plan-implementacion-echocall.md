@@ -259,11 +259,14 @@ Las demás fuentes internas se inspeccionan sin modificación.
 
 ## 5. Estrategia técnica
 
-### 5.1. Variantes objetivo
+### 5.1. Variantes y builds objetivo
 
 **IMPLEMENTADO Y VALIDADO EN FASE 1.** La matriz es:
 
-| Flavor | Build type | Variante |
+Vulnerable y Patched son las variantes de parser. Debug y ASan son build types;
+ASan añade instrumentación, no otra implementación lógica.
+
+| Flavor / variante | Build type | Combinación Gradle |
 |---|---|---|
 | vulnerable | debug | `vulnerableDebug` |
 | vulnerable | asan | `vulnerableAsan` |
@@ -274,7 +277,7 @@ Las demás fuentes internas se inspeccionan sin modificación.
 
 **IMPLEMENTADO Y VALIDADO EN FASE 1.** Las identidades de instalación son:
 
-| Variante | `applicationId` | Nombre instalado |
+| Combinación Gradle | `applicationId` | Nombre instalado |
 |---|---|---|
 | `vulnerableDebug` | `com.echocall.lab.vulnerable` | EchoCall Lab — Vulnerable |
 | `patchedDebug` | `com.echocall.lab.patched` | EchoCall Lab — Patched |
@@ -615,7 +618,7 @@ modificaron.
 - Las 10/10 bibliotecas se correlacionaron desde APK hasta CMake, fuentes y
   objetos; el símbolo del parser esperado está presente y el contrario ausente.
 - Los cuatro APK provisionales cargaron JNI, mostraron el parser correcto,
-  conservaron PID y no registraron crash. Las dos variantes ASan no registraron
+  conservaron PID y no registraron crash. Los dos builds ASan no registraron
   error AddressSanitizer.
 - La muestra usada fue `samples/benign/valid_call_control.bin`, 17 bytes,
   SHA-256
@@ -630,7 +633,7 @@ no explotabilidad. E-022 y E-025 siguen siendo evidencia histórica anterior.
 
 ### Criterios de aceptación
 
-- [x] Cuatro variantes compilan.
+- [x] Cuatro combinaciones Gradle compilan: dos variantes por dos build types.
 - [x] Cuatro IDs distintos.
 - [x] Sin selector runtime.
 - [x] Parser correcto.
@@ -663,7 +666,8 @@ Introducir estado, datos ficticios y navegación sin completar todavía todos lo
 ### Precondiciones
 
 - Fase 1 validada y revisada.
-- Cuatro variantes identificables sin selector runtime.
+- Dos variantes identificables, cada una con builds Debug y ASan, sin selector
+  runtime.
 - Contrato de navegación del documento de diseño aprobado.
 
 ### Alcance autorizado
@@ -1592,7 +1596,7 @@ payloads.
 - [x] Plan actualizado.
 - [x] Línea base preservada.
 - [x] Rama publicada.
-- [x] Cuatro variantes.
+- [x] Dos variantes de parser con cuatro combinaciones Gradle.
 - [x] Parser fijado.
 - [x] La separación nativa de Patched ha sido verificada en Gradle, CMake, fuentes compiladas, símbolos de la `.so` y contenido del APK; la implementación vulnerable no se empaqueta.
 - [x] La separación quedó razonablemente garantizada y Fase 1 no quedó bloqueada.

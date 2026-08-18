@@ -54,12 +54,30 @@ parser C
 Cada APK contiene una sola implementación de parser. La elección no se realiza
 en runtime: el flavor selecciona la fuente nativa durante el build.
 
-| Variante | Nombre instalado | `applicationId` | Parser |
+## Variantes del laboratorio
+
+### Vulnerable
+
+Implementación deliberadamente insegura que copia la longitud declarada sobre
+una reserva fija sin validar antes el máximo relevante.
+
+### Patched
+
+Implementación defensiva que valida el límite semántico antes de procesar el
+payload.
+
+## Builds e instrumentación
+
+Debug y AddressSanitizer son dos formas de construir las mismas variantes, no
+parsers adicionales. ASan instrumenta el código nativo para detectar
+determinados errores de memoria durante una ejecución.
+
+| Variante | Build | Tarea Gradle | `applicationId` |
 |---|---|---|---|
-| `vulnerableDebug` | EchoCall Lab — Vulnerable | `com.echocall.lab.vulnerable` | Vulnerable |
-| `patchedDebug` | EchoCall Lab — Patched | `com.echocall.lab.patched` | Patched |
-| `vulnerableAsan` | EchoCall Lab — Vulnerable ASan | `com.echocall.lab.vulnerable.asan` | Vulnerable |
-| `patchedAsan` | EchoCall Lab — Patched ASan | `com.echocall.lab.patched.asan` | Patched |
+| Vulnerable | Debug | `assembleVulnerableDebug` | `com.echocall.lab.vulnerable` |
+| Patched | Debug | `assemblePatchedDebug` | `com.echocall.lab.patched` |
+| Vulnerable | ASan | `assembleVulnerableAsan` | `com.echocall.lab.vulnerable.asan` |
+| Patched | ASan | `assemblePatchedAsan` | `com.echocall.lab.patched.asan` |
 
 ## Resultado experimental principal
 
@@ -85,15 +103,13 @@ El alcance, los conteos, las huellas y las limitaciones se encuentran en el
 
 | Ruta | Función |
 |---|---|
-| [`android-app/`](android-app/README.md) | Aplicación EchoCall Android, Compose, UDP, JNI y variantes. |
+| [`android-app/`](android-app/README.md) | Aplicación EchoCall Android, Compose, UDP y JNI. |
 | [`native-core/`](native-core/) | Parsers C, receptores CLI y tests nativos. |
 | [`samples/`](samples/README.md) | Muestras ECLB benignas y malformadas del laboratorio. |
-| [`tools/`](tools/README.md) | Utilidades controladas, incluido el emisor UDP. |
+| [`tools/`](tools/README.md) | Utilidades auxiliares para generar muestras y realizar envíos controlados. |
 | [`documentacion/android/`](documentacion/android/) | Documentación autoritativa del estado Android actual. |
 | [`docs/evidencias/`](docs/evidencias/) | Registro y evidencia histórica versionada. |
 | [`docs/`](docs/) | Arquitectura, ECLB, reproducción, resultados, reversing y límites. |
-| [`app/`](app/) | Modelo/prototipo Python de referencia conservado por trazabilidad. |
-| [`tests/`](tests/) | Tests seguros del MVP Python y sus muestras. |
 
 ## Por dónde empezar
 
@@ -113,14 +129,14 @@ documentos históricos.
 Inicio rápido seguro desde la raíz del repositorio:
 
 ```text
-python -m venv .venv
-python -m pip install -r requirements.txt
-python -m unittest discover -s tests -v
+cmake -S native-core -B <TEMP_BUILD_DIR> -DENABLE_ASAN=OFF
+cmake --build <TEMP_BUILD_DIR> --target test_safe_parser receiver_safe
+ctest --test-dir <TEMP_BUILD_DIR> --output-on-failure
 ```
 
-Después continúa con Native Core o Android Patched en la
-[guía operativa](docs/reproduction.md). El quick start no construye ni ejecuta
-la ruta Vulnerable y nunca envía automáticamente la muestra oversized.
+Después continúa con Android Patched en la [guía operativa](docs/reproduction.md).
+El quick start no construye ni ejecuta la ruta Vulnerable y nunca envía
+automáticamente la muestra oversized.
 
 La trazabilidad final separa dos hitos:
 
@@ -134,9 +150,9 @@ procedencia y resultados detallados están registrados en la documentación
 Android. Los artefactos primarios finales se mantienen bajo custodia externa
 selectiva y no se copian a este repositorio.
 
-Las comprobaciones seguras del MVP Python y de Native Core se describen en sus
-respectivos README. La ejecución de muestras malformadas requiere un
-procedimiento experimental autorizado; no forma parte del inicio rápido.
+Las comprobaciones seguras de Native Core se describen en su README. La
+ejecución de muestras malformadas requiere un procedimiento experimental
+autorizado; no forma parte del inicio rápido.
 
 ## Uso responsable
 

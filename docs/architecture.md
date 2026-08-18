@@ -31,18 +31,30 @@ implementación. Por tanto:
 - no existe selector runtime entre Vulnerable y Patched;
 - cada APK contiene un único parser EchoCall;
 - la interfaz Kotlin/JNI y la UI son compartidas;
-- los `applicationId` permiten distinguir las cuatro variantes;
-- Debug y ASan cambian la instrumentación, no el contrato ECLB.
+- los `applicationId` permiten distinguir las instalaciones;
+- Vulnerable y Patched son las dos variantes conceptuales;
+- Debug y ASan son opciones de build/instrumentación y no cambian el parser ni
+  el contrato ECLB.
+
+```text
+Variante Vulnerable ─┬─ Debug
+                     └─ ASan
+
+Variante Patched ────┬─ Debug
+                     └─ ASan
+```
+
+ASan añade instrumentación para detectar determinados errores de memoria
+durante la ejecución. No crea una tercera o cuarta implementación del parser.
 
 ## Componentes
 
 | Componente | Responsabilidad |
 |---|---|
-| `android-app/` | UDP, ciclo de vida, UI, marcador, JNI y variantes |
+| `android-app/` | UDP, ciclo de vida, UI, marcador y JNI |
 | `native-core/` | Contrato C, parsers, CLI y tests seguros |
 | `samples/` | Entradas ECLB versionadas |
-| `tools/` | Emisor UDP controlado |
-| `app/` | Modelo Python de referencia y trazabilidad histórica |
+| `tools/` | Generación de muestras y emisor UDP controlado |
 | `docs/evidencias/` | Registro y evidencia técnica seleccionada |
 
 ## Límites del modelo

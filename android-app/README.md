@@ -15,8 +15,9 @@ UDP :43568 → UdpPacketReceiver → Kotlin → NativeBridge.parsePacket()
 
 - `app/src/main/java/`: receptor UDP, estado, navegación y UI Compose;
 - `app/src/main/cpp/`: gateway JNI y selección CMake del parser;
-- `app/src/{vulnerable,patched}/`: identidad visual de cada flavor;
-- `app/src/{vulnerableAsan,patchedAsan}/`: identidad de las combinaciones ASan;
+- `app/src/{vulnerable,patched}/`: identidad visual de cada variante;
+- `app/src/{vulnerableAsan,patchedAsan}/`: recursos de identidad para sus
+  builds instrumentadas;
 - `../native-core/`: fuentes C reutilizadas por CMake.
 
 ## Requisitos comprobables en el proyecto
@@ -35,15 +36,33 @@ Configura el SDK mediante `ANDROID_HOME`, `ANDROID_SDK_ROOT` o un
 
 ## Variantes
 
-| Variante | `applicationId` | Parser | Instrumentación |
-|---|---|---|---|
-| `vulnerableDebug` | `com.echocall.lab.vulnerable` | Vulnerable | Debug |
-| `patchedDebug` | `com.echocall.lab.patched` | Patched | Debug |
-| `vulnerableAsan` | `com.echocall.lab.vulnerable.asan` | Vulnerable | ASan, `x86_64` |
-| `patchedAsan` | `com.echocall.lab.patched.asan` | Patched | ASan, `x86_64` |
+### Vulnerable
+
+Implementación deliberadamente insegura del parser ECLB.
+
+### Patched
+
+Implementación que incorpora la validación del límite relevante.
 
 CMake recibe `ECHOCALL_PARSER_IMPLEMENTATION` desde el flavor e incluye solo
 `vulnerable_parser.c` o `safe_parser.c`. La interfaz Kotlin/JNI es compartida.
+
+## Builds e instrumentación
+
+El flavor selecciona Vulnerable o Patched. El build type selecciona Debug o
+AddressSanitizer. ASan instrumenta la ejecución nativa para detectar
+determinados errores de memoria; no constituye otra lógica de parser.
+
+| Variante | Build | Tarea Gradle | Propósito |
+|---|---|---|---|
+| Vulnerable | Debug | `assembleVulnerableDebug` | Ejecución funcional del parser vulnerable |
+| Patched | Debug | `assemblePatchedDebug` | Ejecución funcional del parser parcheado |
+| Vulnerable | ASan (`x86_64`) | `assembleVulnerableAsan` | Instrumentación experimental del parser vulnerable |
+| Patched | ASan (`x86_64`) | `assemblePatchedAsan` | Instrumentación experimental del parser parcheado |
+
+Los `applicationId` son, respectivamente,
+`com.echocall.lab.vulnerable`, `com.echocall.lab.patched`,
+`com.echocall.lab.vulnerable.asan` y `com.echocall.lab.patched.asan`.
 
 ## Build
 
@@ -94,7 +113,7 @@ Patched valida el máximo semántico de 32 bytes antes del procesamiento. Para l
 muestra canónica de 77 bytes (`declared_length=64`, `actual_length=64`) devuelve
 `payload_too_large`. Este rechazo concreto no demuestra seguridad general.
 
-Las variantes ASan instrumentan la biblioteca nativa y empaquetan el runtime
+Los builds ASan instrumentan la biblioteca nativa y empaquetan el runtime
 para un entorno `x86_64` controlado. Sirven para diagnóstico de memoria, no
 para producción ni como garantía de ausencia de errores.
 

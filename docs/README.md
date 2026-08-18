@@ -8,8 +8,8 @@ qué fuente usar para cada propósito.
 
 - [Arquitectura vigente](architecture.md): flujo UDP → Kotlin → JNI → parser C
   y selección fija por build.
-- [Guía de reproducción segura](reproduction.md): niveles Python, Native Core,
-  Android Patched y separación de la ruta Vulnerable/ASan.
+- [Guía de reproducción segura](reproduction.md): Native Core, Android Patched
+  e instrumentación ASan separada de la ruta rutinaria.
 - [Resultados experimentales](results.md): comparación final sobre la muestra
   canónica de 77 bytes.
 - [Reversing estático](reversing.md): síntesis comparada de E-028/E-029.
@@ -25,7 +25,7 @@ EchoCall.
 ## Especificación
 
 - [Formato binario ECLB](02_packet_format.md): contrato sintético compartido
-  por el prototipo histórico, Native Core y la integración Android.
+  por Native Core y la integración Android.
 
 ## Diseño histórico
 

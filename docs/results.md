@@ -4,6 +4,11 @@ La comparación final utilizó la misma muestra ECLB canónica y dos candidatos
 Android ASan congelados cuyo commit fuente fue
 `7bbb5ba984c55edfe2d0c6254253fb0ed9f2065d`.
 
+`Patched ASan` y `Vulnerable ASan` designan, respectivamente, la variante
+Patched o Vulnerable construida con instrumentación AddressSanitizer. ASan no
+es una variante lógica del parser ni altera la diferencia de validación que se
+compara.
+
 ## Entrada
 
 | Propiedad | Valor |
