@@ -1,3 +1,9 @@
+/*
+ * Copyright (C) 2026 Àngels Gumbau Granero
+ * SPDX-License-Identifier: GPL-3.0-only
+ * See LICENSE in the repository root.
+ */
+
 #ifndef ZERO_CLICK_LAB_SAFE_PARSER_H
 #define ZERO_CLICK_LAB_SAFE_PARSER_H
 
