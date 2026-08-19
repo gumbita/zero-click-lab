@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "Si utilizas EchoCall Lab en un trabajo académico, educativo o técnico, por favor cita el proyecto."
+title: "EchoCall Lab"
+type: software
+authors:
+  - family-names: "Gumbau Granero"
+    given-names: "Àngels"
+repository-code: "https://github.com/gumbita/zero-click-lab"
+url: "https://github.com/gumbita/zero-click-lab"
+license: "GPL-3.0-only"

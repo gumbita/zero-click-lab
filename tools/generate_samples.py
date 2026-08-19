@@ -1,3 +1,7 @@
+# Copyright (C) 2026 Àngels Gumbau Granero
+# SPDX-License-Identifier: GPL-3.0-only
+# See LICENSE in the repository root.
+
 """Genera las muestras ECLB versionadas de EchoCall Lab."""
 
 from __future__ import annotations

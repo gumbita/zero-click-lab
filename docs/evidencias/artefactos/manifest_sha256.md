@@ -12,7 +12,7 @@ reconstrucción documental en evidencia experimental primaria.
 | Archivo | Tamaño | SHA-256 | Función |
 |---|---:|---|---|
 | `../../../.gitattributes` | 339 bytes | `0BF96FC7CC180580057A29EDB2D8D60297C911A3BFF76D89375F8BB3F03C9AAF` | Conservación byte a byte de artefactos de evidencia |
-| `../../../README.md` | 8 718 bytes | `1726500B7E458963836A18CC0B2822B108C991046B99D71DDD058BA4CB306786` | Enlace raíz al registro de evidencias |
+| `../../../README.md` | 9 132 bytes | `548983F405D12F5CB8648F36E4B610D0BDC9EAD797AF663CF105B6AD9C62589B` | Enlace raíz al registro de evidencias |
 | `../README.md` | 3 998 bytes | `2AFC9A62D7847C35E16A922B8BD5532BB557F30E78680F261103511F1107CB99` | Índice y taxonomía |
 | `../registro_validacion_experimental.md` | 39 526 bytes | `8BF4878AECAC5722EE165D109A91B81BF46A34D6AFEE1B73A1B3A2A6B2A910D4` | Matriz y análisis consolidado |
 | `../procedencia-experimento-android.md` | 6 626 bytes | `275F55336D605D9FA886926EE8A114282D32054B2E76F1E778FCEDBE896A82AE` | Identidad, cronología y custodia externa del experimento Android |

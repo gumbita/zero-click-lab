@@ -1,3 +1,7 @@
+# Copyright (C) 2026 Àngels Gumbau Granero
+# SPDX-License-Identifier: GPL-3.0-only
+# See LICENSE in the repository root.
+
 """Send one binary packet as a single UDP datagram."""
 
 from __future__ import annotations
