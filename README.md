@@ -204,3 +204,16 @@ ejecutar muestras o herramientas.
 - [Meta Security Advisory — CVE-2019-3568](https://www.facebook.com/security/advisories/cve-2019-3568)
 - [Android NDK — Address Sanitizer](https://developer.android.com/ndk/guides/asan)
 - [LLVM/Clang — AddressSanitizer](https://clang.llvm.org/docs/AddressSanitizer.html)
+
+## Autoría, licencia y citación
+
+**Autora:** Àngels Gumbau Granero
+
+Copyright © 2026 Àngels Gumbau Granero.
+
+El material original de EchoCall Lab cuya titularidad corresponde a la autora
+se distribuye bajo la [GNU General Public License v3.0](LICENSE)
+(`GPL-3.0-only`).
+
+Si utilizas EchoCall Lab en un trabajo académico, educativo o técnico,
+consulta [`CITATION.cff`](CITATION.cff) para citar el proyecto.
