@@ -29,7 +29,7 @@ punto normal de limpieza.
 
 El marcador no diagnostica por sí solo un overflow. Ese diagnóstico procede de
 ASan, logs y señal de terminación. Consulta la
-[arquitectura](../docs/architecture.md).
+[arquitectura](../technical-documentation/architecture.md).
 
 ## Código compartido y selección nativa
 
@@ -112,7 +112,7 @@ python tools/send_udp_packet.py --host <IP_O_REDIRECCION_AUTORIZADA> --port 4356
 
 El resultado nativo esperado es `status=accepted code=ok`. Para un emulador,
 la redirección host→guest debe configurarse explícitamente; consulta la
-[guía de reproducción](../docs/reproduction.md).
+[guía de reproducción](../technical-documentation/experimental-reproduction.md).
 
 ## Dónde observar
 
@@ -124,6 +124,6 @@ la redirección host→guest debe configurarse explícitamente; consulta la
   normal;
 - ASan/logcat: diagnóstico de memoria en los builds instrumentados.
 
-Para interpretar las observaciones usa [Resultados](../docs/results.md) y
-[Evidencias](../docs/evidencias/README.md). No envíes la muestra oversized a
+Para interpretar las observaciones usa [Resultados](../technical-documentation/experimental-results.md) y
+[Evidencias](../technical-documentation/evidence/README.md). No envíes la muestra oversized a
 Vulnerable como comprobación rutinaria.

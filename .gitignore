@@ -32,6 +32,6 @@ native-core/build*/
 **/CMakeCache.txt
 
 # Evidence / large outputs
-evidence/
+/evidence/
 captures/
 *.zip

@@ -21,7 +21,7 @@ MAGIC(4) | VERSION(1) | FLAGS(1) | TYPE(1) | LENGTH(2) | SSRC(4) | PAYLOAD(N)
 
 El contrato actual está definido por
 [`include/packet_format.h`](include/packet_format.h) y documentado en
-[`../docs/02_packet_format.md`](../docs/02_packet_format.md). La versión vigente
+[`../technical-documentation/packet-format.md`](../technical-documentation/packet-format.md). La versión vigente
 usa `MAGIC=ECLB`, `VERSION=1`, `TYPE=1` y un máximo defensivo de 32 bytes para el
 payload Patched.
 
@@ -92,9 +92,9 @@ status=accepted code=ok
 
 No se incluye una receta rápida para ejecutar `receiver_vuln` con muestras
 malformadas. Las muestras y evidencias experimentales se describen en la
-[guía de reproducción](../docs/reproduction.md), la
+[guía de reproducción](../technical-documentation/experimental-reproduction.md), la
 [documentación Android](../android-app/README.md) y el
-[registro de evidencias](../docs/evidencias/README.md).
+[registro de evidencias](../technical-documentation/evidence/README.md).
 
 ## Límites
 

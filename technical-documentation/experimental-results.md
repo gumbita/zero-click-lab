@@ -54,9 +54,9 @@ incluye en CI, quickstarts ni demostraciones rutinarias.
 | La operación no retornó normalmente | Ausencia de limpieza del marcador, terminación y `SIGABRT` |
 | Ambos resultados usaron candidatos fijados | Tamaños, SHA-256 y manifiestos de procedencia |
 
-La [procedencia completa](evidencias/procedencia-experimento-android.md)
+La [procedencia completa](evidence/android-experiment-provenance.md)
 relaciona commit fuente, APK, hashes y custodia. El
-[registro experimental](evidencias/registro_validacion_experimental.md)
+[registro experimental](evidence/experimental-validation-log.md)
 separa evidencia primaria, reportada e histórica.
 
 ## Interpretación

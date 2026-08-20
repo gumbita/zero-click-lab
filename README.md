@@ -62,7 +62,7 @@ CMake compila únicamente `vulnerable_parser.c` o `safe_parser.c`; no existe un
 selector runtime entre ambos. Debug y ASan son formas de construir las dos
 variantes, no parsers adicionales.
 
-La [arquitectura completa](docs/architecture.md) explica el receptor, el
+La [arquitectura completa](technical-documentation/architecture.md) explica el receptor, el
 marcador persistente pre-JNI, la selección nativa y los puntos de observación.
 
 ## Vulnerable vs. Patched
@@ -88,7 +88,7 @@ aplica el máximo semántico antes de recorrer el payload:
 
 - [`vulnerable_parser.c`](native-core/src/vulnerable_parser.c)
 - [`safe_parser.c`](native-core/src/safe_parser.c), usado por Patched
-- [especificación canónica de ECLB](docs/02_packet_format.md)
+- [especificación canónica de ECLB](technical-documentation/packet-format.md)
 
 ## Qué demuestra el laboratorio
 
@@ -125,8 +125,8 @@ aplicó a los dos candidatos Android ASan congelados:
 | Vulnerable + ASan | `heap-buffer-overflow`; `WRITE` de 64 bytes; región heap de 32 bytes; `SIGABRT` |
 
 El resultado enlaza una diferencia de código con una diferencia observable de
-ejecución. [Resultados](docs/results.md) explica qué demuestra cada dato;
-[reversing](docs/reversing.md) muestra cómo la validación y la copia aparecen en
+ejecución. [Resultados](technical-documentation/experimental-results.md) explica qué demuestra cada dato;
+[reversing](technical-documentation/reverse-engineering.md) muestra cómo la validación y la copia aparecen en
 el análisis estático.
 
 ## Quick start seguro
@@ -141,23 +141,23 @@ ctest --test-dir <TEMP_BUILD_DIR> --output-on-failure
 
 CTest ejecuta `test_safe_parser` y `receiver_safe`; no invoca
 `receiver_vuln`. Continúa con [Android Patched y la reproducción
-segura](docs/reproduction.md). No envíes la muestra oversized a Vulnerable como
+segura](technical-documentation/experimental-reproduction.md). No envíes la muestra oversized a Vulnerable como
 prueba rutinaria.
 
 ## Ruta de aprendizaje
 
 | Pregunta | Documento |
 |---|---|
-| ¿Cómo llega una entrada hasta C? | [Arquitectura](docs/architecture.md) |
-| ¿Qué contiene un paquete ECLB? | [Formato ECLB](docs/02_packet_format.md) |
+| ¿Cómo llega una entrada hasta C? | [Arquitectura](technical-documentation/architecture.md) |
+| ¿Qué contiene un paquete ECLB? | [Formato ECLB](technical-documentation/packet-format.md) |
 | ¿Dónde está la diferencia de validación? | [Native Core](native-core/README.md) |
-| ¿Qué ocurrió en el experimento? | [Resultados](docs/results.md) |
-| ¿Qué revela el binario? | [Reversing](docs/reversing.md) |
-| ¿Cómo ejecuto comprobaciones seguras? | [Reproducción](docs/reproduction.md) |
-| ¿En qué pruebas se basa cada afirmación? | [Evidencias](docs/evidencias/README.md) |
-| ¿Hasta dónde llegan las conclusiones? | [Limitaciones](docs/limitations.md) |
+| ¿Qué ocurrió en el experimento? | [Resultados](technical-documentation/experimental-results.md) |
+| ¿Qué revela el binario? | [Reversing](technical-documentation/reverse-engineering.md) |
+| ¿Cómo ejecuto comprobaciones seguras? | [Reproducción](technical-documentation/experimental-reproduction.md) |
+| ¿En qué pruebas se basa cada afirmación? | [Evidencias](technical-documentation/evidence/README.md) |
+| ¿Hasta dónde llegan las conclusiones? | [Limitaciones](technical-documentation/limitations.md) |
 
-El [mapa de aprendizaje](docs/README.md) ofrece el recorrido completo.
+El [mapa de aprendizaje](technical-documentation/README.md) ofrece el recorrido completo.
 
 ## Estructura del repositorio
 
@@ -167,8 +167,8 @@ El [mapa de aprendizaje](docs/README.md) ofrece el recorrido completo.
 | [`native-core/`](native-core/README.md) | Contrato C, parsers, CLI y tests seguros |
 | [`samples/`](samples/README.md) | Entradas ECLB explicadas y versionadas |
 | [`tools/`](tools/README.md) | Generador de muestras y emisor UDP controlado |
-| [`docs/`](docs/README.md) | Centro de aprendizaje técnico |
-| [`docs/evidencias/`](docs/evidencias/README.md) | Registro, hashes, procedencia y capturas seleccionadas |
+| [`technical-documentation/`](technical-documentation/README.md) | Centro de aprendizaje técnico |
+| [`technical-documentation/evidence/`](technical-documentation/evidence/README.md) | Registro, hashes, procedencia y capturas seleccionadas |
 
 ## Evidencias
 
@@ -180,7 +180,7 @@ Las conclusiones combinan cuatro clases de prueba:
 - hashes, manifiestos y registros de procedencia.
 
 La relación entre los APK fuente, la muestra y la custodia externa se conserva
-en [procedencia del experimento Android](docs/evidencias/procedencia-experimento-android.md).
+en [procedencia del experimento Android](technical-documentation/evidence/android-experiment-provenance.md).
 
 ## Alcance y limitaciones
 
@@ -188,7 +188,7 @@ EchoCall usa una arquitectura sintética y el protocolo propio ECLB. La evidenci
 demuestra una escritura fuera de límites concreta en el laboratorio y el
 rechazo temprano de esa condición por Patched. No demuestra RCE, secuestro del
 flujo, compromiso completo, seguridad general de Patched ni equivalencia
-binaria con CVE-2019-3568. Consulta [Limitaciones](docs/limitations.md) para los
+binaria con CVE-2019-3568. Consulta [Limitaciones](technical-documentation/limitations.md) para los
 límites de custodia, ASan y validez externa.
 
 ## Uso responsable

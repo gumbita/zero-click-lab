@@ -31,7 +31,7 @@ compatible con CWE-122.
 
 - Identidad ELF registrada: `A14467B2377A73FAEB83143564269E0E16D6494047F89C30819921B76BF26723`.
 - Tamaño registrado: 8.360 bytes.
-- Evidencia: [README y capturas E-028](evidencias/artefactos/E-028/README.md).
+- Evidencia: [README y capturas E-028](evidence/artifacts/E-028/README.md).
 
 ## Patched — E-029
 
@@ -51,7 +51,7 @@ Dentro de `safe_parse_packet` no se observó la secuencia
 
 - Identidad ELF registrada: `229C26DBEB9110B22ED08F75B2A4F171900412389D7440B506EC5E9301507D60`.
 - Tamaño registrado: 7.984 bytes.
-- Evidencia: [README y capturas E-029](evidencias/artefactos/E-029/README.md).
+- Evidencia: [README y capturas E-029](evidence/artifacts/E-029/README.md).
 
 ## Comparación
 

@@ -1,6 +1,6 @@
-docs/evidencias/artefactos/**/*.log -text whitespace=-trailing-space
-docs/evidencias/artefactos/**/*.txt -text whitespace=-trailing-space
-docs/evidencias/artefactos/**/*.xml -text whitespace=-trailing-space
-docs/evidencias/artefactos/**/*.png binary
-docs/evidencias/artefactos/E-025/*-metadata.txt whitespace=-trailing-space
+technical-documentation/evidence/artifacts/**/*.log -text whitespace=-trailing-space
+technical-documentation/evidence/artifacts/**/*.txt -text whitespace=-trailing-space
+technical-documentation/evidence/artifacts/**/*.xml -text whitespace=-trailing-space
+technical-documentation/evidence/artifacts/**/*.png binary
+technical-documentation/evidence/artifacts/E-025/*-metadata.txt whitespace=-trailing-space
 *.xlsx binary

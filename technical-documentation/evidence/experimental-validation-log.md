@@ -5,8 +5,8 @@
 > Las expresiones como «funcionalidad actual» dentro de entradas antiguas
 > describen el estado existente en la fecha de esa evidencia, no necesariamente
 > el `HEAD` actual. La arquitectura final de EchoCall está documentada en
-> [`docs/architecture.md`](../architecture.md) y la identidad del experimento
-> en la [ficha de procedencia](procedencia-experimento-android.md).
+> [`architecture.md`](../architecture.md) y la identidad del experimento en la
+> [ficha de procedencia](android-experiment-provenance.md).
 
 Este documento es la matriz maestra de evidencias del laboratorio del TFM.
 Distingue evidencia primaria, reconstrucción documental, resultado reportado y
@@ -59,8 +59,8 @@ puede no estar reproducida y, aun así, no ser recomendable repetirla.
 | E-023 | P5 Robustez UDP | Ciclo de vida y ráfagas | Muestra válida actual; 17 bytes | UDP y ambos parsers | Stop, restart, bind único, diez retornos SAFE y uno VULNERABLE; PID 5624 vivo | Transcripción E-021–E-024 | `PRIMARIA` | Transcripción y código |
 | E-024 | P5 Robustez UDP | `EADDRINUSE` y recuperación | Puerto 43568 ocupado; después muestra válida | UDP y SAFE | Error visible, un retry, bind único y parse SAFE aceptado; PID 5971 vivo | Transcripción E-021–E-024 | `PRIMARIA` | Transcripción y código |
 | E-025 | P5 Android UDP | SAFE oversized por UDP con cadena de custodia | `samples/malformed/oversized_complete_payload.bin`; 77 bytes; SHA-256 previo `516F7C6A9B6237274F33F8AB01057DFDBD1137DF0C898F70B5AFB6B7DA742ABA` | UDP, JNI, SAFE y ASan | Recepción y despacho SAFE; `payload_too_large`; PID 5397 permanece vivo; sin firmas de error buscadas en el log | Metadatos, sender, log y UI anterior/posterior | `PRIMARIA` | Cinco artefactos E-025 y hashes verificados |
-| E-028 | Reversing estático | Ghidra sobre ELF Vulnerable x86_64 | ELF con identidad registrada `A14467B2...26723`, 8360 bytes | JNI y `vulnerable_parse_packet` | `declared == actual` permite alcanzar `malloc(32)` y una copia dependiente de `declared_length`; no se identifica `declared <= 32` antes del sink | [README y capturas](artefactos/E-028/README.md) | `PRIMARIA` | Capturas conservadas; custodia parcial porque el ELF exacto no se localizó en el árbol auditado |
-| E-029 | Reversing estático | Ghidra sobre ELF Patched x86_64 | ELF con identidad registrada `229C26DB...7D60`, 7984 bytes | JNI y `safe_parse_packet` | `declared <= 32` precede a la coherencia; superar el máximo produce `status = 6` y `payload_too_large` | [README y capturas](artefactos/E-029/README.md) | `PRIMARIA` | Capturas conservadas; custodia parcial porque el ELF exacto no se localizó en el árbol auditado |
+| E-028 | Reversing estático | Ghidra sobre ELF Vulnerable x86_64 | ELF con identidad registrada `A14467B2...26723`, 8360 bytes | JNI y `vulnerable_parse_packet` | `declared == actual` permite alcanzar `malloc(32)` y una copia dependiente de `declared_length`; no se identifica `declared <= 32` antes del sink | [README y capturas](artifacts/E-028/README.md) | `PRIMARIA` | Capturas conservadas; custodia parcial porque el ELF exacto no se localizó en el árbol auditado |
+| E-029 | Reversing estático | Ghidra sobre ELF Patched x86_64 | ELF con identidad registrada `229C26DB...7D60`, 7984 bytes | JNI y `safe_parse_packet` | `declared <= 32` precede a la coherencia; superar el máximo produce `status = 6` y `payload_too_large` | [README y capturas](artifacts/E-029/README.md) | `PRIMARIA` | Capturas conservadas; custodia parcial porque el ELF exacto no se localizó en el árbol auditado |
 
 ## Revisión de E-007–E-014
 
@@ -76,7 +76,7 @@ la implementación no mejora artificialmente su nivel experimental.
 | E-011 | La configuración local actual del AVD se denomina `EchoCall_Lab_API_36`, usa `android-36` y arquitectura `x86_64`. | `%USERPROFILE%/.android/avd/EchoCall_Lab_API_36.avd/config.ini` y `.ini` actuales, no versionados | Exportación o captura histórica del AVD y build fingerprint de la sesión original. | Configuración local actual, resultado reportado |
 | E-012 | `EchoCallLabScreen` conserva el botón `Simulate incoming call` y el panel de llamada simulada. | [`MainActivity.kt`](../../android-app/app/src/main/java/com/echocall/lab/MainActivity.kt), commit [`33ff251`](https://github.com/gumbita/zero-click-lab/commit/33ff2512918ec65f9cfe1ac63a6afe6918eae4f0) | Captura o grabación original de la fase básica. | Código, commit, resultado reportado |
 | E-013 | El flujo local carga el paquete y llama a JNI sin depender de Accept o Reject; esos botones representan una decisión posterior. | Función `EchoCallLabScreen` en [`MainActivity.kt`](../../android-app/app/src/main/java/com/echocall/lab/MainActivity.kt), commit [`33ff251`](https://github.com/gumbita/zero-click-lab/commit/33ff2512918ec65f9cfe1ac63a6afe6918eae4f0) | Log temporal original que pruebe el orden causal antes de cualquier interacción. | Código, commit, resultado reportado |
-| E-014 | El código contiene `CALL_INCOMING`, `CONTROL_PACKET_RECEIVED`, `NATIVE_PARSE_STARTED` y estados finales. | [`MainActivity.kt`](../../android-app/app/src/main/java/com/echocall/lab/MainActivity.kt); [captura contextual](artefactos/contexto/echocall-vulnerable-20260731-134143.png) no concluyente | Captura o log causal de la sesión original con la secuencia completa. | Código, captura contextual, resultado reportado |
+| E-014 | El código contiene `CALL_INCOMING`, `CONTROL_PACKET_RECEIVED`, `NATIVE_PARSE_STARTED` y estados finales. | [`MainActivity.kt`](../../android-app/app/src/main/java/com/echocall/lab/MainActivity.kt); [captura contextual](artifacts/context/echocall-vulnerable-20260731-134143.png) no concluyente | Captura o log causal de la sesión original con la secuencia completa. | Código, captura contextual, resultado reportado |
 
 ## Reconstrucción documental E-015–E-020
 
@@ -180,7 +180,7 @@ conserve las salidas experimentales originales.
 - **Fuentes:** [`MainActivity.kt`](../../android-app/app/src/main/java/com/echocall/lab/MainActivity.kt),
   [`vulnerable_parser.c`](../../native-core/src/vulnerable_parser.c),
   [`native_bridge.c`](../../android-app/app/src/main/cpp/native_bridge.c),
-  [log E-022](artefactos/E-022/asan-udp-vulnerable-20260731-140415.log),
+  [log E-022](artifacts/E-022/asan-udp-vulnerable-20260731-140415.log),
   biblioteca no strip externa identificada en el manifest y commit
   [`ad5045f`](https://github.com/gumbita/zero-click-lab/commit/ad5045feee02684ea4e368aab0ebcc6d5c1836dd).
 - **Correspondencia documental:** `vulnerable_parser.c:83` reserva 32 bytes;
@@ -253,19 +253,19 @@ Datos de cadena de custodia:
 
 Artefactos:
 
-- [metadatos](artefactos/E-025/e025-safe-udp-oversized-20260804-121742-metadata.txt):
+- [metadatos](artifacts/E-025/e025-safe-udp-oversized-20260804-121742-metadata.txt):
   1 361 bytes; SHA-256
   `163250586C651FAEAAA4226A06197FD0D395CD84B8933B08AD436DB3FD873E45`;
-- [salida del emisor](artefactos/E-025/e025-safe-udp-oversized-20260804-121742-sender.txt):
+- [salida del emisor](artifacts/E-025/e025-safe-udp-oversized-20260804-121742-sender.txt):
   79 bytes; SHA-256
   `C0EAA651A54FA70296A7AEE873358FEA1584094D46053EC0D713F54538BDA4F5`;
-- [log íntegro](artefactos/E-025/e025-safe-udp-oversized-20260804-121742.log):
+- [log íntegro](artifacts/E-025/e025-safe-udp-oversized-20260804-121742.log):
   2 774 bytes; SHA-256
   `D06D6FABF8E7333011CB51C66019BBAA7F14564EE96FD8AFED3B5AE44A664EDB`;
-- [UI anterior](artefactos/E-025/e025-safe-before-20260804-121742.xml):
+- [UI anterior](artifacts/E-025/e025-safe-before-20260804-121742.xml):
   10 642 bytes; SHA-256
   `2FD09851FAD75DC0E1AFB2D313321BB2CE48B100D2EB7543B4BA9FF396263FF3`;
-- [UI posterior](artefactos/E-025/e025-safe-after-20260804-121742.xml):
+- [UI posterior](artifacts/E-025/e025-safe-after-20260804-121742.xml):
   15 139 bytes; SHA-256
   `96552323FA40F7C6C79414197933865DDA189BA8704F5371B7BEFF416B7DD6AC`.
 
@@ -303,14 +303,14 @@ explotabilidad completa, y no afirma equivalencia exacta con CVE-2019-3568.
 
 Artefactos primarios conservados:
 
-- [Log ASan E-022](artefactos/E-022/asan-udp-vulnerable-20260731-140415.log):
+- [Log ASan E-022](artifacts/E-022/asan-udp-vulnerable-20260731-140415.log):
   64 698 bytes; SHA-256
   `F59B0BCCC33F2B9E6BCCA28DA80145F59C04A2E93B9F101A999A042185EDED7D`.
 - Biblioteca no strip E-022, excluida de Git normal y conservada como artefacto
   externo: 106 528 bytes; SHA-256
   `BA86A1DDB9881A6BF22F07907DCE14995242C42F4B25981FC1F1DD6649490453`;
   Build ID `c455a1c576ff356de665e37770bd209913e6e7b2`.
-- [Transcripción saneada E-021–E-024](artefactos/E-021_E-024_sesion_powershell_sanitizada.txt):
+- [Transcripción saneada E-021–E-024](artifacts/E-021_E-024_sesion_powershell_sanitizada.txt):
   369 039 bytes y 4 258 líneas; SHA-256
   `92C0CF67B87D2D126504FA9FDD59455753EA56363B40AFD1865EB25866595496`.
   Es un derivado documental; sustituye las 915 apariciones del prefijo de
@@ -318,7 +318,7 @@ Artefactos primarios conservados:
 - Transcripción original E-021–E-024, excluida de Git por contener rutas
   personales: 372 699 bytes y 4 258 líneas; SHA-256
   `ECED591432B4783142303B530FD42AC41CFD6493722FA410B4C4DC0C9A860F14`.
-- [Captura contextual](artefactos/contexto/echocall-vulnerable-20260731-134143.png):
+- [Captura contextual](artifacts/context/echocall-vulnerable-20260731-134143.png):
   204 949 bytes; SHA-256
   `EE7DDFD7804D18DB51F1C415934B0E57EF98DE485E4EB79EDE94D45CF634A8E0`.
 
@@ -336,7 +336,7 @@ no representan 4 258 observaciones independientes.
 
 ## Cadena de custodia de entradas y binarios
 
-- Los hashes del [manifest](artefactos/manifest_sha256.md) demuestran la
+- Los hashes del [manifest](artifacts/sha256-manifest.md) demuestran la
   identidad de los ficheros actualmente presentes.
 - Un hash calculado durante la consolidación, después de una sesión histórica,
   no demuestra por sí solo qué fichero exacto se envió en aquella sesión.
@@ -441,5 +441,5 @@ contextual, los cinco artefactos E-025 y el derivado saneado de la transcripció
 
 Permanecen excluidos el XLSX pendiente de revisión estructural, la transcripción
 original con rutas personales, la biblioteca `.so`, los APK y los artefactos de
-build. El [manifest](artefactos/manifest_sha256.md) separa expresamente
+build. El [manifest](artifacts/sha256-manifest.md) separa expresamente
 artefactos versionados, externos/excluidos y pendientes de revisión.

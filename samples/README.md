@@ -29,7 +29,7 @@ copia gobernada por 64. Patched rechaza antes porque 64 supera el máximo 32.
 | `truncated_packet.bin` | `9F46C77E1F2857E4E8D2A1C62403EF15275A664B20CF70ACB2922F083CF1F18C` |
 
 [`tools/generate_samples.py`](../tools/generate_samples.py) regenera exactamente
-este conjunto. La [especificación ECLB](../docs/02_packet_format.md) explica los
+este conjunto. La [especificación ECLB](../technical-documentation/packet-format.md) explica los
 offsets y el orden big-endian.
 
 ## Uso seguro

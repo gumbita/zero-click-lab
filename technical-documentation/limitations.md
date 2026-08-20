@@ -2,7 +2,7 @@
 
 Estas limitaciones acotan la interpretación del experimento; no sustituyen la
 explicación técnica de [arquitectura](architecture.md) y
-[resultados](results.md).
+[resultados](experimental-results.md).
 
 ## Validez interna
 
@@ -48,7 +48,7 @@ proyectos.
 
 - Los candidatos finales y parte de la evidencia primaria permanecen bajo
   custodia externa selectiva; sus hashes están en
-  [procedencia Android](evidencias/procedencia-experimento-android.md).
+  [procedencia Android](evidence/android-experiment-provenance.md).
 - Las capturas E-028/E-029 están versionadas, pero sus ELF Debug exactos con los
   hashes registrados no están disponibles actualmente.
 - No se afirma identidad entre esos ELF y los APK ASan de la comparación

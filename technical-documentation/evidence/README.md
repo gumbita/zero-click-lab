@@ -6,7 +6,7 @@
 > evidencia primaria final del experimento Android se mantiene bajo custodia
 > externa selectiva. Su identidad, procedencia, protocolo y límites están
 > consolidados en la
-> [ficha de procedencia del experimento Android](procedencia-experimento-android.md).
+> [ficha de procedencia del experimento Android](android-experiment-provenance.md).
 
 Esta ruta contiene el registro versionado de la validación y la reconstrucción
 documental del laboratorio zero-click. Cada resultado debe
@@ -15,28 +15,29 @@ un resultado reportado sin artefacto, o de una prueba aún pendiente. El código
 de terminación se registra cuando aplica y está disponible; si no se obtuvo,
 permanece explícitamente como `ND`.
 
-La custodia es selectiva: no todo lo presente localmente en `docs/evidencias/`
-se incorpora a Git. El [manifest](artefactos/manifest_sha256.md) distingue
+La custodia es selectiva: no todo lo presente localmente en
+`technical-documentation/evidence/`
+se incorpora a Git. El [manifest](artifacts/sha256-manifest.md) distingue
 artefactos versionados, externos/excluidos y pendientes de revisión.
 
 ## Contenido
 
-- [Registro de validación experimental](registro_validacion_experimental.md):
+- [Registro de validación experimental](experimental-validation-log.md):
   matriz maestra, carencias y criterio de capturas y logs.
-- [Procedencia del experimento Android](procedencia-experimento-android.md):
+- [Procedencia del experimento Android](android-experiment-provenance.md):
   hashes, tamaños, versiones, cronología y localización de artefactos externos.
 - `registro_evidencias_zero_click.xlsx`: archivo XLSX local excluido
   temporalmente de Git. Solo se han confirmado existencia, tamaño y hash; su
   contenido interno no se certifica.
-- [`artefactos/`](artefactos/README.md): convención para incorporar logs,
+- [`artifacts/`](artifacts/README.md): convención para incorporar logs,
   capturas, manifiestos y salidas de herramientas sin perder trazabilidad.
-- [E-028](artefactos/E-028/README.md): análisis estático Ghidra de Vulnerable;
+- [E-028](artifacts/E-028/README.md): análisis estático Ghidra de Vulnerable;
   capturas preservadas y custodia física del ELF exacto no disponible.
-- [E-029](artefactos/E-029/README.md): análisis estático Ghidra de Patched;
+- [E-029](artifacts/E-029/README.md): análisis estático Ghidra de Patched;
   capturas preservadas y custodia física del ELF exacto no disponible.
-- [Comparativa técnica](../reversing.md): convergencia de evidencia estática y
+- [Comparativa técnica](../reverse-engineering.md): convergencia de evidencia estática y
   dinámica sin afirmar identidad binaria con los candidatos ASan finales.
-- [Manifest SHA-256](artefactos/manifest_sha256.md): identidad de los
+- [Manifest SHA-256](artifacts/sha256-manifest.md): identidad de los
   artefactos actualmente custodiados.
 
 ## Clasificación de evidencia

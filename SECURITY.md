@@ -16,8 +16,8 @@ sistemas de terceros.
 - La evidencia demuestra una escritura fuera de límites concreta; no demuestra
   RCE, control del flujo ni compromiso completo.
 
-Consulta [Reproducción segura](docs/reproduction.md) para comandos permitidos y
-[Limitaciones](docs/limitations.md) para el alcance metodológico.
+Consulta [Reproducción segura](technical-documentation/experimental-reproduction.md) para comandos permitidos y
+[Limitaciones](technical-documentation/limitations.md) para el alcance metodológico.
 
 ## Comunicación privada
 
