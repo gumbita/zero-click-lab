@@ -2,7 +2,7 @@
 
 Este documento conserva la información de procedencia y los hashes únicos que
 antes estaban repartidos entre el diseño y el plan de implementación Android.
-Complementa el [registro de validación](registro_validacion_experimental.md):
+Complementa el [registro de validación](experimental-validation-log.md):
 no sustituye los artefactos primarios ni convierte en pública la custodia
 externa.
 

@@ -11,13 +11,13 @@ reconstrucción documental en evidencia experimental primaria.
 
 | Archivo | Tamaño | SHA-256 | Función |
 |---|---:|---|---|
-| `../../../.gitattributes` | 339 bytes | `0BF96FC7CC180580057A29EDB2D8D60297C911A3BFF76D89375F8BB3F03C9AAF` | Conservación byte a byte de artefactos de evidencia |
-| `../../../README.md` | 9 132 bytes | `548983F405D12F5CB8648F36E4B610D0BDC9EAD797AF663CF105B6AD9C62589B` | Enlace raíz al registro de evidencias |
-| `../README.md` | 3 998 bytes | `2AFC9A62D7847C35E16A922B8BD5532BB557F30E78680F261103511F1107CB99` | Índice y taxonomía |
-| `../registro_validacion_experimental.md` | 39 526 bytes | `8BF4878AECAC5722EE165D109A91B81BF46A34D6AFEE1B73A1B3A2A6B2A910D4` | Matriz y análisis consolidado |
-| `../procedencia-experimento-android.md` | 6 626 bytes | `275F55336D605D9FA886926EE8A114282D32054B2E76F1E778FCEDBE896A82AE` | Identidad, cronología y custodia externa del experimento Android |
-| `README.md` | 3 076 bytes | `CA7175DCACD724E1E3B9C497AC44343B9AFF26935F324E5377F027A7331FEC8D` | Política de artefactos y saneamiento |
-| `contexto/echocall-vulnerable-20260731-134143.png` | 204 949 bytes | `EE7DDFD7804D18DB51F1C415934B0E57EF98DE485E4EB79EDE94D45CF634A8E0` | Captura contextual; no concluyente para E-021/E-022 |
+| `../../../.gitattributes` | 419 bytes | `F91513AB21DD8270B8D2B9E397841E4DAD3A1C9F92709E7A97D50B1AF66F6A68` | Conservación byte a byte de artefactos de evidencia |
+| `../../../README.md` | 9 549 bytes | `29554A555222396FE4562DAA33FF1A3BF6B0EB7587F4205DF49166912999006A` | Enlace raíz al registro de evidencias |
+| `../README.md` | 4 010 bytes | `B17BA0144E3475941EC10F08FBA236F62FBBE233F7F610F4B4B33F98DC632D81` | Índice y taxonomía |
+| `../experimental-validation-log.md` | 39 503 bytes | `045CDC43C637D58CC8023211A71DE4F9FFA38CA9DEF69035B7D928945AE6190E` | Matriz y análisis consolidado |
+| `../android-experiment-provenance.md` | 6 621 bytes | `0266D7765C11B279B26D5A35A7693958323D8DE3CB94A55A0453C151D44DF1A2` | Identidad, cronología y custodia externa del experimento Android |
+| `README.md` | 3 086 bytes | `91FF3ED6BC3A991DB3A3C60432947B2E192E6B2E6FA85130A6D3768F546B8303` | Política de artefactos y saneamiento |
+| `context/echocall-vulnerable-20260731-134143.png` | 204 949 bytes | `EE7DDFD7804D18DB51F1C415934B0E57EF98DE485E4EB79EDE94D45CF634A8E0` | Captura contextual; no concluyente para E-021/E-022 |
 | `E-022/asan-udp-vulnerable-20260731-140415.log` | 64 698 bytes | `F59B0BCCC33F2B9E6BCCA28DA80145F59C04A2E93B9F101A999A042185EDED7D` | Log primario E-022 |
 | `E-021_E-024_sesion_powershell_sanitizada.txt` | 369 039 bytes | `92C0CF67B87D2D126504FA9FDD59455753EA56363B40AFD1865EB25866595496` | Derivado saneado de la transcripción primaria |
 | `E-025/e025-safe-before-20260804-121742.xml` | 10 642 bytes | `2FD09851FAD75DC0E1AFB2D313321BB2CE48B100D2EB7543B4BA9FF396263FF3` | UI anterior E-025 |
@@ -39,7 +39,7 @@ reconstrucción documental en evidencia experimental primaria.
 | `E-029/e029-04-ghidra-patched-status6-payload-too-large.png` | 145 711 bytes | `28AE8870C078C273F40CA234955096E1664CCB1426C2DF7DACC49AE6993103E1` | Mapeo de estado 6 a `payload_too_large` |
 | `E-029/e029-aux-02-ghidra-patched-safe-parser-entry.png` | 150 286 bytes | `A88D7AE1CCFECDDCD887A35A24C9CD9EEEED8864117B05D7CF1F26B70249D470` | Entrada auxiliar de `safe_parse_packet` |
 
-`manifest_sha256.md` también se versiona, pero no incluye su propio hash porque
+`sha256-manifest.md` también se versiona, pero no incluye su propio hash porque
 ese valor cambiaría al escribirlo y produciría una referencia circular.
 
 ## B. Artefactos externos o excluidos

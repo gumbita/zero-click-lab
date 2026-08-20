@@ -146,9 +146,10 @@ ausencia de errores.
 - `device not found`: vuelve a comprobar `adb devices`; no interpretes el fallo
   del entorno como resultado del parser.
 
-Los resultados consolidados están en [`results.md`](results.md), la evidencia
-en [`evidencias/`](evidencias/) y la identidad de los artefactos Android
-externos en la [ficha de procedencia](evidencias/procedencia-experimento-android.md).
+Los resultados consolidados están en
+[`experimental-results.md`](experimental-results.md), la evidencia en
+[`evidence/`](evidence/) y la identidad de los artefactos Android externos en
+la [ficha de procedencia](evidence/android-experiment-provenance.md).
 
 ## Estado verificado del entorno
 

@@ -26,7 +26,7 @@ parser C fijado en el build
 `UdpPacketReceiver` recibe el datagrama y activa el procesamiento antes de que
 la persona interactúe con la llamada simulada. Kotlin conserva el contexto de
 la interfaz y transforma el resultado JNI en eventos observables. El contrato
-binario está definido en la [especificación ECLB](02_packet_format.md).
+binario está definido en la [especificación ECLB](packet-format.md).
 
 ## Frontera Kotlin/JNI/C
 
@@ -96,7 +96,7 @@ requiere el informe ASan, logs, señal y demás evidencia de ejecución.
 | [`native-core/`](../native-core/README.md) | Contrato C, parsers, CLI y CTest |
 | [`samples/`](../samples/README.md) | Entradas ECLB versionadas |
 | [`tools/`](../tools/README.md) | Generación de muestras y sender UDP |
-| [`docs/evidencias/`](evidencias/README.md) | Resultados, hashes y procedencia |
+| [`technical-documentation/evidence/`](evidence/README.md) | Resultados, hashes y procedencia |
 
 ## Puntos de observación
 
@@ -108,4 +108,4 @@ requiere el informe ASan, logs, señal y demás evidencia de ejecución.
 - **Reversing:** estructura estática de los binarios E-028/E-029.
 
 Los resultados observados se separan de su interpretación en
-[`results.md`](results.md).
+[`experimental-results.md`](experimental-results.md).

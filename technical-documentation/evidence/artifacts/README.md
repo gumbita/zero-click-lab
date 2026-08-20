@@ -8,7 +8,7 @@ E-005_asan_receiver_vuln_oversized.txt
 E-006_receiver_safe_oversized.txt
 E-013_android_flujo_pre_interaccion_logcat.txt
 E-013_android_llamada_pre_interaccion.png
-manifest_sha256.md
+sha256-manifest.md
 ```
 
 Cada log debe conservar, siempre que sea posible:
@@ -38,7 +38,7 @@ comando, la salida íntegra y el estado final del proceso.
   reserva de 32 bytes y copia gobernada por `declared_length`.
 - [E-029 — Patched](E-029/README.md): límite `declared_length <= 32`, estado 6
   y `payload_too_large`.
-- [Comparativa](../../reversing.md): lectura diferencial y límites de
+- [Comparativa](../../reverse-engineering.md): lectura diferencial y límites de
   interpretación.
 
 Los README preservan las identidades registradas durante las sesiones Ghidra.
