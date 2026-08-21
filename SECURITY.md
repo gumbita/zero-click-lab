@@ -21,10 +21,12 @@ Consulta [Reproducción segura](technical-documentation/experimental-reproductio
 
 ## Comunicación privada
 
-Si detectas una vulnerabilidad accidental distinta del comportamiento
-deliberado, no publiques detalles explotables en un issue. Comunícala mediante
-el canal privado por el que recibiste acceso al repositorio; si no dispones de
-uno, solicita primero un canal privado sin incluir información sensible.
+Si detectas una vulnerabilidad accidental distinta del comportamiento deliberado del laboratorio, no publiques inicialmente detalles explotables en una issue pública.
 
-Este archivo no concede una licencia de uso. La licencia se decidirá antes de
-una eventual publicación pública.
+Cuando el reporte privado de vulnerabilidades de GitHub esté habilitado para este repositorio, utiliza ese canal para comunicar el problema de forma privada.
+
+## Licencia
+
+EchoCall Lab se distribuye bajo los términos indicados en [`LICENSE`](LICENSE).
+
+El material original cuya titularidad corresponde a la autora se distribuye bajo GNU General Public License v3.0 (`GPL-3.0-only`).
