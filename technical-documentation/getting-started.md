@@ -1,274 +1,614 @@
-# Getting Started de EchoCall Lab
+# Instalación reproducible de EchoCall Lab en Windows 11
 
-Esta guía lleva desde un entorno nuevo hasta la primera ejecución segura de
-EchoCall Patched. El recorrido no ejecuta el parser Vulnerable con entradas
-malformadas ni reproduce el crash experimental documentado.
+> Esta guía documenta el entorno de referencia de EchoCall Lab sobre Windows 11 y PowerShell.
+> Los comandos, rutas y procedimientos se han definido para este
+> entorno. Linux y macOS no están cubiertos por este Getting Started y pueden
+> requerir comandos, rutas y configuración diferentes.
 
-Trabaja únicamente en equipos, emuladores y redes propios o expresamente
-autorizados. Antes de continuar, revisa [`SECURITY.md`](../SECURITY.md).
+El objetivo es partir de un Windows 11 sin entorno de desarrollo preparado y
+terminar con EchoCall Patched instalado en un Android Emulator API 36. El flujo
+compila y prueba Native Core seguro, prepara el SDK Android, envía una muestra
+benigna y permite comprobar de forma opcional el rechazo defensivo de una
+muestra sobredimensionada.
 
-## Requisitos y versiones
+No se ejecuta `receiver_vuln` ni se envían entradas malformadas a EchoCall
+Vulnerable. Trabaja únicamente en el emulador local y en sistemas propios o
+expresamente autorizados.
 
-Las versiones siguientes proceden de los archivos de build del repositorio.
+## 1. Entorno de referencia y requisitos
 
-| Componente | Versión | Tipo de requisito |
+### Equipo Windows
+
+- Windows 11 de 64 bits sobre arquitectura x86-64.
+- PowerShell 5.1 o PowerShell 7.
+- Cuenta con permiso para instalar aplicaciones y aceptar elevaciones UAC.
+- Conexión a Internet para `winget`, Git, Gradle y Android SDK Manager.
+- Virtualización Intel VT-x o AMD-V habilitada en UEFI.
+- Al menos 16 GB de RAM para Android Studio y un emulador; 32 GB recomendados.
+- Al menos 16 GB libres en la unidad del sistema; 32 GB o más recomendados.
+
+Comprueba el sistema desde PowerShell:
+
+```powershell
+if (-not [Environment]::Is64BitOperatingSystem) { throw "Se requiere Windows de 64 bits" }
+Get-CimInstance Win32_OperatingSystem | Select-Object Caption, Version, OSArchitecture
+Get-CimInstance Win32_Processor | Select-Object Name, VirtualizationFirmwareEnabled
+Get-PSDrive -Name C | Select-Object Name, Used, Free
+winget --version
+```
+
+`VirtualizationFirmwareEnabled` debe mostrar `True`. Si muestra `False`, activa
+Intel VT-x o AMD-V en la configuración UEFI antes de crear el emulador. Si
+`winget` no existe, instala o actualiza **App Installer** desde Microsoft Store
+y abre una PowerShell nueva.
+
+### Versiones requeridas por el repositorio
+
+| Componente | Versión | Naturaleza del requisito |
 |---|---|---|
-| Python | 3.10 o posterior | Mínimo deducido de la sintaxis del código |
+| Python | 3.10 o posterior | Versión soportada por EchoCall Lab |
 | CMake para Native Core | 3.20 o posterior | Mínimo declarado |
-| Compilador C | Compatible con C17 | Estándar requerido |
-| Gradle Wrapper | 8.13 | Versión fijada; usa el wrapper incluido |
+| Compilador C | MSVC con soporte C17 | Toolchain Windows de referencia |
+| Gradle Wrapper | 8.13 | Versión fijada por el repositorio |
 | Android Gradle Plugin | 8.12.2 | Versión fijada |
 | Kotlin | 2.0.21 | Versión fijada |
 | Android SDK | `compileSdk=36`, `targetSdk=36` | Configuración fijada |
 | Android mínimo | `minSdk=28` | Mínimo admitido por la aplicación |
+| Android SDK Build Tools | `35.0.0` | Versión mínima y predeterminada para AGP 8.12; no está fijada por el proyecto |
 | Android NDK | `27.0.12077973` | Versión fijada |
-| CMake para Android | 3.22.1 | Versión fijada |
-| Java/JVM | Target 17 | Target de compilación |
-| AVD de referencia | API 36, ABI `x86_64` | Configuración recomendada |
+| CMake para Android | `3.22.1` | Versión fijada |
+| Target Java/Kotlin | 17 | `sourceCompatibility`, `targetCompatibility` y `jvmTarget` fijados por el proyecto |
+| JDK para ejecutar Gradle/AGP | 17 o posterior | JDK 17 es el mínimo requerido por AGP 8.12; se usa el JBR de Android Studio |
+| AVD de referencia | API 36, ABI `x86_64` | Configuración respaldada para EchoCall Lab |
 
-`minSdk=28` no es la configuración de referencia del emulador. Solo indica la
-versión mínima de Android aceptada por la aplicación. Para reproducibilidad,
-usa un AVD API 36 con ABI `x86_64`.
+`minSdk=28` no describe el emulador de referencia. El AVD utilizado en esta
+guía es API 36 con ABI `x86_64`.
 
-## 1. Clonar el repositorio
+## 2. Instalar las herramientas de Windows
 
-Instala Git y clona la URL real del proyecto:
+Abre una PowerShell normal. Los instaladores pueden solicitar elevación UAC.
+Instala Git, Python 3.12, CMake, Visual Studio Build Tools 2022 con el workload
+de C++ y Android Studio:
 
-```text
-git clone https://github.com/gumbita/zero-click-lab.git
-cd zero-click-lab
+```powershell
+winget install --id Git.Git --exact --source winget --accept-source-agreements --accept-package-agreements
+winget install --id Python.Python.3.12 --exact --source winget --accept-source-agreements --accept-package-agreements
+winget install --id Kitware.CMake --exact --source winget --accept-source-agreements --accept-package-agreements
+winget install --id Microsoft.VisualStudio.2022.BuildTools --exact --source winget --accept-source-agreements --accept-package-agreements --override "--wait --passive --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"
+winget install --id Google.AndroidStudio --exact --source winget --accept-source-agreements --accept-package-agreements
 ```
 
-Todos los comandos siguientes indican explícitamente desde qué directorio se
-ejecutan.
+Cuando terminen los instaladores, cierra PowerShell y abre una nueva para que
+reciba el `PATH` actualizado. Verifica las herramientas de host:
 
-## 2. Comprobar Python
+```powershell
+$requiredCommands = @("git", "python", "cmake", "ctest")
+foreach ($command in $requiredCommands) {
+    if (-not (Get-Command $command -ErrorAction SilentlyContinue)) {
+        throw "No se encuentra $command en PATH. Reabre PowerShell o revisa su instalación."
+    }
+}
 
-Las utilidades de `tools/` generan muestras ECLB deterministas y envían un
-archivo como un único datagrama UDP. Solo utilizan la biblioteca estándar; no
-hay `requirements.txt` ni dependencias Python que instalar.
-
-Desde la raíz del repositorio:
-
-```text
+git --version
 python --version
+cmake --version
+ctest --version
+
+$pythonVersion = [Version](& python -c "import platform; print(platform.python_version())")
+if ($pythonVersion -lt [Version]"3.10") { throw "EchoCall Lab requiere Python 3.10 o posterior" }
+
+$vswhere = Join-Path ${env:ProgramFiles(x86)} "Microsoft Visual Studio\Installer\vswhere.exe"
+if (-not (Test-Path -LiteralPath $vswhere)) { throw "No se encuentra vswhere.exe; revisa Visual Studio Build Tools" }
+$vsInstall = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+if ([string]::IsNullOrWhiteSpace($vsInstall)) { throw "Falta el workload C++ de Visual Studio Build Tools" }
+$vsInstall
 ```
 
-Usa Python 3.10 o posterior. La sintaxis actual, incluida la unión de tipos
-`int | None`, requiere como mínimo Python 3.10.
+No instales Gradle globalmente: el repositorio incluye el wrapper 8.13. Los
+scripts Python solo usan la biblioteca estándar y no requieren `pip install`.
 
-## 3. Construir Native Core seguro
+## 3. Clonar EchoCall Lab
 
-Necesitas CMake 3.20 o posterior y un compilador compatible con C17, como GCC,
-Clang o MSVC con soporte suficiente para el estándar utilizado. Configura el
-build fuera del repositorio para no mezclar salidas generadas con las fuentes.
+La guía utiliza `$env:USERPROFILE\source\zero-click-lab` como ruta reproducible.
+Ejecuta:
 
-Desde la raíz del repositorio:
-
-```text
-cmake -S native-core -B <TEMP_BUILD_DIR> -DENABLE_ASAN=OFF
-cmake --build <TEMP_BUILD_DIR> --target test_safe_parser receiver_safe
-ctest --test-dir <TEMP_BUILD_DIR> --output-on-failure
+```powershell
+$workspace = Join-Path $env:USERPROFILE "source"
+$repo = Join-Path $workspace "zero-click-lab"
+New-Item -ItemType Directory -Path $workspace -Force | Out-Null
+if (Test-Path -LiteralPath $repo) { throw "La ruta $repo ya existe; utiliza una carpeta vacía para esta instalación" }
+Set-Location $workspace
+git clone https://github.com/gumbita/zero-click-lab.git
+Set-Location $repo
+git status --short --branch
 ```
 
-CTest ejecuta `test_safe_parser` y `receiver_safe`; no invoca
-`receiver_vuln`. Después puede hacerse una comprobación manual benigna:
+Mantén abierta esta PowerShell durante el procedimiento. Si la cierras, vuelve
+a definir `$repo`, `$sdk`, `$adb`, `$emulator`, `$javaHome` y `$serial` con los
+bloques correspondientes antes de continuar.
 
-```text
-<TEMP_BUILD_DIR>/receiver_safe samples/benign/valid_call_control.bin
+## 4. Compilar y comprobar Native Core seguro
+
+El build se crea bajo `$env:TEMP`, fuera del repositorio, con MSVC x64. La ruta
+incluye una marca temporal para no borrar ni reutilizar builds anteriores:
+
+```powershell
+Set-Location $repo
+$build = Join-Path $env:TEMP ("echocall-native-safe-" + (Get-Date -Format "yyyyMMdd-HHmmss"))
+cmake -S .\native-core -B $build -G "Visual Studio 17 2022" -A x64 -DENABLE_ASAN=OFF
+if ($LASTEXITCODE -ne 0) { throw "Falló la configuración de Native Core" }
+cmake --build $build --config Debug --target test_safe_parser receiver_safe
+if ($LASTEXITCODE -ne 0) { throw "Falló la compilación de los targets seguros" }
+ctest --test-dir $build -C Debug --output-on-failure
+if ($LASTEXITCODE -ne 0) { throw "Fallaron los tests seguros de Native Core" }
 ```
 
-Resultado esperado:
+CTest ejecuta `test_safe_parser` y las pruebas de `receiver_safe`; no ejecuta
+`receiver_vuln`. Comprueba además la muestra benigna directamente:
+
+```powershell
+$receiverSafe = Join-Path $build "Debug\receiver_safe.exe"
+$validSample = Join-Path $repo "samples\benign\valid_call_control.bin"
+if (-not (Test-Path -LiteralPath $receiverSafe)) { throw "No se generó receiver_safe.exe" }
+$safeOutput = & $receiverSafe $validSample
+$safeOutput
+if ($safeOutput -notcontains "status=accepted code=ok") { throw "Native Core no aceptó la muestra benigna" }
+```
+
+Resultado requerido:
 
 ```text
 status=accepted code=ok
 ```
 
-No uses `receiver_vuln` con entradas malformadas como comprobación rutinaria.
+## 5. Preparar Android Studio y Android SDK
 
-## 4. Preparar Android Studio y el SDK
+Inicia Android Studio:
 
-Instala Android Studio y, desde **SDK Manager**, prepara:
-
-- Android SDK Platform 36;
-- Android SDK Platform-Tools, que incluye ADB;
-- Android NDK `27.0.12077973`;
-- CMake `3.22.1`;
-- JDK 17, que coincide con el target Java/JVM 17 del proyecto.
-
-Usa `ANDROID_HOME` como variable de entorno recomendada cuando las herramientas
-no localicen el SDK. Como alternativa, crea `android-app/local.properties`, que
-no se versiona, con una ruta válida para tu equipo:
-
-```properties
-sdk.dir=C:\\Android\\Sdk
+```powershell
+$studio = Join-Path $env:ProgramFiles "Android\Android Studio\bin\studio64.exe"
+if (-not (Test-Path -LiteralPath $studio)) { throw "No se encuentra Android Studio en su ruta estándar" }
+Start-Process -FilePath $studio
 ```
 
-En Linux o macOS, por ejemplo:
+En el asistente inicial de Android Studio:
 
-```properties
-sdk.dir=/opt/android-sdk
+1. Selecciona la instalación **Standard**.
+2. Conserva como SDK la ruta predeterminada
+   `$env:LOCALAPPDATA\Android\Sdk`.
+3. En la pantalla inicial abre **More Actions > SDK Manager**.
+4. En **SDK Tools**, marca **Android SDK Command-line Tools (latest)** y aplica
+   la instalación.
+5. Cierra Android Studio cuando termine; el resto de componentes se instalará
+   de forma verificable desde PowerShell.
+
+Define las rutas del SDK y del JBR incluido en Android Studio:
+
+```powershell
+$repo = Join-Path $env:USERPROFILE "source\zero-click-lab"
+$sdk = Join-Path $env:LOCALAPPDATA "Android\Sdk"
+$javaHome = Join-Path $env:ProgramFiles "Android\Android Studio\jbr"
+$sdkmanager = Join-Path $sdk "cmdline-tools\latest\bin\sdkmanager.bat"
+$adb = Join-Path $sdk "platform-tools\adb.exe"
+$emulator = Join-Path $sdk "emulator\emulator.exe"
+
+if (-not (Test-Path -LiteralPath $repo)) { throw "No se encuentra el repositorio en $repo" }
+if (-not (Test-Path -LiteralPath $javaHome)) { throw "No se encuentra el JBR de Android Studio" }
+if (-not (Test-Path -LiteralPath $sdkmanager)) { throw "Instala Android SDK Command-line Tools (latest) desde SDK Manager" }
+
+$env:ANDROID_HOME = $sdk
+$env:JAVA_HOME = $javaHome
+[Environment]::SetEnvironmentVariable("ANDROID_HOME", $sdk, "User")
+[Environment]::SetEnvironmentVariable("JAVA_HOME", $javaHome, "User")
 ```
 
-El wrapper Gradle está incluido en el repositorio; no instales otra versión de
-Gradle global para sustituirlo.
+Revisa y acepta las licencias que presente Android SDK Manager:
 
-## 5. Crear el AVD de referencia
-
-En **Device Manager** de Android Studio crea un dispositivo virtual con:
-
-- imagen de sistema API 36;
-- ABI `x86_64`;
-- red del emulador sin exposición a terceros.
-
-Inicia el AVD y espera a que Android complete el arranque. La ABI `x86_64` es
-también la utilizada por los builds ASan experimentales, aunque este onboarding
-solo construye Patched Debug.
-
-## 6. Comprobar el emulador
-
-Desde cualquier terminal donde ADB esté disponible:
-
-```text
-adb devices
+```powershell
+& $sdkmanager --licenses
+if ($LASTEXITCODE -ne 0) { throw "No se aceptaron todas las licencias Android necesarias" }
 ```
 
-Anota el serial mostrado, normalmente similar a `emulator-5554`. El estado
-debe ser `device`; `offline` o una lista vacía no permiten continuar.
+Instala las versiones necesarias para el proyecto. `buildToolsVersion` no está
+declarado en `android-app/app/build.gradle.kts`: se instala SDK Build Tools
+`35.0.0` porque es la versión mínima y predeterminada para AGP 8.12, no porque
+el proyecto use `compileSdk=36`. La system image se selecciona al crear el AVD
+en el apartado siguiente.
 
-En los comandos siguientes sustituye `<serial>` por ese valor.
+```powershell
+$sdkPackages = @(
+    "platform-tools",
+    "platforms;android-36",
+    "build-tools;35.0.0",
+    "emulator",
+    "ndk;27.0.12077973",
+    "cmake;3.22.1"
+)
+& $sdkmanager --install @sdkPackages
+if ($LASTEXITCODE -ne 0) { throw "Falló la instalación de componentes Android" }
+```
+
+Crea `local.properties` con una ruta válida para el formato de propiedades de
+Java y verifica todos los componentes:
+
+```powershell
+$sdkForProperties = $sdk.Replace('\', '/')
+$localProperties = Join-Path $repo "android-app\local.properties"
+Set-Content -LiteralPath $localProperties -Value "sdk.dir=$sdkForProperties" -Encoding ascii
+
+$requiredSdkPaths = @(
+    (Join-Path $sdk "platform-tools\adb.exe"),
+    (Join-Path $sdk "platforms\android-36\android.jar"),
+    (Join-Path $sdk "build-tools\35.0.0\aapt2.exe"),
+    (Join-Path $sdk "ndk\27.0.12077973"),
+    (Join-Path $sdk "cmake\3.22.1\bin\cmake.exe"),
+    (Join-Path $sdk "emulator\emulator.exe")
+)
+foreach ($path in $requiredSdkPaths) {
+    if (-not (Test-Path -LiteralPath $path)) { throw "Falta el componente Android: $path" }
+}
+
+$java = Join-Path $javaHome "bin\java.exe"
+$javaVersionOutput = (& $java -version 2>&1) -join "`n"
+$javaVersionOutput
+if ($javaVersionOutput -notmatch 'version "(\d+)') { throw "No se pudo determinar la versión del JBR" }
+$javaMajor = [int]$Matches[1]
+if ($javaMajor -lt 17) { throw "AGP 8.12 requiere JDK 17 o posterior; versión detectada=$javaMajor" }
+& $adb version
+& (Join-Path $sdk "cmake\3.22.1\bin\cmake.exe") --version
+```
+
+## 6. Preparar la aceleración y crear el AVD API 36
+
+Comprueba primero la aceleración del emulador:
+
+```powershell
+& $emulator -accel-check
+if ($LASTEXITCODE -ne 0) { throw "La aceleración del Android Emulator no está disponible" }
+```
+
+Si falla, confirma que la virtualización está habilitada en UEFI. Después abre
+**PowerShell como administrador**, activa Windows Hypervisor Platform y
+reinicia Windows:
+
+```powershell
+Enable-WindowsOptionalFeature -Online -FeatureName HypervisorPlatform -All -NoRestart
+Restart-Computer
+```
+
+Tras el reinicio, repite la definición de variables del apartado anterior y no
+continúes hasta que `emulator.exe -accel-check` termine correctamente.
+
+Abre Android Studio y crea el dispositivo desde **More Actions > Virtual Device
+Manager > Create Virtual Device** con esta configuración:
+
+- perfil de hardware: **Pixel 7** como ejemplo; el repositorio no exige un
+  modelo concreto;
+- nombre del AVD: `EchoCall_Lab_API_36`;
+- system image: **API 36** con ABI `x86_64`; descarga una imagen compatible
+  desde el propio asistente si todavía no está instalada;
+- orientación y opciones avanzadas: valores predeterminados.
+
+No selecciones una imagen ARM. Al terminar, vuelve a PowerShell y verifica que
+el AVD existe:
+
+```powershell
+$avdName = "EchoCall_Lab_API_36"
+$availableAvds = & $emulator -list-avds
+$availableAvds
+if ($availableAvds -notcontains $avdName) { throw "No se encuentra el AVD $avdName" }
+```
+
+Arranca el emulador en una ventana visible y espera hasta cinco minutos a que
+Android complete el boot:
+
+```powershell
+$emulatorProcess = Start-Process -FilePath $emulator -ArgumentList @("-avd", $avdName) -PassThru
+$deadline = (Get-Date).AddMinutes(5)
+$serial = $null
+do {
+    Start-Sleep -Seconds 2
+    $serial = & $adb devices | Select-String "^emulator-\d+\s+device$" | ForEach-Object { ($_.Line -split "\s+")[0] } | Select-Object -First 1
+} until ($serial -or (Get-Date) -ge $deadline)
+if (-not $serial) { throw "ADB no detectó el emulador dentro del tiempo esperado" }
+
+& $adb -s $serial wait-for-device
+$bootDeadline = (Get-Date).AddMinutes(5)
+do {
+    Start-Sleep -Seconds 2
+    $bootCompleted = (& $adb -s $serial shell getprop sys.boot_completed).Trim()
+} until ($bootCompleted -eq "1" -or (Get-Date) -ge $bootDeadline)
+if ($bootCompleted -ne "1") { throw "Android no completó el arranque dentro del tiempo esperado" }
+
+& $adb devices
+$apiLevel = (& $adb -s $serial shell getprop ro.build.version.sdk).Trim()
+$abi = (& $adb -s $serial shell getprop ro.product.cpu.abi).Trim()
+if ($apiLevel -ne "36") { throw "El AVD no usa API 36: API detectada=$apiLevel" }
+if ($abi -ne "x86_64") { throw "El AVD no usa ABI x86_64: ABI detectada=$abi" }
+"AVD validado: serial=$serial API=$apiLevel ABI=$abi"
+```
+
+Los comandos posteriores reutilizan `$serial`; no escribas manualmente un
+número de puerto de emulador.
 
 ## 7. Compilar EchoCall Patched
 
-Desde la raíz del repositorio, en Windows:
+Compila la variante real `patchedDebug` con el wrapper del repositorio:
 
-```text
-cd android-app
-.\gradlew.bat :app:assemblePatchedDebug
+```powershell
+$repo = Join-Path $env:USERPROFILE "source\zero-click-lab"
+$env:ANDROID_HOME = Join-Path $env:LOCALAPPDATA "Android\Sdk"
+$env:JAVA_HOME = Join-Path $env:ProgramFiles "Android\Android Studio\jbr"
+Set-Location (Join-Path $repo "android-app")
+& .\gradlew.bat --version
+if ($LASTEXITCODE -ne 0) { throw "Gradle Wrapper no pudo iniciarse" }
+& .\gradlew.bat :app:assemblePatchedDebug
+if ($LASTEXITCODE -ne 0) { throw "Falló assemblePatchedDebug" }
+
+$apk = Join-Path $repo "android-app\app\build\outputs\apk\patched\debug\app-patched-debug.apk"
+if (-not (Test-Path -LiteralPath $apk)) { throw "No se generó el APK Patched en $apk" }
+Get-Item -LiteralPath $apk | Select-Object FullName, Length, LastWriteTime
 ```
 
-En Linux o macOS:
+La tarea compila Patched con `safe_parser.c`. No compila ambos parsers dentro de
+la misma biblioteca ni selecciona el parser durante la ejecución.
 
-```text
-cd android-app
-./gradlew :app:assemblePatchedDebug
+## 8. Instalar y arrancar EchoCall Patched
+
+Recupera `$serial` si abriste una PowerShell nueva y exige exactamente un
+emulador API 36 conectado:
+
+```powershell
+$sdk = Join-Path $env:LOCALAPPDATA "Android\Sdk"
+$adb = Join-Path $sdk "platform-tools\adb.exe"
+$repo = Join-Path $env:USERPROFILE "source\zero-click-lab"
+$apk = Join-Path $repo "android-app\app\build\outputs\apk\patched\debug\app-patched-debug.apk"
+$emulatorSerials = @(& $adb devices | Select-String "^emulator-\d+\s+device$" | ForEach-Object { ($_.Line -split "\s+")[0] })
+if ($emulatorSerials.Count -ne 1) { throw "Debe haber exactamente un Android Emulator en estado device" }
+$serial = $emulatorSerials[0]
+$apiLevel = (& $adb -s $serial shell getprop ro.build.version.sdk).Trim()
+if ($apiLevel -ne "36") { throw "El emulador conectado no usa API 36" }
+if (-not (Test-Path -LiteralPath $apk)) { throw "No se encuentra el APK Patched en $apk" }
 ```
 
-El APK generado queda en:
+Instala el APK, limpia Logcat e inicia el componente real de Patched:
 
-```text
-android-app/app/build/outputs/apk/patched/debug/app-patched-debug.apk
+```powershell
+& $adb -s $serial install -r $apk
+if ($LASTEXITCODE -ne 0) { throw "ADB no pudo instalar EchoCall Patched" }
+$installedPath = (& $adb -s $serial shell pm path com.echocall.lab.patched) -join "`n"
+if ($LASTEXITCODE -ne 0 -or $installedPath -notmatch "package:") { throw "El package Patched no está instalado" }
+$installedPath
+
+& $adb -s $serial logcat -c
+& $adb -s $serial shell am force-stop com.echocall.lab.patched
+& $adb -s $serial shell am start -n com.echocall.lab.patched/com.echocall.lab.MainActivity
+if ($LASTEXITCODE -ne 0) { throw "No se pudo arrancar MainActivity de Patched" }
+Start-Sleep -Seconds 2
+
+$receiverLog = & $adb -s $serial logcat -d -s "EchoCallUDP:I" "*:S"
+$receiverLog | Select-String -SimpleMatch "Socket bound on UDP port 43568"
+$receiverLogText = $receiverLog -join "`n"
+if ($receiverLogText -notmatch "Socket bound on UDP port 43568") { throw "EchoCall no está escuchando en UDP 43568" }
 ```
 
-La compilación de Patched no ejecuta muestras ni inicia el receptor.
+Mantén la ventana de EchoCall en primer plano. En **Lab Mode** debe verse
+`PATCHED · Fijado al compilar` y `UDP listening on port 43568`.
 
-## 8. Instalar y arrancar Patched
+## 9. Configurar UDP del host hacia el emulador
 
-Desde `android-app/`:
+La dirección `127.0.0.1` del host Windows no entra automáticamente en el
+Android Emulator. Configura la redirección antes de enviar cualquier muestra:
 
-```text
-adb -s <serial> install -r app/build/outputs/apk/patched/debug/app-patched-debug.apk
-adb -s <serial> shell am start -n com.echocall.lab.patched/com.echocall.lab.MainActivity
+```powershell
+$redirections = (& $adb -s $serial emu redir list) -join "`n"
+if ($redirections -match "udp:43568" -and $redirections -notmatch "udp:43568.*43568") {
+    & $adb -s $serial emu redir del udp:43568
+    if ($LASTEXITCODE -ne 0) { throw "No se pudo retirar una redirección UDP 43568 incompatible" }
+    $redirections = ""
+}
+if ($redirections -notmatch "udp:43568.*43568") {
+    & $adb -s $serial emu redir add udp:43568:43568
+    if ($LASTEXITCODE -ne 0) { throw "No se pudo crear udp:43568:43568" }
+}
+$redirections = (& $adb -s $serial emu redir list) -join "`n"
+$redirections
+if ($redirections -notmatch "udp:43568.*43568") { throw "La redirección UDP no quedó activa" }
 ```
 
-Mantén la aplicación iniciada y comprueba que la pantalla técnica indica que
-el receptor UDP escucha en el puerto `43568`.
+Si aparece un error de puerto ocupado, no continúes hasta resolverlo. Comprueba
+qué proceso utiliza el puerto host:
 
-## 9. Configurar UDP antes de enviar
-
-La dirección `127.0.0.1` del host no llega automáticamente al invitado. Antes
-de enviar cualquier muestra, crea la redirección host→guest:
-
-```text
-adb -s <serial> emu redir add udp:43568:43568
-adb -s <serial> emu redir list
-```
-
-La lista debe mostrar `udp:43568:43568`. Si usas un dispositivo físico
-autorizado, envía a su IP dentro de tu red controlada y no uses `adb emu redir`.
-
-Vuelve ahora a la raíz del repositorio, porque `tools/` y `samples/` se
-referencian desde ella:
-
-```text
-cd ..
+```powershell
+Get-NetUDPEndpoint -LocalPort 43568 -ErrorAction SilentlyContinue | Select-Object LocalAddress, LocalPort, OwningProcess
 ```
 
 ## 10. Primera prueba benigna
 
-Opcionalmente limpia el buffer de log antes del envío:
+Ejecuta todos los comandos desde la raíz del repositorio. Limpia Logcat, envía
+`valid_call_control.bin` y exige el resultado aceptado:
 
-```text
-adb -s <serial> logcat -c
+```powershell
+Set-Location $repo
+$appProcessBefore = ((& $adb -s $serial shell pidof com.echocall.lab.patched) -join "").Trim()
+if ([string]::IsNullOrWhiteSpace($appProcessBefore)) { throw "EchoCall Patched no está vivo antes de la prueba" }
+
+& $adb -s $serial logcat -c
+python .\tools\send_udp_packet.py --host 127.0.0.1 --port 43568 --file .\samples\benign\valid_call_control.bin
+if ($LASTEXITCODE -ne 0) { throw "Falló el envío UDP de la muestra benigna" }
+Start-Sleep -Seconds 2
+
+$benignLog = & $adb -s $serial logcat -d -s "EchoCallUDP:I" "*:S"
+$benignLog | Select-String -SimpleMatch "status=accepted code=ok"
+$benignLogText = $benignLog -join "`n"
+if ($benignLogText -notmatch "status=accepted code=ok") { throw "No se observó la aceptación de valid_call_control.bin" }
+
+$appProcessAfter = ((& $adb -s $serial shell pidof com.echocall.lab.patched) -join "").Trim()
+if ($appProcessAfter -ne $appProcessBefore) { throw "El proceso Patched terminó o se reinició durante la prueba benigna" }
+"Prueba benigna validada: status=accepted code=ok; proceso=$appProcessAfter"
 ```
 
-Desde la raíz del repositorio, envía la muestra válida:
-
-```text
-python tools/send_udp_packet.py --host 127.0.0.1 --port 43568 --file samples/benign/valid_call_control.bin
-adb -s <serial> logcat -d -s EchoCallUDP
-```
-
-El emisor confirma únicamente el envío. En EchoCall o Logcat debe observarse:
+El resultado requerido en Logcat es:
 
 ```text
 status=accepted code=ok
 ```
 
-La aplicación debe permanecer viva.
+## 11. Prueba defensiva opcional, solo contra Patched
 
-## 11. Prueba defensiva opcional
+No ejecutes este apartado si la pantalla no muestra `PATCHED · Fijado al
+compilar` o si el package instalado no es `com.echocall.lab.patched`. La prueba
+envía una entrada coherente de 64 bytes que Patched debe rechazar antes de
+copiar el payload.
 
-Esta comprobación utiliza una entrada oversized exclusivamente contra Patched.
-Antes de ejecutarla, confirma que el package activo es
-`com.echocall.lab.patched` y que no hay otra variante escuchando en el puerto.
+```powershell
+$installedPatched = (& $adb -s $serial shell pm path com.echocall.lab.patched) -join "`n"
+if ($installedPatched -notmatch "package:") { throw "No está instalado com.echocall.lab.patched" }
+$appProcessBefore = ((& $adb -s $serial shell pidof com.echocall.lab.patched) -join "").Trim()
+if ([string]::IsNullOrWhiteSpace($appProcessBefore)) { throw "EchoCall Patched no está vivo antes de la prueba defensiva" }
 
-```text
-adb -s <serial> logcat -c
-python tools/send_udp_packet.py --host 127.0.0.1 --port 43568 --file samples/malformed/oversized_complete_payload.bin
-adb -s <serial> logcat -d -s EchoCallUDP
+& $adb -s $serial logcat -c
+Set-Location $repo
+python .\tools\send_udp_packet.py --host 127.0.0.1 --port 43568 --file .\samples\malformed\oversized_complete_payload.bin
+if ($LASTEXITCODE -ne 0) { throw "Falló el envío UDP de la muestra defensiva" }
+Start-Sleep -Seconds 2
+
+$defensiveLog = & $adb -s $serial logcat -d -s "EchoCallUDP:I" "*:S"
+$expectedRejection = "status=rejected code=payload_too_large declared_length=64 actual_length=64 maximum=32"
+$defensiveLog | Select-String -SimpleMatch $expectedRejection
+$defensiveLogText = $defensiveLog -join "`n"
+if ($defensiveLogText -notmatch [regex]::Escape($expectedRejection)) { throw "No se observó el rechazo payload_too_large esperado" }
+
+$appProcessAfter = ((& $adb -s $serial shell pidof com.echocall.lab.patched) -join "").Trim()
+if ([string]::IsNullOrWhiteSpace($appProcessAfter)) { throw "Patched no permanece vivo después del rechazo" }
+if ($appProcessAfter -ne $appProcessBefore) { throw "Patched se reinició durante la prueba defensiva" }
+"Prueba defensiva validada: payload_too_large; proceso vivo=$appProcessAfter"
 ```
 
-Resultado esperado:
+El resultado requerido es:
 
 ```text
 status=rejected code=payload_too_large declared_length=64 actual_length=64 maximum=32
 ```
 
-Patched debe rechazar la entrada y permanecer vivo. No repitas esta prueba
-contra Vulnerable: el resultado experimental concluyente ya está documentado y
-clasificado como **NO REPETIR**.
+No envíes `oversized_complete_payload.bin` a EchoCall Vulnerable ni a
+`receiver_vuln` como comprobación rutinaria.
 
 ## 12. Resolución de problemas
 
-- **SDK no localizado:** define `ANDROID_HOME` o comprueba
-  `android-app/local.properties` y su `sdk.dir`.
-- **ADB no detecta el emulador:** confirma que el AVD terminó de arrancar,
-  ejecuta `adb devices` y reinicia el servidor con `adb kill-server` seguido de
-  `adb start-server` si fuera necesario.
-- **Redirección UDP ausente:** ejecuta `adb -s <serial> emu redir list` antes de
-  enviar desde `127.0.0.1` y vuelve a añadir `udp:43568:43568` si falta.
-- **Puerto ocupado (`EADDRINUSE`):** detén la otra variante o proceso que use
-  `43568/UDP`; solo una instancia puede escuchar el puerto.
-- **NDK incorrecto:** instala exactamente `27.0.12077973` desde SDK Manager y
-  deja que Gradle use el `ndkVersion` fijado por el proyecto.
-- **Error de runtime ASan:** solo aplica a builds experimentales ASan; verifica
-  el NDK fijado y la ABI `x86_64`. No es necesario para Patched Debug.
-- **Logs no visibles:** comprueba el serial, usa `logcat -d -s EchoCallUDP` y
-  verifica que la aplicación esté iniciada y escuchando.
-- **Rutas `tools/` o `samples/` inexistentes:** vuelve a la raíz
-  `zero-click-lab/`; no ejecutes esos comandos desde `android-app/`.
+### `python`, `cmake` o `git` no se reconocen
 
-## 13. Siguientes pasos
+Cierra todas las ventanas de PowerShell, abre una nueva y repite la
+verificación del apartado 2. Comprueba qué ejecutable está resolviendo Windows:
 
-- [Arquitectura](architecture.md)
-- [Formato ECLB](packet-format.md)
-- [Reproducción experimental](experimental-reproduction.md)
-- [Resultados experimentales](experimental-results.md)
-- [Ingeniería inversa](reverse-engineering.md)
-- [Limitaciones](limitations.md)
-- [Evidencia y trazabilidad](evidence/README.md)
+```powershell
+Get-Command git, python, cmake, ctest | Select-Object Name, Source
+```
 
-La reproducción experimental desarrolla los builds instrumentados y la
-captura de nuevas comprobaciones sin convertir la ruta Vulnerable en parte del
-onboarding.
+Si `python` abre Microsoft Store, desactiva los alias `python.exe` y
+`python3.exe` en **Configuración > Aplicaciones > Alias de ejecución de
+aplicaciones** y vuelve a abrir PowerShell.
+
+### CMake no encuentra Visual Studio
+
+Comprueba el workload C++:
+
+```powershell
+$vswhere = Join-Path ${env:ProgramFiles(x86)} "Microsoft Visual Studio\Installer\vswhere.exe"
+& $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+```
+
+Si no devuelve una ruta, abre **Visual Studio Installer**, modifica **Build
+Tools 2022** e instala **Desktop development with C++** con sus componentes
+recomendados.
+
+### Android SDK Command-line Tools no existe
+
+Abre **Android Studio > More Actions > SDK Manager > SDK Tools**, instala
+**Android SDK Command-line Tools (latest)** y vuelve a definir `$sdkmanager`.
+
+### Gradle no encuentra SDK, Java, NDK o CMake
+
+```powershell
+$repo = Join-Path $env:USERPROFILE "source\zero-click-lab"
+$env:ANDROID_HOME = Join-Path $env:LOCALAPPDATA "Android\Sdk"
+$env:JAVA_HOME = Join-Path $env:ProgramFiles "Android\Android Studio\jbr"
+Get-Content -LiteralPath (Join-Path $repo "android-app\local.properties")
+Test-Path (Join-Path $env:ANDROID_HOME "ndk\27.0.12077973")
+Test-Path (Join-Path $env:ANDROID_HOME "cmake\3.22.1\bin\cmake.exe")
+& (Join-Path $env:JAVA_HOME "bin\java.exe") -version
+```
+
+Los dos `Test-Path` deben devolver `True` y Java debe indicar versión 17 o
+posterior.
+
+### El emulador no arranca o la aceleración falla
+
+- Confirma VT-x o AMD-V en UEFI.
+- Activa `HypervisorPlatform` desde PowerShell como administrador.
+- Reinicia Windows.
+- Ejecuta de nuevo `& $emulator -accel-check`.
+- No uses una imagen ARM; el AVD de referencia es `x86_64`.
+
+### ADB no muestra el emulador como `device`
+
+```powershell
+& $adb kill-server
+& $adb start-server
+& $adb devices
+```
+
+Espera a que el AVD termine de arrancar. No continúes si aparece `offline`.
+
+### La redirección UDP no existe
+
+```powershell
+& $adb -s $serial emu redir list
+```
+
+Debe aparecer una entrada que relacione el puerto host UDP 43568 con el puerto
+guest 43568. La redirección se pierde al cerrar el emulador y debe recrearse en
+la siguiente sesión.
+
+### EchoCall no escucha o no aparecen logs
+
+```powershell
+& $adb -s $serial shell am start -n com.echocall.lab.patched/com.echocall.lab.MainActivity
+Start-Sleep -Seconds 2
+& $adb -s $serial logcat -d -s "EchoCallUDP:I" "*:S"
+```
+
+Mantén la actividad visible. `MainActivity.onStop()` detiene el receptor, por
+lo que EchoCall debe permanecer abierta durante los envíos.
+
+### Los paths `tools` o `samples` no existen
+
+```powershell
+$repo = Join-Path $env:USERPROFILE "source\zero-click-lab"
+Set-Location $repo
+Test-Path .\tools\send_udp_packet.py
+Test-Path .\samples\benign\valid_call_control.bin
+Test-Path .\samples\malformed\oversized_complete_payload.bin
+```
+
+Los tres resultados deben ser `True`.
+
+## 13. Criterios de finalización
+
+La instalación queda completada cuando se cumplen todos estos puntos:
+
+- Git, Python 3.10+, CMake 3.20+ y Visual Studio Build Tools C++ están
+  verificados.
+- Native Core seguro compila y CTest termina sin fallos.
+- `receiver_safe.exe` devuelve `status=accepted code=ok` para la muestra
+  benigna.
+- Android SDK Platform 36, Build Tools 35.0.0, NDK `27.0.12077973`, CMake
+  `3.22.1`, Platform-Tools, Emulator y la system image están instalados.
+- El AVD `EchoCall_Lab_API_36` informa API 36 y ABI `x86_64`.
+- `:app:assemblePatchedDebug` genera `app-patched-debug.apk`.
+- `com.echocall.lab.patched` está instalado y su receptor escucha en UDP 43568.
+- La redirección host→guest `udp:43568:43568` está activa.
+- `valid_call_control.bin` produce `status=accepted code=ok`.
+- Si se ejecuta la comprobación opcional,
+  `oversized_complete_payload.bin` produce `payload_too_large` y el mismo
+  proceso Patched permanece vivo.
