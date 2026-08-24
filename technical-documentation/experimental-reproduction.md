@@ -136,8 +136,8 @@ ausencia de errores.
 
 ## Resolución de problemas
 
-- `SDK location not found`: configura `ANDROID_HOME`/`ANDROID_SDK_ROOT` o un
-  `local.properties` local.
+- `SDK location not found`: configura `ANDROID_HOME` o un `local.properties`
+  local.
 - `Expected exactly one x86_64 ASan runtime`: verifica el NDK fijado por el
   proyecto.
 - `EADDRINUSE`: detén la otra variante; todas escuchan `43568/UDP`.
@@ -154,6 +154,10 @@ la [ficha de procedencia](evidence/android-experiment-provenance.md).
 ## Estado verificado del entorno
 
 Comprobaciones realizadas el 2026-08-18 durante la revisión del repositorio:
+
+> Esta tabla refleja exclusivamente la revisión realizada el 18/08/2026.
+> Para el procedimiento actual de instalación y puesta en marcha en Windows 11,
+> consulta el [Getting Started](getting-started.md).
 
 | Comprobación | Estado | Resultado |
 |---|---|---|

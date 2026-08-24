@@ -77,8 +77,8 @@ empaqueta su runtime para hacer observables determinadas operaciones inválidas.
 | Android Gradle Plugin | `8.12.2` |
 | Kotlin | `2.0.21` |
 
-Configura el SDK mediante `ANDROID_HOME`, `ANDROID_SDK_ROOT` o un
-`local.properties` no versionado. Usa el wrapper incluido.
+Configura el SDK mediante `ANDROID_HOME` o un `local.properties` no versionado.
+Usa el wrapper incluido.
 
 ## Compilar
 
