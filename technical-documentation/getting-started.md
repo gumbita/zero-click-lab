@@ -93,11 +93,16 @@ foreach ($command in $requiredCommands) {
 
 git --version
 python --version
-cmake --version
+$cmakeVersionOutput = (& cmake --version) -join "`n"
+$cmakeVersionOutput
 ctest --version
 
 $pythonVersion = [Version](& python -c "import platform; print(platform.python_version())")
 if ($pythonVersion -lt [Version]"3.10") { throw "EchoCall Lab requiere Python 3.10 o posterior" }
+
+if ($cmakeVersionOutput -notmatch 'cmake version (\d+\.\d+\.\d+)') { throw "No se pudo determinar la versión de CMake" }
+$cmakeVersion = [Version]$Matches[1]
+if ($cmakeVersion -lt [Version]"3.20.0") { throw "EchoCall Lab requiere CMake 3.20 o posterior" }
 
 $vswhere = Join-Path ${env:ProgramFiles(x86)} "Microsoft Visual Studio\Installer\vswhere.exe"
 if (-not (Test-Path -LiteralPath $vswhere)) { throw "No se encuentra vswhere.exe; revisa Visual Studio Build Tools" }
@@ -232,8 +237,6 @@ if (-not (Test-Path -LiteralPath $javaHome)) { throw "No se encuentra el JBR de 
 
 $env:ANDROID_HOME = $sdk
 $env:JAVA_HOME = $javaHome
-[Environment]::SetEnvironmentVariable("ANDROID_HOME", $sdk, "User")
-[Environment]::SetEnvironmentVariable("JAVA_HOME", $javaHome, "User")
 ```
 
 Crea `local.properties` con una ruta válida para el formato de propiedades de
