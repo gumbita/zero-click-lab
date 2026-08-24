@@ -5,14 +5,13 @@
 > entorno. Linux y macOS no están cubiertos por este Getting Started y pueden
 > requerir comandos, rutas y configuración diferentes.
 
-El objetivo es partir de un Windows 11 sin entorno de desarrollo preparado y
-terminar con EchoCall Patched instalado en un Android Emulator API 36. El flujo
-compila y prueba Native Core seguro, prepara el SDK Android, envía una muestra
-benigna y permite comprobar de forma opcional el rechazo defensivo de una
-muestra sobredimensionada.
+Esta guía parte de un Windows 11 sin preparar y termina con EchoCall Patched
+instalado y funcionando en un Android Emulator API 36. Al final enviarás un
+paquete válido para comprobar el recorrido completo. También puedes probar,
+solo contra Patched, el rechazo seguro de un paquete demasiado grande.
 
-No se ejecuta `receiver_vuln` ni se envían entradas malformadas a EchoCall
-Vulnerable. Trabaja únicamente en el emulador local y en sistemas propios o
+Los comandos no ejecutan `receiver_vuln` ni envían entradas malformadas a
+EchoCall Vulnerable. Usa el laboratorio únicamente en sistemas propios o
 expresamente autorizados.
 
 ## 1. Entorno de referencia y requisitos
@@ -126,10 +125,10 @@ Set-Location $repo
 git status --short --branch
 ```
 
-### Recuperar el contexto tras abrir una PowerShell nueva o reiniciar Windows
+### Recuperar el contexto de PowerShell
 
-Las variables de PowerShell no sobreviven al cierre de la terminal. Ejecuta
-este bloque para recuperar las rutas base de la guía:
+Si cierras PowerShell o reinicias Windows, recupera las variables con este
+bloque:
 
 ```powershell
 $repo = Join-Path $env:USERPROFILE "source\zero-click-lab"
@@ -141,17 +140,14 @@ $env:ANDROID_HOME = $sdk
 $env:JAVA_HOME = $javaHome
 ```
 
-Este bloque no vuelve a clonar el repositorio ni recrea `local.properties`.
-Las variables de estado `$avdName`, `$serial` y `$apk` se reconstruyen en los
-apartados donde se utilizan.
+No vuelvas a clonar el repositorio ni a crear `local.properties`. Los apartados
+posteriores recuperan `$avdName`, `$serial` y `$apk` cuando los necesitan.
 
-## 4. Compilar y comprobar Native Core seguro
+## 4. Comprobar Native Core seguro (opcional)
 
-El build se crea en una ruta persistente bajo `$env:LOCALAPPDATA`, fuera del
-repositorio, con MSVC x64. Esto evita colocar los directorios intermedios y de
-salida de MSBuild bajo la carpeta temporal de Windows. La ruta incluye una
-marca temporal para no borrar ni reutilizar builds anteriores; la guía no
-elimina automáticamente ninguno de ellos:
+No necesitas este paso para instalar la app Android. Ejecútalo si quieres
+comprobar primero el parser seguro desde Windows; si no, continúa en el
+apartado 5. Cada ejecución crea un build nuevo fuera del repositorio:
 
 ```powershell
 Set-Location $repo
@@ -166,8 +162,8 @@ ctest --test-dir $build -C Debug --output-on-failure
 if ($LASTEXITCODE -ne 0) { throw "Fallaron los tests seguros de Native Core" }
 ```
 
-CTest ejecuta `test_safe_parser` y las pruebas de `receiver_safe`; no ejecuta
-`receiver_vuln`. Comprueba además la muestra benigna directamente:
+CTest prueba únicamente los targets seguros. Comprueba también la muestra
+válida con `receiver_safe`:
 
 ```powershell
 $receiverSafe = Join-Path $build "Debug\receiver_safe.exe"
@@ -284,18 +280,8 @@ if ($LASTEXITCODE -ne 0) {
 }
 ```
 
-Si falla, lee el diagnóstico mostrado por `-accel-check` y confirma que Intel
-VT-x o AMD-V está habilitado en UEFI. Habilita Windows Hypervisor Platform solo
-si el diagnóstico indica que falta un hipervisor compatible. Para hacerlo,
-abre **PowerShell como administrador**, ejecuta y reinicia Windows:
-
-```powershell
-Enable-WindowsOptionalFeature -Online -FeatureName HypervisorPlatform -All -NoRestart
-Restart-Computer
-```
-
-Tras el reinicio, repite la definición de variables del apartado anterior y no
-continúes hasta que `emulator.exe -accel-check` termine correctamente.
+Si falla, no continúes: revisa **El emulador no arranca o la aceleración falla**
+en el apartado 12 y repite la comprobación.
 
 Abre Android Studio y crea el dispositivo desde **Tools > Device Manager >
 Create Virtual Device** con esta configuración:
@@ -387,8 +373,8 @@ if (-not (Test-Path -LiteralPath $apk)) { throw "No se generó el APK Patched en
 Get-Item -LiteralPath $apk | Select-Object FullName, Length, LastWriteTime
 ```
 
-La tarea compila Patched con `safe_parser.c`. No compila ambos parsers dentro de
-la misma biblioteca ni selecciona el parser durante la ejecución.
+Esta tarea compila Patched con `safe_parser.c`. No la sustituyas por una tarea
+de la variante Vulnerable.
 
 ## 8. Instalar y arrancar EchoCall Patched
 
@@ -421,7 +407,7 @@ if ($abi -ne "x86_64") { throw "El emulador conectado no usa ABI x86_64" }
 if (-not (Test-Path -LiteralPath $apk)) { throw "No se encuentra el APK Patched en $apk" }
 ```
 
-Instala el APK, limpia Logcat e inicia el componente real de Patched:
+Instala el APK, limpia Logcat e inicia EchoCall Patched:
 
 ```powershell
 & $adb -s $serial install -r $apk
@@ -473,10 +459,14 @@ qué proceso utiliza el puerto host:
 Get-NetUDPEndpoint -LocalPort 43568 -ErrorAction SilentlyContinue | Select-Object LocalAddress, LocalPort, OwningProcess
 ```
 
-## 10. Primera prueba benigna
+## 10. Comprobar que EchoCall recibe y procesa un paquete válido
 
-Ejecuta todos los comandos desde la raíz del repositorio. Limpia Logcat, envía
-`valid_call_control.bin` y exige el resultado aceptado:
+`valid_call_control.bin` es un paquete de control válido. Esta prueba comprueba
+que la redirección UDP, el receptor Android y el parser Patched funcionan
+juntos. `status=accepted code=ok` significa que EchoCall ha recibido y aceptado
+el paquete; la comprobación del PID confirma que la app no se ha reiniciado.
+
+Ejecuta desde la raíz del repositorio:
 
 ```powershell
 Set-Location $repo
@@ -504,12 +494,14 @@ El resultado requerido en Logcat es:
 status=accepted code=ok
 ```
 
-## 11. Prueba defensiva opcional, solo contra Patched
+## 11. Comprobar el rechazo seguro de un paquete demasiado grande (opcional)
 
-No ejecutes este apartado si la pantalla no muestra `PATCHED · Fijado al
-compilar` o si el package instalado no es `com.echocall.lab.patched`. La prueba
-envía una entrada coherente de 64 bytes que Patched debe rechazar antes de
-copiar el payload.
+`oversized_complete_payload.bin` contiene un payload de 64 bytes, frente al
+máximo de 32 que admite Patched. El resultado esperado es
+`payload_too_large`, y la aplicación debe seguir viva con el mismo PID.
+
+Ejecuta esta prueba únicamente si la pantalla muestra `PATCHED · Fijado al
+compilar` y el package instalado es `com.echocall.lab.patched`:
 
 ```powershell
 $installedPatched = (& $adb -s $serial shell pm path com.echocall.lab.patched) -join "`n"
@@ -608,10 +600,18 @@ fallo de aceleración y no se corrige activando `HypervisorPlatform`.
 
 - Lee primero el mensaje completo de `& $emulator -accel-check`.
 - Confirma VT-x o AMD-V en UEFI.
-- Activa `HypervisorPlatform` únicamente si el diagnóstico indica que falta un
-  hipervisor compatible y reinicia Windows.
-- Ejecuta de nuevo `& $emulator -accel-check`.
 - No uses una imagen ARM; el AVD de referencia es `x86_64`.
+
+Si el diagnóstico indica que falta un hipervisor compatible, abre PowerShell
+como administrador y habilita Windows Hypervisor Platform:
+
+```powershell
+Enable-WindowsOptionalFeature -Online -FeatureName HypervisorPlatform -All -NoRestart
+Restart-Computer
+```
+
+Después del reinicio, recupera las variables de PowerShell y ejecuta de nuevo
+`& $emulator -accel-check`.
 
 ### ADB no muestra el emulador como `device`
 
@@ -656,28 +656,14 @@ Test-Path .\samples\malformed\oversized_complete_payload.bin
 
 Los tres resultados deben ser `True`.
 
-## 13. Criterios de finalización
+## 13. Comprobación final
 
-La instalación queda completada cuando se cumplen todos estos puntos:
+EchoCall Lab está listo cuando:
 
-- Las herramientas de host Git, Python 3.10+, CMake 3.20+, CTest y Visual
-  Studio Build Tools C++ están instaladas y verificadas.
-- Native Core seguro compila y CTest termina sin fallos.
-- `receiver_safe.exe` procesa `valid_call_control.bin` y su salida contiene
-  `status=accepted code=ok`.
-- Las rutas comprobadas de Android SDK Platform 36, Build Tools 35.0.0, NDK
-  `27.0.12077973`, CMake `3.22.1`, Platform-Tools y Emulator existen.
-- `emulator.exe` existe, responde y `emulator.exe -accel-check` termina
-  correctamente.
-- El AVD `EchoCall_Lab_API_36` arranca, se identifica por ese nombre e informa
-  API 36 y ABI `x86_64`.
-- `:app:assemblePatchedDebug` genera `app-patched-debug.apk`.
-- `com.echocall.lab.patched` está instalado y la aplicación arranca.
-- Logcat confirma `Socket bound on UDP port 43568`.
-- `adb emu redir list` muestra la redirección host→guest
-  `udp:43568:43568`.
-- `valid_call_control.bin` produce `status=accepted code=ok` y el proceso
-  Patched conserva el mismo PID.
-- Si se ejecuta la comprobación opcional solo contra Patched,
-  `oversized_complete_payload.bin` produce `payload_too_large` y el mismo
-  proceso Patched permanece vivo.
+- `EchoCall_Lab_API_36` funciona con API 36 y ABI `x86_64`;
+- EchoCall Patched está instalado, abierto y escuchando en UDP 43568;
+- la redirección `udp:43568:43568` está activa;
+- `valid_call_control.bin` produce `status=accepted code=ok` sin reiniciar la
+  app;
+- si haces la prueba opcional, Patched responde `payload_too_large` y conserva
+  el mismo PID.
