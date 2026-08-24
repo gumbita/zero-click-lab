@@ -68,6 +68,17 @@ types. ASan añade instrumentación al código nativo y empaqueta el runtime
 necesario para el entorno `x86_64`; no altera el contrato ECLB ni crea otro
 parser.
 
+<p align="center">
+  <img src="media/screenshots/c02-patched-asan-identidad-lab.png" alt="Modo Lab de Patched ASan con package, parser compilado y estado del receptor UDP" width="360">
+</p>
+
+<p align="center"><em>Identificación en tiempo de ejecución de la variante Patched ASan, cuyo parser queda fijado durante la compilación.</em></p>
+
+La vista identifica el build ASan, el package
+`com.echocall.lab.patched.asan`, la implementación `PATCHED` y el estado del
+receptor UDP. En esta toma el receptor informa `EADDRINUSE`; ese estado
+operativo no altera la identidad del parser compilado.
+
 ## Marcador pre-JNI
 
 Antes de invocar JNI, la aplicación persiste un marcador con el identificador
@@ -87,6 +98,12 @@ NATIVE_PARSE_STARTED
 El marcador permite observar que una operación marcada no alcanzó la limpieza
 normal. No diagnostica por sí mismo la causa: la atribución de un overflow
 requiere el informe ASan, logs, señal y demás evidencia de ejecución.
+
+<p align="center">
+  <img src="media/screenshots/c06-vulnerable-procesamiento-interrumpido.png" alt="Pantalla de recuperación de EchoCall tras detectar un procesamiento anterior interrumpido" width="360">
+</p>
+
+<p align="center"><em>Interfaz de recuperación reproducida mediante un marcador de prueba: EchoCall detecta un procesamiento anterior interrumpido sin atribuir por sí sola su causa.</em></p>
 
 ## Componentes
 

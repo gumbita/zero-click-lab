@@ -3,4 +3,5 @@ technical-documentation/evidence/artifacts/**/*.txt -text whitespace=-trailing-s
 technical-documentation/evidence/artifacts/**/*.xml -text whitespace=-trailing-space
 technical-documentation/evidence/artifacts/**/*.png binary
 technical-documentation/evidence/artifacts/E-025/*-metadata.txt whitespace=-trailing-space
+technical-documentation/media/screenshots/*.png binary
 *.xlsx binary
