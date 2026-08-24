@@ -150,22 +150,3 @@ Los resultados consolidados están en
 [`experimental-results.md`](experimental-results.md), la evidencia en
 [`evidence/`](evidence/) y la identidad de los artefactos Android externos en
 la [ficha de procedencia](evidence/android-experiment-provenance.md).
-
-## Estado verificado del entorno
-
-Comprobaciones realizadas el 2026-08-18 durante la revisión del repositorio:
-
-> Esta tabla refleja exclusivamente la revisión realizada el 18/08/2026.
-> Para el procedimiento actual de instalación y puesta en marcha en Windows 11,
-> consulta el [Getting Started](getting-started.md).
-
-| Comprobación | Estado | Resultado |
-|---|---|---|
-| Configuración/build Native Core seguro | PASS | MinGW GCC 13.2.0, CMake 3.29.2 |
-| CTest | PASS | 9/9; solo `test_safe_parser` y `receiver_safe` |
-| `assemblePatchedDebug` | PASS | 43 tareas |
-| `assembleVulnerableDebug` | PASS | Build sin ejecución |
-| `assemblePatchedAsan` | PASS | Build `x86_64` sin ejecución |
-| `assembleVulnerableAsan` | PASS | Build `x86_64` sin ejecución |
-| Instalación, arranque y UDP Android | NO PROBADO | ADB no detectó dispositivos conectados |
-| Oversized contra Vulnerable | NO EJECUTADO | Exclusión deliberada de seguridad |
