@@ -5,14 +5,13 @@
 > entorno. Linux y macOS no están cubiertos por este Getting Started y pueden
 > requerir comandos, rutas y configuración diferentes.
 
-El objetivo es partir de un Windows 11 sin entorno de desarrollo preparado y
-terminar con EchoCall Patched instalado en un Android Emulator API 36. El flujo
-compila y prueba Native Core seguro, prepara el SDK Android, envía una muestra
-benigna y permite comprobar de forma opcional el rechazo defensivo de una
-muestra sobredimensionada.
+Esta guía parte de un Windows 11 sin preparar y termina con EchoCall Patched
+instalado y funcionando en un Android Emulator API 36. Al final enviarás un
+paquete válido para comprobar el recorrido completo. También puedes probar,
+solo contra Patched, el rechazo seguro de un paquete demasiado grande.
 
-No se ejecuta `receiver_vuln` ni se envían entradas malformadas a EchoCall
-Vulnerable. Trabaja únicamente en el emulador local y en sistemas propios o
+Los comandos no ejecutan `receiver_vuln` ni envían entradas malformadas a
+EchoCall Vulnerable. Usa el laboratorio únicamente en sistemas propios o
 expresamente autorizados.
 
 ## 1. Entorno de referencia y requisitos
@@ -71,12 +70,15 @@ Instala Git, Python 3.12, CMake, Visual Studio Build Tools 2022 con el workload
 de C++ y Android Studio:
 
 ```powershell
-winget install --id Git.Git --exact --source winget --accept-source-agreements --accept-package-agreements
-winget install --id Python.Python.3.12 --exact --source winget --accept-source-agreements --accept-package-agreements
-winget install --id Kitware.CMake --exact --source winget --accept-source-agreements --accept-package-agreements
-winget install --id Microsoft.VisualStudio.2022.BuildTools --exact --source winget --accept-source-agreements --accept-package-agreements --override "--wait --passive --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"
-winget install --id Google.AndroidStudio --exact --source winget --accept-source-agreements --accept-package-agreements
+winget install --id Git.Git --exact --source winget --no-upgrade --accept-source-agreements --accept-package-agreements
+winget install --id Python.Python.3.12 --exact --source winget --no-upgrade --accept-source-agreements --accept-package-agreements
+winget install --id Kitware.CMake --exact --source winget --no-upgrade --accept-source-agreements --accept-package-agreements
+winget install --id Microsoft.VisualStudio.2022.BuildTools --exact --source winget --no-upgrade --accept-source-agreements --accept-package-agreements --override "--wait --passive --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"
+winget install --id Google.AndroidStudio --exact --source winget --no-upgrade --accept-source-agreements --accept-package-agreements
 ```
+
+`--no-upgrade` instala el paquete cuando falta, pero evita forzar la
+actualización si ya existe una versión instalada. No fija una versión concreta.
 
 Cuando terminen los instaladores, cierra PowerShell y abre una nueva para que
 reciba el `PATH` actualizado. Verifica las herramientas de host:
@@ -91,11 +93,16 @@ foreach ($command in $requiredCommands) {
 
 git --version
 python --version
-cmake --version
+$cmakeVersionOutput = (& cmake --version) -join "`n"
+$cmakeVersionOutput
 ctest --version
 
 $pythonVersion = [Version](& python -c "import platform; print(platform.python_version())")
 if ($pythonVersion -lt [Version]"3.10") { throw "EchoCall Lab requiere Python 3.10 o posterior" }
+
+if ($cmakeVersionOutput -notmatch 'cmake version (\d+\.\d+\.\d+)') { throw "No se pudo determinar la versión de CMake" }
+$cmakeVersion = [Version]$Matches[1]
+if ($cmakeVersion -lt [Version]"3.20.0") { throw "EchoCall Lab requiere CMake 3.20 o posterior" }
 
 $vswhere = Join-Path ${env:ProgramFiles(x86)} "Microsoft Visual Studio\Installer\vswhere.exe"
 if (-not (Test-Path -LiteralPath $vswhere)) { throw "No se encuentra vswhere.exe; revisa Visual Studio Build Tools" }
@@ -123,18 +130,35 @@ Set-Location $repo
 git status --short --branch
 ```
 
-Mantén abierta esta PowerShell durante el procedimiento. Si la cierras, vuelve
-a definir `$repo`, `$sdk`, `$adb`, `$emulator`, `$javaHome` y `$serial` con los
-bloques correspondientes antes de continuar.
+### Recuperar el contexto de PowerShell
 
-## 4. Compilar y comprobar Native Core seguro
+Si cierras PowerShell o reinicias Windows, recupera las variables con este
+bloque:
 
-El build se crea bajo `$env:TEMP`, fuera del repositorio, con MSVC x64. La ruta
-incluye una marca temporal para no borrar ni reutilizar builds anteriores:
+```powershell
+$repo = Join-Path $env:USERPROFILE "source\zero-click-lab"
+$sdk = Join-Path $env:LOCALAPPDATA "Android\Sdk"
+$javaHome = Join-Path $env:ProgramFiles "Android\Android Studio\jbr"
+$adb = Join-Path $sdk "platform-tools\adb.exe"
+$emulator = Join-Path $sdk "emulator\emulator.exe"
+$env:ANDROID_HOME = $sdk
+$env:JAVA_HOME = $javaHome
+```
+
+No vuelvas a clonar el repositorio ni a crear `local.properties`. Los apartados
+posteriores recuperan `$avdName`, `$serial` y `$apk` cuando los necesitan.
+
+## 4. Comprobar Native Core seguro (opcional)
+
+No necesitas este paso para instalar la app Android. Ejecútalo si quieres
+comprobar primero el parser seguro desde Windows; si no, continúa en el
+apartado 5. Cada ejecución crea un build nuevo fuera del repositorio:
 
 ```powershell
 Set-Location $repo
-$build = Join-Path $env:TEMP ("echocall-native-safe-" + (Get-Date -Format "yyyyMMdd-HHmmss"))
+$buildRoot = Join-Path $env:LOCALAPPDATA "EchoCallLab\builds"
+New-Item -ItemType Directory -Path $buildRoot -Force | Out-Null
+$build = Join-Path $buildRoot ("native-safe-" + (Get-Date -Format "yyyyMMdd-HHmmss"))
 cmake -S .\native-core -B $build -G "Visual Studio 17 2022" -A x64 -DENABLE_ASAN=OFF
 if ($LASTEXITCODE -ne 0) { throw "Falló la configuración de Native Core" }
 cmake --build $build --config Debug --target test_safe_parser receiver_safe
@@ -143,8 +167,8 @@ ctest --test-dir $build -C Debug --output-on-failure
 if ($LASTEXITCODE -ne 0) { throw "Fallaron los tests seguros de Native Core" }
 ```
 
-CTest ejecuta `test_safe_parser` y las pruebas de `receiver_safe`; no ejecuta
-`receiver_vuln`. Comprueba además la muestra benigna directamente:
+CTest prueba únicamente los targets seguros. Comprueba también la muestra
+válida con `receiver_safe`:
 
 ```powershell
 $receiverSafe = Join-Path $build "Debug\receiver_safe.exe"
@@ -152,7 +176,10 @@ $validSample = Join-Path $repo "samples\benign\valid_call_control.bin"
 if (-not (Test-Path -LiteralPath $receiverSafe)) { throw "No se generó receiver_safe.exe" }
 $safeOutput = & $receiverSafe $validSample
 $safeOutput
-if ($safeOutput -notcontains "status=accepted code=ok") { throw "Native Core no aceptó la muestra benigna" }
+$safeOutputText = $safeOutput -join "`n"
+if ($safeOutputText -notmatch '(?m)^status=accepted code=ok(?:\s|$)') {
+    throw "Native Core no aceptó la muestra benigna"
+}
 ```
 
 Resultado requerido:
@@ -171,16 +198,30 @@ if (-not (Test-Path -LiteralPath $studio)) { throw "No se encuentra Android Stud
 Start-Process -FilePath $studio
 ```
 
-En el asistente inicial de Android Studio:
+Completa el asistente inicial con la instalación **Standard** y conserva como
+SDK la ruta predeterminada `$env:LOCALAPPDATA\Android\Sdk`. Abre el proyecto
+`android-app` del repositorio y, en la ventana principal de Android Studio,
+entra en **Tools > SDK Manager**.
 
-1. Selecciona la instalación **Standard**.
-2. Conserva como SDK la ruta predeterminada
-   `$env:LOCALAPPDATA\Android\Sdk`.
-3. En la pantalla inicial abre **More Actions > SDK Manager**.
-4. En **SDK Tools**, marca **Android SDK Command-line Tools (latest)** y aplica
-   la instalación.
-5. Cierra Android Studio cuando termine; el resto de componentes se instalará
-   de forma verificable desde PowerShell.
+Instala los componentes desde las dos pestañas del SDK Manager:
+
+1. En **SDK Platforms**, selecciona **Android 16 (API 36)** y comprueba que
+   incluye **Android SDK Platform 36**.
+2. En **SDK Tools**, selecciona:
+   - **Android SDK Platform-Tools**;
+   - **Android Emulator**;
+3. Activa **Show Package Details** en **SDK Tools** y selecciona estas versiones
+   exactas:
+   - **Android SDK Build-Tools 35.0.0**;
+   - **NDK (Side by side) 27.0.12077973**;
+   - **CMake 3.22.1**.
+4. Pulsa **Apply** y después **OK**, acepta las licencias que muestre Android
+   Studio y espera a que finalicen todas las instalaciones.
+
+El proyecto no declara `buildToolsVersion`. Build Tools `35.0.0` se instala
+porque es la versión mínima y predeterminada de AGP 8.12, no por
+`compileSdk=36`. No es necesario cerrar Android Studio para continuar con las
+comprobaciones.
 
 Define las rutas del SDK y del JBR incluido en Android Studio:
 
@@ -188,44 +229,14 @@ Define las rutas del SDK y del JBR incluido en Android Studio:
 $repo = Join-Path $env:USERPROFILE "source\zero-click-lab"
 $sdk = Join-Path $env:LOCALAPPDATA "Android\Sdk"
 $javaHome = Join-Path $env:ProgramFiles "Android\Android Studio\jbr"
-$sdkmanager = Join-Path $sdk "cmdline-tools\latest\bin\sdkmanager.bat"
 $adb = Join-Path $sdk "platform-tools\adb.exe"
 $emulator = Join-Path $sdk "emulator\emulator.exe"
 
 if (-not (Test-Path -LiteralPath $repo)) { throw "No se encuentra el repositorio en $repo" }
 if (-not (Test-Path -LiteralPath $javaHome)) { throw "No se encuentra el JBR de Android Studio" }
-if (-not (Test-Path -LiteralPath $sdkmanager)) { throw "Instala Android SDK Command-line Tools (latest) desde SDK Manager" }
 
 $env:ANDROID_HOME = $sdk
 $env:JAVA_HOME = $javaHome
-[Environment]::SetEnvironmentVariable("ANDROID_HOME", $sdk, "User")
-[Environment]::SetEnvironmentVariable("JAVA_HOME", $javaHome, "User")
-```
-
-Revisa y acepta las licencias que presente Android SDK Manager:
-
-```powershell
-& $sdkmanager --licenses
-if ($LASTEXITCODE -ne 0) { throw "No se aceptaron todas las licencias Android necesarias" }
-```
-
-Instala las versiones necesarias para el proyecto. `buildToolsVersion` no está
-declarado en `android-app/app/build.gradle.kts`: se instala SDK Build Tools
-`35.0.0` porque es la versión mínima y predeterminada para AGP 8.12, no porque
-el proyecto use `compileSdk=36`. La system image se selecciona al crear el AVD
-en el apartado siguiente.
-
-```powershell
-$sdkPackages = @(
-    "platform-tools",
-    "platforms;android-36",
-    "build-tools;35.0.0",
-    "emulator",
-    "ndk;27.0.12077973",
-    "cmake;3.22.1"
-)
-& $sdkmanager --install @sdkPackages
-if ($LASTEXITCODE -ne 0) { throw "Falló la instalación de componentes Android" }
 ```
 
 Crea `local.properties` con una ruta válida para el formato de propiedades de
@@ -263,34 +274,33 @@ if ($javaMajor -lt 17) { throw "AGP 8.12 requiere JDK 17 o posterior; versión d
 Comprueba primero la aceleración del emulador:
 
 ```powershell
+if (-not (Test-Path -LiteralPath $emulator)) {
+    throw "Android Emulator no está instalado correctamente: falta $emulator"
+}
 & $emulator -accel-check
-if ($LASTEXITCODE -ne 0) { throw "La aceleración del Android Emulator no está disponible" }
+if ($LASTEXITCODE -ne 0) {
+    throw "Android Emulator está instalado, pero la comprobación de aceleración ha fallado"
+}
 ```
 
-Si falla, confirma que la virtualización está habilitada en UEFI. Después abre
-**PowerShell como administrador**, activa Windows Hypervisor Platform y
-reinicia Windows:
+Si falla, no continúes: revisa **El emulador no arranca o la aceleración falla**
+en el apartado 12 y repite la comprobación.
 
-```powershell
-Enable-WindowsOptionalFeature -Online -FeatureName HypervisorPlatform -All -NoRestart
-Restart-Computer
-```
+Abre Android Studio y crea el dispositivo desde **Tools > Device Manager >
+Create Virtual Device** con esta configuración:
 
-Tras el reinicio, repite la definición de variables del apartado anterior y no
-continúes hasta que `emulator.exe -accel-check` termine correctamente.
-
-Abre Android Studio y crea el dispositivo desde **More Actions > Virtual Device
-Manager > Create Virtual Device** con esta configuración:
-
-- perfil de hardware: **Pixel 7** como ejemplo; el repositorio no exige un
-  modelo concreto;
+- perfil de hardware: **Pixel 9 Pro**, utilizado en la validación de referencia;
+  no es un requisito funcional y puede usarse otro perfil **Phone** compatible;
 - nombre del AVD: `EchoCall_Lab_API_36`;
-- system image: **API 36** con ABI `x86_64`; descarga una imagen compatible
-  desde el propio asistente si todavía no está instalada;
+- system image de referencia: **Android 16 (API 36, "Baklava"), Google Play
+  Intel x86_64 Atom System Image**, con ABI `x86_64`; los requisitos
+  funcionales son API 36 y ABI `x86_64`;
 - orientación y opciones avanzadas: valores predeterminados.
 
-No selecciones una imagen ARM. Al terminar, vuelve a PowerShell y verifica que
-el AVD existe:
+Si la system image todavía no está instalada, descárgala desde Device Manager
+antes de crear el AVD. No selecciones una imagen ARM ni la variante
+experimental **16 KB Page Size** para este recorrido. Al terminar, vuelve a
+PowerShell y verifica que el AVD con el nombre exacto de referencia existe:
 
 ```powershell
 $avdName = "EchoCall_Lab_API_36"
@@ -300,17 +310,28 @@ if ($availableAvds -notcontains $avdName) { throw "No se encuentra el AVD $avdNa
 ```
 
 Arranca el emulador en una ventana visible y espera hasta cinco minutos a que
-Android complete el boot:
+Android complete el boot. `-avd $avdName` inicia específicamente ese AVD; los
+nombres de otros dispositivos almacenados no intervienen en esta selección:
 
 ```powershell
-$emulatorProcess = Start-Process -FilePath $emulator -ArgumentList @("-avd", $avdName) -PassThru
+Start-Process -FilePath $emulator -ArgumentList @("-avd", $avdName)
 $deadline = (Get-Date).AddMinutes(5)
 $serial = $null
 do {
     Start-Sleep -Seconds 2
-    $serial = & $adb devices | Select-String "^emulator-\d+\s+device$" | ForEach-Object { ($_.Line -split "\s+")[0] } | Select-Object -First 1
+    $emulatorSerials = @(& $adb devices | Select-String "^emulator-\d+\s+device$" | ForEach-Object { ($_.Line -split "\s+")[0] })
+    foreach ($candidate in $emulatorSerials) {
+        $candidateAvdName = @(& $adb -s $candidate emu avd name) |
+            ForEach-Object { $_.Trim() } |
+            Where-Object { $_ -and $_ -ne "OK" } |
+            Select-Object -First 1
+        if ($candidateAvdName -eq $avdName) {
+            $serial = $candidate
+            break
+        }
+    }
 } until ($serial -or (Get-Date) -ge $deadline)
-if (-not $serial) { throw "ADB no detectó el emulador dentro del tiempo esperado" }
+if (-not $serial) { throw "ADB no detectó el AVD $avdName dentro del tiempo esperado" }
 
 & $adb -s $serial wait-for-device
 $bootDeadline = (Get-Date).AddMinutes(5)
@@ -321,11 +342,16 @@ do {
 if ($bootCompleted -ne "1") { throw "Android no completó el arranque dentro del tiempo esperado" }
 
 & $adb devices
+$runningAvdName = @(& $adb -s $serial emu avd name) |
+    ForEach-Object { $_.Trim() } |
+    Where-Object { $_ -and $_ -ne "OK" } |
+    Select-Object -First 1
 $apiLevel = (& $adb -s $serial shell getprop ro.build.version.sdk).Trim()
 $abi = (& $adb -s $serial shell getprop ro.product.cpu.abi).Trim()
+if ($runningAvdName -ne $avdName) { throw "El serial $serial no corresponde al AVD $avdName" }
 if ($apiLevel -ne "36") { throw "El AVD no usa API 36: API detectada=$apiLevel" }
 if ($abi -ne "x86_64") { throw "El AVD no usa ABI x86_64: ABI detectada=$abi" }
-"AVD validado: serial=$serial API=$apiLevel ABI=$abi"
+"AVD validado: nombre=$runningAvdName serial=$serial API=$apiLevel ABI=$abi"
 ```
 
 Los comandos posteriores reutilizan `$serial`; no escribas manualmente un
@@ -350,28 +376,41 @@ if (-not (Test-Path -LiteralPath $apk)) { throw "No se generó el APK Patched en
 Get-Item -LiteralPath $apk | Select-Object FullName, Length, LastWriteTime
 ```
 
-La tarea compila Patched con `safe_parser.c`. No compila ambos parsers dentro de
-la misma biblioteca ni selecciona el parser durante la ejecución.
+Esta tarea compila Patched con `safe_parser.c`. No la sustituyas por una tarea
+de la variante Vulnerable.
 
 ## 8. Instalar y arrancar EchoCall Patched
 
-Recupera `$serial` si abriste una PowerShell nueva y exige exactamente un
-emulador API 36 conectado:
+Recupera `$serial` si abriste una PowerShell nueva. El bloque identifica el AVD
+de referencia por su nombre aunque haya otros emuladores conectados:
 
 ```powershell
 $sdk = Join-Path $env:LOCALAPPDATA "Android\Sdk"
 $adb = Join-Path $sdk "platform-tools\adb.exe"
 $repo = Join-Path $env:USERPROFILE "source\zero-click-lab"
 $apk = Join-Path $repo "android-app\app\build\outputs\apk\patched\debug\app-patched-debug.apk"
+$avdName = "EchoCall_Lab_API_36"
 $emulatorSerials = @(& $adb devices | Select-String "^emulator-\d+\s+device$" | ForEach-Object { ($_.Line -split "\s+")[0] })
-if ($emulatorSerials.Count -ne 1) { throw "Debe haber exactamente un Android Emulator en estado device" }
-$serial = $emulatorSerials[0]
+$serial = $null
+foreach ($candidate in $emulatorSerials) {
+    $candidateAvdName = @(& $adb -s $candidate emu avd name) |
+        ForEach-Object { $_.Trim() } |
+        Where-Object { $_ -and $_ -ne "OK" } |
+        Select-Object -First 1
+    if ($candidateAvdName -eq $avdName) {
+        $serial = $candidate
+        break
+    }
+}
+if (-not $serial) { throw "No se encuentra el AVD $avdName conectado y en estado device" }
 $apiLevel = (& $adb -s $serial shell getprop ro.build.version.sdk).Trim()
+$abi = (& $adb -s $serial shell getprop ro.product.cpu.abi).Trim()
 if ($apiLevel -ne "36") { throw "El emulador conectado no usa API 36" }
+if ($abi -ne "x86_64") { throw "El emulador conectado no usa ABI x86_64" }
 if (-not (Test-Path -LiteralPath $apk)) { throw "No se encuentra el APK Patched en $apk" }
 ```
 
-Instala el APK, limpia Logcat e inicia el componente real de Patched:
+Instala el APK, limpia Logcat e inicia EchoCall Patched:
 
 ```powershell
 & $adb -s $serial install -r $apk
@@ -423,10 +462,14 @@ qué proceso utiliza el puerto host:
 Get-NetUDPEndpoint -LocalPort 43568 -ErrorAction SilentlyContinue | Select-Object LocalAddress, LocalPort, OwningProcess
 ```
 
-## 10. Primera prueba benigna
+## 10. Comprobar que EchoCall recibe y procesa un paquete válido
 
-Ejecuta todos los comandos desde la raíz del repositorio. Limpia Logcat, envía
-`valid_call_control.bin` y exige el resultado aceptado:
+`valid_call_control.bin` es un paquete de control válido. Esta prueba comprueba
+que la redirección UDP, el receptor Android y el parser Patched funcionan
+juntos. `status=accepted code=ok` significa que EchoCall ha recibido y aceptado
+el paquete; la comprobación del PID confirma que la app no se ha reiniciado.
+
+Ejecuta desde la raíz del repositorio:
 
 ```powershell
 Set-Location $repo
@@ -454,12 +497,14 @@ El resultado requerido en Logcat es:
 status=accepted code=ok
 ```
 
-## 11. Prueba defensiva opcional, solo contra Patched
+## 11. Comprobar el rechazo seguro de un paquete demasiado grande (opcional)
 
-No ejecutes este apartado si la pantalla no muestra `PATCHED · Fijado al
-compilar` o si el package instalado no es `com.echocall.lab.patched`. La prueba
-envía una entrada coherente de 64 bytes que Patched debe rechazar antes de
-copiar el payload.
+`oversized_complete_payload.bin` contiene un payload de 64 bytes, frente al
+máximo de 32 que admite Patched. El resultado esperado es
+`payload_too_large`, y la aplicación debe seguir viva con el mismo PID.
+
+Ejecuta esta prueba únicamente si la pantalla muestra `PATCHED · Fijado al
+compilar` y el package instalado es `com.echocall.lab.patched`:
 
 ```powershell
 $installedPatched = (& $adb -s $serial shell pm path com.echocall.lab.patched) -join "`n"
@@ -522,11 +567,6 @@ Si no devuelve una ruta, abre **Visual Studio Installer**, modifica **Build
 Tools 2022** e instala **Desktop development with C++** con sus componentes
 recomendados.
 
-### Android SDK Command-line Tools no existe
-
-Abre **Android Studio > More Actions > SDK Manager > SDK Tools**, instala
-**Android SDK Command-line Tools (latest)** y vuelve a definir `$sdkmanager`.
-
 ### Gradle no encuentra SDK, Java, NDK o CMake
 
 ```powershell
@@ -542,13 +582,39 @@ Test-Path (Join-Path $env:ANDROID_HOME "cmake\3.22.1\bin\cmake.exe")
 Los dos `Test-Path` deben devolver `True` y Java debe indicar versión 17 o
 posterior.
 
+### SDK Manager muestra Emulator instalado, pero falta `emulator.exe`
+
+Comprueba la ruta física antes de investigar la virtualización:
+
+```powershell
+$sdk = Join-Path $env:LOCALAPPDATA "Android\Sdk"
+$emulator = Join-Path $sdk "emulator\emulator.exe"
+Test-Path -LiteralPath $emulator
+Get-ChildItem -LiteralPath (Join-Path $sdk "emulator") -ErrorAction SilentlyContinue
+```
+
+Si `Test-Path` devuelve `False`, la instalación de **Android Emulator** está
+incompleta aunque SDK Manager la muestre seleccionada. Revisa o reinstala ese
+componente desde **Tools > SDK Manager > SDK Tools** y confirma que existe
+físicamente `$sdk\emulator\emulator.exe`. La ausencia del ejecutable no es un
+fallo de aceleración y no se corrige activando `HypervisorPlatform`.
+
 ### El emulador no arranca o la aceleración falla
 
+- Lee primero el mensaje completo de `& $emulator -accel-check`.
 - Confirma VT-x o AMD-V en UEFI.
-- Activa `HypervisorPlatform` desde PowerShell como administrador.
-- Reinicia Windows.
-- Ejecuta de nuevo `& $emulator -accel-check`.
 - No uses una imagen ARM; el AVD de referencia es `x86_64`.
+
+Si el diagnóstico indica que falta un hipervisor compatible, abre PowerShell
+como administrador y habilita Windows Hypervisor Platform:
+
+```powershell
+Enable-WindowsOptionalFeature -Online -FeatureName HypervisorPlatform -All -NoRestart
+Restart-Computer
+```
+
+Después del reinicio, recupera las variables de PowerShell y ejecuta de nuevo
+`& $emulator -accel-check`.
 
 ### ADB no muestra el emulador como `device`
 
@@ -593,22 +659,14 @@ Test-Path .\samples\malformed\oversized_complete_payload.bin
 
 Los tres resultados deben ser `True`.
 
-## 13. Criterios de finalización
+## 13. Comprobación final
 
-La instalación queda completada cuando se cumplen todos estos puntos:
+EchoCall Lab está listo cuando:
 
-- Git, Python 3.10+, CMake 3.20+ y Visual Studio Build Tools C++ están
-  verificados.
-- Native Core seguro compila y CTest termina sin fallos.
-- `receiver_safe.exe` devuelve `status=accepted code=ok` para la muestra
-  benigna.
-- Android SDK Platform 36, Build Tools 35.0.0, NDK `27.0.12077973`, CMake
-  `3.22.1`, Platform-Tools, Emulator y la system image están instalados.
-- El AVD `EchoCall_Lab_API_36` informa API 36 y ABI `x86_64`.
-- `:app:assemblePatchedDebug` genera `app-patched-debug.apk`.
-- `com.echocall.lab.patched` está instalado y su receptor escucha en UDP 43568.
-- La redirección host→guest `udp:43568:43568` está activa.
-- `valid_call_control.bin` produce `status=accepted code=ok`.
-- Si se ejecuta la comprobación opcional,
-  `oversized_complete_payload.bin` produce `payload_too_large` y el mismo
-  proceso Patched permanece vivo.
+- `EchoCall_Lab_API_36` funciona con API 36 y ABI `x86_64`;
+- EchoCall Patched está instalado, abierto y escuchando en UDP 43568;
+- la redirección `udp:43568:43568` está activa;
+- `valid_call_control.bin` produce `status=accepted code=ok` sin reiniciar la
+  app;
+- si haces la prueba opcional, Patched responde `payload_too_large` y conserva
+  el mismo PID.
