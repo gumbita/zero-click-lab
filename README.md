@@ -129,20 +129,18 @@ ejecución. [Resultados](technical-documentation/experimental-results.md) explic
 [reversing](technical-documentation/reverse-engineering.md) muestra cómo la validación y la copia aparecen en
 el análisis estático.
 
-## Quick start seguro
+## Primeros pasos
 
-El recorrido inicial construye y ejecuta únicamente Native Core Patched:
+Para instalar EchoCall Lab desde cero en Windows 11, preparar el emulador,
+compilar EchoCall Patched y comprobar el recorrido UDP completo:
 
-```text
-cmake -S native-core -B <TEMP_BUILD_DIR> -DENABLE_ASAN=OFF
-cmake --build <TEMP_BUILD_DIR> --target test_safe_parser receiver_safe
-ctest --test-dir <TEMP_BUILD_DIR> --output-on-failure
-```
+[**Getting Started — instalación y primera ejecución**](technical-documentation/getting-started.md)
 
-CTest ejecuta `test_safe_parser` y `receiver_safe`; no invoca
-`receiver_vuln`. Continúa con [Android Patched y la reproducción
-segura](technical-documentation/experimental-reproduction.md). No envíes la muestra oversized a Vulnerable como
-prueba rutinaria.
+La guía utiliza únicamente la variante Patched para las comprobaciones
+rutinarias. La comprobación independiente de Native Core es opcional.
+
+Para profundizar, consulta la [guía de reproducción
+experimental](technical-documentation/experimental-reproduction.md).
 
 ## Ruta de aprendizaje
 
