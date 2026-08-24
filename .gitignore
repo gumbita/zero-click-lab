@@ -34,4 +34,5 @@ native-core/build*/
 # Evidence / large outputs
 /evidence/
 captures/
+/capturas-tfm/
 *.zip

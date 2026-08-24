@@ -222,6 +222,19 @@ ejecutar durante esta consolidación.
 | E-028 | Reversing estático Vulnerable | `PRIMARIA` | Sí, cuatro capturas principales y dos auxiliares | Sí, documental | El análisis ya está cerrado; no requiere ejecución | `NO NECESARIA` | Custodia parcial: identidad registrada; falta el ELF exacto. |
 | E-029 | Reversing estático Patched | `PRIMARIA` | Sí, cuatro capturas principales y una auxiliar | Sí, documental | El análisis ya está cerrado; no requiere ejecución | `NO NECESARIA` | Custodia parcial: identidad registrada; falta el ELF exacto. |
 
+## Derivado visual complementario de E-022
+
+![Extracto saneado del informe ASan E-022 con heap-buffer-overflow, escritura de 64 bytes, región heap de 32 bytes y frames nativos](../media/screenshots/c05-vulnerable-asan-heap-buffer-overflow-sanitized.png)
+
+*Extracto visual saneado del informe ASan preservado en E-022: escritura de 64 bytes inmediatamente después de una región heap de 32 bytes.*
+
+La imagen es un recorte píxel a píxel de la captura de terminal aportada:
+elimina la ruta personal y el historial de comandos, y conserva las líneas
+técnicas seleccionadas. El [log textual completo de
+E-022](artifacts/E-022/asan-udp-vulnerable-20260731-140415.log) es la evidencia
+primaria; esta imagen es un derivado visual complementario y no sustituye al
+artefacto preservado.
+
 ## E-025 — SAFE oversized por UDP
 
 E-025 conserva una ejecución SAFE por UDP realizada con la variante ASan y el

@@ -53,6 +53,23 @@ Dentro de `safe_parse_packet` no se observó la secuencia
 - Tamaño registrado: 7.984 bytes.
 - Evidencia: [README y capturas E-029](evidence/artifacts/E-029/README.md).
 
+## Comparación visual del análisis estático
+
+Las imágenes siguientes se referencian desde sus ubicaciones originales en
+E-028 y E-029. No se han movido, renombrado ni duplicado.
+
+### Vulnerable — E-028
+
+![Descompilación Ghidra del parser Vulnerable con una reserva de 32 bytes y una copia dependiente de la longitud declarada](evidence/artifacts/E-028/e028-04-ghidra-vulnerable-root-cause.png)
+
+*Descompilación del parser vulnerable: reserva fija de 32 bytes y copia gobernada por la longitud declarada sin validar el máximo semántico.*
+
+### Patched — E-029
+
+![Descompilación Ghidra del parser Patched con la comprobación de longitud antes del procesamiento](evidence/artifacts/E-029/e029-03-ghidra-patched-length-check.png)
+
+*Descompilación del parser Patched: comprobación de la longitud declarada frente al máximo permitido antes de realizar la copia.*
+
 ## Comparación
 
 | Elemento | Vulnerable | Patched |

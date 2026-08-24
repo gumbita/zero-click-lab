@@ -19,6 +19,12 @@ límite relevante antes de procesar el payload. Las pruebas nativas, los builds
 Android, AddressSanitizer (ASan) y el reversing permiten observar esa diferencia
 desde el código fuente, la ejecución y el binario.
 
+<p align="center">
+  <img src="technical-documentation/media/screenshots/c01-echocall-conversaciones.png" alt="Pantalla principal de EchoCall Lab con conversaciones y contactos simulados" width="360">
+</p>
+
+<p align="center"><em>Interfaz principal de EchoCall Lab. Los contactos, mensajes y llamadas mostrados son datos simulados.</em></p>
+
 El caso real que motiva la pregunta técnica es
 [CVE-2019-3568](https://www.cve.org/CVERecord?id=CVE-2019-3568), cuyo registro
 oficial describe un desbordamiento de buffer en una pila VoIP. EchoCall no

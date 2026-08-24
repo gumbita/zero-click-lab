@@ -39,6 +39,29 @@ Patched devolvió literalmente:
 status=rejected code=payload_too_large declared_length=64 actual_length=64 maximum=32
 ```
 
+### Complemento visual actual de Patched
+
+<p align="center">
+  <img src="media/screenshots/c03-patched-llamada-bloqueada.png" alt="Pantalla de llamada bloqueada de la variante Patched para el contacto simulado Marta Soler" width="360">
+</p>
+
+<p align="center"><em>La variante Patched bloquea la llamada simulada después de rechazar automáticamente el paquete por una longitud no permitida.</em></p>
+
+La pantalla muestra el resultado visible para la persona usuaria. Por sí sola
+no demuestra la recepción UDP, la ejecución del parser ni la cadena
+experimental.
+
+<p align="center">
+  <img src="media/screenshots/c04-patched-rechazo-payload-too-large.png" alt="Modo Lab de Patched con rechazo payload_too_large, longitud declarada y real de 64 bytes y máximo de 32" width="360">
+</p>
+
+<p align="center"><em>Resultado técnico de Patched: la longitud declarada de 64 bytes supera el máximo semántico de 32 y la entrada se rechaza antes de la copia.</em></p>
+
+Ambas capturas son demostraciones actuales y complementarias. C04 no procede
+de la ejecución histórica E-025 ni reemplaza sus metadatos, sender, log y
+estados UI primarios; documenta el mismo contrato de rechazo
+`payload_too_large` en la interfaz vigente.
+
 Vulnerable alcanzó la copia y ASan atribuyó la escritura a
 `vulnerable_parse_packet`. La ejecución oversized Vulnerable fue única y no se
 incluye en CI, quickstarts ni demostraciones rutinarias.
